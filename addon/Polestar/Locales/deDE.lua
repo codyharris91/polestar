@@ -1239,10 +1239,6 @@ L["When the step sets your home and you talk to its innkeeper, binds your Hearth
 -- L["At level 40 and 60, if you have not learned riding yet, says the cost in chat (with any Honored discount) and points the arrow at your race's riding trainer when you can afford it. Warlocks and Alliance Paladins are sent to their free-mount quest NPC instead. Once per tier per character."] = ""
 -- L["Hide the game's quest tracker"] = ""
 -- L["Hides the game's tracker on the right of the screen, with its quests, achievements and professions, as Questie can. Not with the gamepad interface."] = ""
--- L["Click objectives to target"] = ""
--- L["Clicking an objective row or NPC heading also targets and marks its NPC outside combat. This replaces your current target; a failed search clears it."] = ""
--- L["Objective target icon"] = ""
--- L["The raid icon placed on the NPC targeted by an objective click."] = ""
 
 -- Rares/View.lua, Rares/Options.lua
 L["Seen"] = "Gesehen"
@@ -2318,10 +2314,6 @@ L["Now: %d%% into level %d"] = "Jetzt: %d%% in Stufe %d"
 L["After: level %d"] = "Danach: Stufe %d"
 L["After: %d%% into level %d"] = "Danach: %d%% in Stufe %d"
 L["Recommended: level %d"] = "Empfohlen: Stufe %d"
-
--- UI/NameTargets.lua
--- L["Click to target and mark %s (out of combat)."] = ""
--- L["%s not found nearby."] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["The arrow's target and the areas it spawns in."] = "Das Ziel des Pfeils und die Gebiete, in denen es spawnt."
