@@ -1239,11 +1239,6 @@ L["When the step sets your home and you talk to its innkeeper, binds your Hearth
 -- L["At level 40 and 60, if you have not learned riding yet, says the cost in chat (with any Honored discount) and points the arrow at your race's riding trainer when you can afford it. Warlocks and Alliance Paladins are sent to their free-mount quest NPC instead. Once per tier per character."] = ""
 -- L["Hide the game's quest tracker"] = ""
 -- L["Hides the game's tracker on the right of the screen, with its quests, achievements and professions, as Questie can. Not with the gamepad interface."] = ""
--- L["Action-bar macro"] = ""
--- L["Create target macro"] = ""
--- L["Put a character macro on your cursor to place on an action bar. It follows the guide outside combat, even with the Target button hidden. Uses guide order; does not cycle names or icons on each press."] = ""
--- L["Stop macro updates"] = ""
--- L["Leave the macro as it is and stop following the guide. Create target macro resumes updates if it is unchanged. Editing, renaming or deleting the macro also stops updates."] = ""
 
 -- Rares/View.lua, Rares/Options.lua
 L["Seen"] = "Gesehen"
@@ -2319,24 +2314,6 @@ L["Now: %d%% into level %d"] = "Jetzt: %d%% in Stufe %d"
 L["After: level %d"] = "Danach: Stufe %d"
 L["After: %d%% into level %d"] = "Danach: %d%% in Stufe %d"
 L["Recommended: level %d"] = "Empfohlen: Stufe %d"
-
--- QoL/ActionBarMacro.lua
--- L["Polestar Target updates stopped because its saved ownership could not be verified."] = ""
--- L["Polestar Target was edited, renamed, deleted or duplicated. Automatic updates have stopped; your macros were left unchanged."] = ""
--- L["Polestar Target could not be saved and verified. Automatic updates are off; check your character macros before trying again."] = ""
--- L["The current targets do not fit in Polestar Target. Its action is cleared until a valid target list is available."] = ""
--- L["This client does not support creating an action-bar target macro."] = ""
--- L["Place Polestar Target after combat ends."] = ""
--- L["Close the macro editor before placing Polestar Target."] = ""
--- L["Clear your cursor before placing Polestar Target."] = ""
--- L["A macro named Polestar Target already exists, or your macro list could not be read. Rename that macro before creating one with Polestar."] = ""
--- L["There is no free character macro slot for Polestar Target."] = ""
--- L["The current step has no active targets for Polestar Target."] = ""
--- L["The current targets do not fit in a character macro. Polestar Target was not placed."] = ""
--- L["Polestar Target was saved, but your cursor is occupied. Find it in your character macros."] = ""
--- L["Polestar Target was saved, but could not be picked up. Find it in your character macros."] = ""
--- L["Place Polestar Target on an action bar. It will follow the current step until you stop updates or edit the macro."] = ""
--- L["Polestar Target updates stopped. The macro and its current action were kept."] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["The arrow's target and the areas it spawns in."] = "Das Ziel des Pfeils und die Gebiete, in denen es spawnt."
