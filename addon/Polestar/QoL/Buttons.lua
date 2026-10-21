@@ -669,36 +669,8 @@ end
 -- Goals done with an NPC, whom the step key targets by name.
 local NPC_VERBS = { accept = true, turnin = true, talk = true, train = true, vendor = true, buy = true, sethome = true, getfp = true, learn = true }
 
--- TARGET_EXACT still passes its argument to the native TargetUnit API.
--- Reject common unit-reference spellings rather than rely on undocumented
--- native precedence between a literal creature name and a unit token.
-local GUIDE_UNIT_NAMES = { [""] = true, player = true, vehicle = true, focus = true, mouseover = true, npc = true, none = true }
-local function guideNameSafe(name)
-	if not Buttons.MacroSafeName(name) or #name > MACRO_LIMIT or name:find("[\\|/;%[%]]")
-		or name:match("^%s") or name:match("%s$") then return false end
-	local unit = name:lower()
-	while true do
-		local shorter = unit:gsub("target$", ""):gsub("pet$", "")
-		if shorter == unit then break end
-		unit = shorter
-	end
-	return not (GUIDE_UNIT_NAMES[unit] or unit:match("^party%d+$") or unit:match("^partypet%d+$")
-		or unit:match("^raid%d+$") or unit:match("^raidpet%d+$") or unit:match("^arena%d+$")
-		or unit:match("^arenapet%d+$") or unit:match("^boss%d+$") or unit:match("^nameplate%d+$")
-		or unit:match("^maintank%d+$") or unit:match("^mainassist%d+$"))
-end
-
--- Forever imports every SLASH_<key><n> into its command registry. Use the
--- client's first alias so command spelling follows its locale; a missing
--- or malformed alias disables this action rather than risking a partial
--- macro (particularly a mark whose preceding clear/target never ran).
-local function guideCommand(key)
-	local command = _G["SLASH_" .. key .. "1"]
-	if type(command) == "string" and command:match("^/[^%s%c/;%[%]|\\]+$") then return command end
-end
-
--- One clicked guide name, independent of the standalone target button's
--- list and marking settings. The view's chosen NPC wins over the raw goal;
+-- One clicked guide name, using the target button's macro and mark settings.
+-- The view's chosen NPC wins over the raw goal;
 -- collect subjects are items, so only their chosen or named NPC source can
 -- be targeted. No world-wide dropper lookup or other goal is consulted.
 function Buttons.GuideNameMacro(goal, raw)
@@ -726,27 +698,12 @@ function Buttons.GuideNameMacro(goal, raw)
 			end
 		end
 	end
-	-- Names are plain data, never macro conditions, markup or escape text.
-	if not guideNameSafe(name) then return nil end
-	local clear, target, mark = guideCommand("CLEARTARGET"), guideCommand("TARGET_EXACT"), guideCommand("TARGET_MARKER")
-	if not (clear and target and mark) then return nil end
-	local icon = tonumber(ns.Get("qol.guideNameIcon"))
-	if not icon or icon < 1 or icon > 8 or icon ~= math.floor(icon) then icon = 3 end
-	-- Every line is out-of-combat only, even if an old secure action survives
-	-- a layout change. Clearing first also makes an absent/dead name mark
-	-- nothing rather than the player's previous target. "!" keeps the icon
-	-- on repeated clicks instead of toggling it off. A nearer corpse can
-	-- still win the native lookup; clearing it does not search past it.
-	-- Verified in Forever's SlashCommands.lua at 172a387e3ab85b26e6640d3058d5ec1e6ccd4c63:
-	-- TARGET_EXACT (489-497), CLEARTARGET (541-545), TARGET_MARKER (1451-1478).
-	local macro = concat({
-		clear .. " [nocombat]",
-		target .. " [nocombat] " .. name,
-		clear .. " [nocombat,dead]",
-		mark .. " [@target,exists,nodead,nocombat] !" .. icon,
-	}, "\n")
-	if #macro > MACRO_LIMIT then return nil end
-	return macro, name
+	if not Buttons.MacroSafeName(name) then return nil end
+	local kind = (t == "kill" or t == "collect") and "mob" or "npc"
+	local macro = Buttons.TargetMacro({ name }, 1, Buttons.MarkLine(kind))
+	-- TargetMacro drops extra names to fit; a single long name cannot be trimmed.
+	if not macro or #macro > MACRO_LIMIT then return nil end
+	return macro, name, kind
 end
 
 -- What the step key does now. view, raw: QoL.CurrentStep()'s, when the
@@ -814,6 +771,16 @@ end
 ---------------------------------------------------------------------------
 
 local itemButton, hearthButton, targetButton, rareButton, stepButton
+
+-- Every targeting entry point shares one mark cycle. Prepared secure macros
+-- change only when safe; guide name overlays listen for the new selection.
+function Buttons.AdvanceMark(kind)
+	if not nextMark(kind) then return false end
+	if targetButton then applyTarget(targetButton) end
+	if stepButton then applyStep(stepButton) end
+	ns.Fire("QOL_TARGET_MARK_CHANGED", kind)
+	return true
+end
 
 local function refresh()
 	if not itemButton then return end
@@ -893,10 +860,8 @@ local function create()
 		if down or self.dragging then return end
 		local n = #target.list
 		if n > 1 then target.cycle = target.cycle % n + 1 end
-		local marked = nextMark("mob")
-		if n > 1 or marked then applyTarget(targetButton) end
-		-- The step key shares the icon cycle.
-		if marked then applyStep(stepButton) end
+		local marked = Buttons.AdvanceMark("mob")
+		if n > 1 and not marked then applyTarget(targetButton) end
 	end)
 	rareButton = newButton("PolestarRareButton", rareTooltip)
 	rareButton.Icon:SetTexture(media("qol-target"))
@@ -919,9 +884,8 @@ local function create()
 		local n = #step.list
 		local names = step.kind == "target" and n > 1
 		if names then step.cycle = step.cycle % n + 1 end
-		local marked = nextMark(STEP_MARK[step.kind])
-		if names or marked then applyStep(self) end
-		if marked then applyTarget(targetButton) end
+		local marked = Buttons.AdvanceMark(STEP_MARK[step.kind])
+		if names and not marked then applyStep(self) end
 	end)
 	Buttons.item, Buttons.hearth, Buttons.target, Buttons.rare, Buttons.step = itemButton, hearthButton, targetButton, rareButton, stepButton
 	set = { hearthButton, itemButton, targetButton, rareButton }

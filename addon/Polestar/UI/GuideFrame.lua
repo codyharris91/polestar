@@ -543,6 +543,7 @@ local function paintPerson(group)
 end
 
 local function personEnter(self)
+	self.Hover:Show()
 	local lines = {}
 	if self.psPlace then
 		lines[#lines + 1] = { left = L["Location"], right = string.format("%s  %.1f, %.1f", UI.MapName(self.psPlace.map) or "", self.psPlace.x, self.psPlace.y) }
@@ -552,6 +553,11 @@ local function personEnter(self)
 	if view and view.title and view.title ~= self.psLabel then lines[#lines + 1] = view.title end
 	W.Tooltip(self, tooltipAnchor(), self.psLabel or "", lines)
 	GF.HoverIn()
+end
+
+local function personLeave(self)
+	self.Hover:Hide()
+	W.HideTooltip(self)
 end
 
 ---------------------------------------------------------------------------
@@ -2544,7 +2550,16 @@ local function build()
 	-- The focus header: who (or what) the goals below belong to.
 	person = CreateFrame("Button", nil, card)
 	person:RegisterForClicks("LeftButtonUp")
-	W.Hover(person, 0.7)
+	-- Ordinary texture: the name-target overlay forwards enter/leave, which
+	-- cannot activate a native HIGHLIGHT on the header underneath it.
+	person.Hover = person:CreateTexture(nil, "BACKGROUND")
+	person.Hover:SetTexture(Theme.Media("white"))
+	person.Hover:SetAllPoints(person)
+	W.Painter(person.Hover, function(t)
+		local r, g, b, a = Theme.Wash("hover")
+		t:SetVertexColor(r, g, b, a * 0.7)
+	end)
+	person.Hover:Hide()
 	-- The arrow on this person: the 2px accent selection bar.
 	person.Mark = person:CreateTexture(nil, "ARTWORK")
 	person.Mark:SetTexture(Theme.Media("white"))
@@ -2570,7 +2585,8 @@ local function build()
 	person.Rule:Hide()
 	person:SetScript("OnClick", function(self) pointAt(self.psPlace, self.psLabel) end)
 	person:SetScript("OnEnter", personEnter)
-	person:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
+	person:SetScript("OnLeave", personLeave)
+	person:SetScript("OnHide", personLeave)
 
 	-- The author's tip, one line until opened.
 	local tip = CreateFrame("Button", nil, card)

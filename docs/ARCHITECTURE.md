@@ -3302,23 +3302,27 @@ flight timer and the instance tracker are set under Quality of Life.
 ### Clickable objectives
 
 `qol.guideNameTarget` is off by default. Enabling it extends objective-row
-navigation clicks to target the objective's NPC and mark it
-(`qol.guideNameIcon`, diamond by default). Opt-in is a product decision:
+navigation clicks to target the objective's NPC. Marking uses the existing
+`qol.markTarget`, `qol.markMob` and `qol.markNpc` settings, including their
+shared icon cycle. Opt-in is a product decision:
 existing navigation clicks should not unexpectedly replace the player's
 target. The default can be changed independently of the targeting code.
 `QoL.Buttons.GuideNameMacro` resolves one NPC belonging to that
-goal, never a collect item's name or another objective, and prepares a
-bounded, sanitized macro. It clears an unmatched old target and dead matches
-before marking. For a collect with two named sources, it uses the primary
-source; the hover tooltip identifies that NPC. The client determines
+goal, never a collect item's name or another objective, then delegates to
+`Buttons.TargetMacro({ name }, 1, Buttons.MarkLine(kind))`. Kill and collect
+goals use the mob icon; NPC verbs and headings use the NPC icon. The shared
+name validation and literal macro commands are the same as the Target
+button's, and the result must fit within 255 bytes. It clears the previous
+target and dead matches before optional marking. For a collect with two
+named sources, it uses the primary source; the hover tooltip identifies
+that NPC. The client determines
 targeting range and marker permission. An exact-name search can select a
 nearer corpse instead of a living namesake; clearing that corpse does not
 make the macro search farther.
 
 The command sequence is checked against Forever 1.60.1 (70450):
 [exact targeting and clearing](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L489),
-[marker commands](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L1451),
-and [client command aliases](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua#L794).
+and [marker commands](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L1451).
 
 `UI/NameTargets.lua` pools secure buttons over objective rows (and the NPC
 heading's text), independently of the guide's frame tree. Absolute UIParent

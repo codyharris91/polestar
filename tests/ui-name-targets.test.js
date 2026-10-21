@@ -7,7 +7,6 @@ const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
 
 const SECURE_VISIBILITY = `
-SLASH_CLEARTARGET1, SLASH_TARGET_EXACT1, SLASH_TARGET_MARKER1 = "/cleartarget", "/targetexact", "/tm"
 local M = stub.Methods
 -- The client derives a frame's width from its left/right anchors. The
 -- general UI stub does not solve anchors; rows use this one shared-parent
@@ -121,25 +120,28 @@ function run(script, { before = '', enabled = true } = {}) {
 	}).emitted;
 }
 
-test('each enabled mob or item-source objective targets only its own NPC with the default Diamond mark', () => {
+test('each enabled mob or item-source objective uses the shared target macro with marking off by default', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)
 		settle()
 		local kill = targetFor(rowFor("Kobold Vermin"))
 		local collect = targetFor(rowFor("Tough Wolf Meat"))
-		emit({ enabled = Polestar.GetDefault("qol.guideNameTarget"), icon = Polestar.GetDefault("qol.guideNameIcon"),
-			kill = kill and { name = kill.psName, macro = kill:GetAttribute("macrotext1"), type = kill:GetAttribute("type1") },
-			collect = collect and { name = collect.psName, macro = collect:GetAttribute("macrotext1") },
+		emit({ enabled = Polestar.GetDefault("qol.guideNameTarget"), marking = Polestar.GetDefault("qol.markTarget"),
+			kill = kill and { name = kill.psName, kind = kill.psKind, macro = kill:GetAttribute("macrotext1"), type = kill:GetAttribute("type1") },
+			collect = collect and { name = collect.psName, kind = collect.psKind, macro = collect:GetAttribute("macrotext1") },
+			expected = Polestar.QoL.Buttons.TargetMacro({ "Kobold Vermin" }, 1),
 			header = targetFor(GF.parts.person) ~= nil })`);
 	assert.equal(out.enabled, false);
-	assert.equal(out.icon, '3');
+	assert.equal(out.marking, false);
 	assert.equal(out.kill?.name, 'Kobold Vermin');
+	assert.equal(out.kill.kind, 'mob');
 	assert.equal(out.kill.type, 'macro');
-	assert.match(out.kill.macro, /\/targetexact \[nocombat\] Kobold Vermin(?:\n|$)/);
+	assert.equal(out.kill.macro, out.expected);
 	assert.doesNotMatch(out.kill.macro, /Young Wolf/);
-	assert.match(out.kill.macro, /\/tm[^\n]*!?3$/);
+	assert.doesNotMatch(out.kill.macro, /\/tm/);
 	assert.equal(out.collect?.name, 'Young Wolf');
-	assert.match(out.collect.macro, /\/targetexact \[nocombat\] Young Wolf(?:\n|$)/);
+	assert.equal(out.collect.kind, 'mob');
+	assert.match(out.collect.macro, /\/targetexact Young Wolf(?:\n|$)/);
 	assert.doesNotMatch(out.collect.macro, /Kobold Vermin|targetexact Tough Wolf Meat/);
 	assert.equal(out.header, false, 'a field-place header is not an NPC');
 });
@@ -159,12 +161,129 @@ test('the NPC header follows the focused giver and ordinary guide frames stay un
 		for _, row in ipairs(GF.rows) do ordinary = ordinary and not row.secure end
 		emit({ before = before, next = next and next.psName, ordinary = ordinary })`);
 	assert.equal(out.before?.name, 'Marshal McBride');
-	assert.match(out.before.macro, /\/targetexact \[nocombat\] Marshal McBride(?:\n|$)/);
+	assert.match(out.before.macro, /\/targetexact Marshal McBride(?:\n|$)/);
 	assert.equal(out.before.holder, true);
 	assert.equal(out.before.root, true);
 	assert.equal(out.before.secure, true);
 	assert.equal(out.next, 'Eagan Peltskinner');
 	assert.equal(out.ordinary, true);
+});
+
+test('shared mob and NPC mark settings update overlays and their hovered tooltip', () => {
+	const [out] = run(`
+		uistub.setGuide(uistub.elwynn, 3)
+		settle()
+		local b = assert(targetFor(rowFor("Kobold Vermin")))
+		stub.RunScript(b, "OnEnter")
+		local unmarked = GameTooltip.lines[#GameTooltip.lines]
+		Polestar.Set("qol.markTarget", true)
+		Polestar.Set("qol.markMob", "7")
+		local marked = { macro = b.psMacro, hint = GameTooltip.lines[#GameTooltip.lines], hover = b.psOwner.Hover:IsShown() }
+		uistub.setStep(4)
+		settle()
+		Polestar.Set("qol.markNpc", "6")
+		local npc = assert(targetFor(GF.parts.person))
+		local header = { kind = npc.psKind, macro = npc.psMacro }
+		stub.RunScript(npc, "OnEnter")
+		Polestar.Set("qol.markTarget", false)
+		emit({ unmarked = unmarked, marked = marked, header = header,
+			off = { macro = npc.psMacro, hint = GameTooltip.lines[#GameTooltip.lines], hover = GF.parts.person.Hover:IsShown() } })`);
+	assert.match(out.unmarked, /target Kobold Vermin/);
+	assert.doesNotMatch(out.unmarked, /mark/);
+	assert.match(out.marked.macro, /\/tm[^\n]* !7$/);
+	assert.match(out.marked.hint, /target and mark Kobold Vermin/);
+	assert.equal(out.marked.hover, true);
+	assert.equal(out.header.kind, 'npc');
+	assert.match(out.header.macro, /\/tm[^\n]* !6$/);
+	assert.doesNotMatch(out.off.macro, /\/tm/);
+	assert.match(out.off.hint, /target Marshal McBride/);
+	assert.doesNotMatch(out.off.hint, /mark/);
+	assert.equal(out.off.hover, true);
+});
+
+test('the NPC header wash responds to delegated hover, survives cycle refresh, and clears on every exit', () => {
+	const [out] = run(`
+		Polestar.Set("qol.markTarget", true)
+		Polestar.Set("qol.markNpc", "cycle")
+		uistub.setGuide(uistub.elwynn, 4)
+		settle()
+		local header = GF.parts.person
+		local wash = assert(header.Hover, "the header needs an ordinary hover texture")
+		local b = assert(targetFor(header))
+		stub.RunScript(b, "OnEnter")
+		local entered = wash:IsShown()
+		local before = b.psMacro
+		postClick(b, "LeftButton", false)
+		local cycled = { hover = wash:IsShown(), changed = b.psMacro ~= before }
+		stub.RunScript(b, "OnLeave")
+		local left = not wash:IsShown()
+		stub.RunScript(b, "OnEnter")
+		F:Hide()
+		local hidden = not wash:IsShown()
+		F:Show()
+		stub.RunScript(assert(targetFor(header)), "OnEnter")
+		q.combat(true)
+		local combat = not wash:IsShown()
+		q.combat(false)
+		stub.RunScript(assert(targetFor(header)), "OnEnter")
+		Polestar.Set("qol.guideNameTarget", false)
+		local disabled = not wash:IsShown()
+		-- Native header hover still works with the opt-in feature disabled.
+		stub.RunScript(header, "OnEnter")
+		local ordinary = wash:IsShown()
+		stub.RunScript(header, "OnLeave")
+		local ordinaryLeft = not wash:IsShown()
+		Polestar.Set("qol.guideNameTarget", true)
+		stub.RunScript(assert(targetFor(header)), "OnEnter")
+		uistub.goal(4, 1).status, uistub.goal(4, 2).status = "done", "done"
+		uistub.update()
+		settle()
+		emit({ entered = entered, cycled = cycled, left = left, hidden = hidden, combat = combat,
+			disabled = disabled, ordinary = ordinary, ordinaryLeft = ordinaryLeft,
+			reused = not wash:IsShown(), nextName = targetFor(header).psName, layer = wash:GetDrawLayer() })`);
+	assert.equal(out.entered, true);
+	assert.deepEqual(out.cycled, { hover: true, changed: true });
+	for (const key of ['left', 'hidden', 'combat', 'disabled', 'ordinary', 'ordinaryLeft', 'reused']) assert.equal(out[key], true, key);
+	assert.equal(out.nextName, 'Eagan Peltskinner');
+	assert.equal(out.layer, 'BACKGROUND', 'delegated OnEnter cannot light a native HIGHLIGHT texture');
+});
+
+test('left release advances the clicked kind after navigation even when navigation reuses its overlay', () => {
+	const [out] = run(`
+		Polestar.Set("qol.markTarget", true)
+		Polestar.Set("qol.markMob", "cycle")
+		Polestar.Set("qol.markNpc", "4")
+		uistub.setGuide(uistub.elwynn, 3)
+		settle()
+		local row = rowFor("Kobold Vermin")
+		local b = assert(targetFor(row))
+		local events = {}
+		Polestar.On("QOL_TARGET_MARK_CHANGED", function(kind) events[#events + 1] = { kind, callCount("AimGoal") } end)
+		local click = row:GetScript("OnClick")
+		row:SetScript("OnClick", function(self, mouse)
+			click(self, mouse)
+			if mouse == "LeftButton" then uistub.setStep(4) end
+		end)
+		postClick(b, "LeftButton", true)
+		local pressed = #events
+		postClick(b, "LeftButton", false)
+		local released = #events
+		local aimed = lastCall("AimGoal")
+		postClick(b, "RightButton", false)
+		emit({ pressed = pressed, released = released, events = events, aimed = aimed,
+			reused = b.psOwner == GF.parts.person, kind = b.psKind, name = b.psName,
+			macro = b.psMacro, nextMob = Polestar.QoL.Buttons.MarkLine("mob") })`);
+	assert.equal(out.pressed, 0);
+	assert.equal(out.released, 1);
+	assert.equal(out.events.length, 1, 'right release does not advance marking');
+	assert.equal(out.events[0][0], 'mob', 'retain the kind that the secure click actually used');
+	assert.ok(out.events[0][1] >= 1, 'navigation happens before shared mark refresh');
+	assert.deepEqual(out.aimed, ['AimGoal', 3, 3]);
+	assert.equal(out.reused, true);
+	assert.equal(out.kind, 'npc');
+	assert.equal(out.name, 'Marshal McBride');
+	assert.match(out.macro, /\/tm[^\n]* !4$/);
+	assert.match(out.nextMob, /\/tm[^\n]* ~2$/);
 });
 
 test('place and object rows never receive a name-target overlay', () => {
@@ -240,7 +359,8 @@ test('icon, text, subline and whitespace target the row while checkbox, Skip and
 	assert.deepEqual(out.nextLevels, [13, 14]);
 	assert.equal(out.hover, true);
 	assert.equal(out.left, true);
-	assert.match(out.hint, /target and mark Kobold Vermin/);
+	assert.match(out.hint, /target Kobold Vermin/);
+	assert.doesNotMatch(out.hint, /mark/);
 	assert.equal(out.controlAim, 0);
 	assert.deepEqual(out.spot, ['CycleSpot', 3, 3]);
 	assert.deepEqual(out.skip, ['SkipGoal', 3, 3]);
@@ -392,17 +512,19 @@ test('combat hides secure overlays while the unprotected guide updates, then use
 		uistub.setStep(4)
 		Polestar.Set("ui.width", 420)
 		Polestar.Set("ui.scale", 1.2)
-		Polestar.Set("qol.guideNameIcon", "6")
+		Polestar.Set("qol.markTarget", true)
+		Polestar.Set("qol.markNpc", "6")
 		uistub.update()
 		settle()
+		rowFor("Kobold Camp Cleanup"):Click("LeftButton")
 		local unchanged = true
 		for i, button in ipairs(NT.buttons) do unchanged = unchanged and button:GetAttribute("macrotext1") == old[i] end
-		local during = { visible = #targets(), unchanged = unchanged, title = GF.parts.person.Name:GetText(), shown = F:IsShown() }
+		local during = { visible = #targets(), unchanged = unchanged, title = GF.parts.person.Name:GetText(), shown = F:IsShown(), aim = lastCall("AimGoal") }
 		q.combat(false)
 		settle()
 		emit({ before = before, during = during, after = targets(), header = targetFor(GF.parts.person).psName })`);
 	assert.ok(out.before.length > 0);
-	assert.deepEqual(out.during, { visible: 0, unchanged: true, title: 'Marshal McBride', shown: true });
+	assert.deepEqual(out.during, { visible: 0, unchanged: true, title: 'Marshal McBride', shown: true, aim: ['AimGoal', 4, 1] });
 	assert.equal(out.header, 'Marshal McBride');
 	assert.ok(out.after.length > 0);
 	for (const target of out.after) {

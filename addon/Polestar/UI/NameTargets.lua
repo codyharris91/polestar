@@ -26,8 +26,21 @@ local function leave(b)
 	end
 end
 
+local function enter(b)
+	b.psHover = true
+	ownerScript(b, "OnEnter")
+	if GameTooltip then
+		local r, g, blue = ns.Theme.Color("textDim")
+		local mark = ns.QoL.On("markTarget")
+		local hint = mark and L["Click to target and mark %s (out of combat)."] or L["Click to target %s (out of combat)."]
+		GameTooltip:AddLine(string.format(hint, b.psName or ""), r, g, blue, true)
+		GameTooltip:Show()
+	end
+end
+
 function NameTargets.Hide()
 	if watcher then watcher:Hide() end
+	for _, b in ipairs(NameTargets.buttons) do leave(b) end
 	if locked() then return end
 	for _, b in ipairs(NameTargets.buttons) do b:Hide() end
 end
@@ -44,21 +57,14 @@ local function createButton(i)
 	b:RegisterForClicks("AnyUp", "AnyDown")
 	b:SetAttribute("useOnKeyDown", false)
 	b:SetAttribute("type1", "macro")
-	b:SetScript("OnEnter", function(self)
-		self.psHover = true
-		ownerScript(self, "OnEnter")
-		if GameTooltip then
-			local r, g, b = ns.Theme.Color("textDim")
-			GameTooltip:AddLine(string.format(L["Click to target and mark %s (out of combat)."], self.psName or ""), r, g, b, true)
-			GameTooltip:Show()
-		end
-	end)
+	b:SetScript("OnEnter", enter)
 	b:SetScript("OnLeave", leave)
 	b:SetScript("OnHide", leave)
 	-- OnClick belongs to SecureActionButtonTemplate. Keep the ordinary row
 	-- navigation and right-click completion, once, after the secure action.
 	b:HookScript("PostClick", function(self, mouse, down)
 		if down or locked() then return end
+		local kind = self.psKind
 		-- The secure macro clears absent or dead targets. Report that result
 		-- before navigation can repaint the row and reuse this button.
 		if mouse == "LeftButton" and UnitExists and not UnitExists("target") then
@@ -70,6 +76,9 @@ local function createButton(i)
 			end
 		end
 		if mouse == "LeftButton" or (mouse == "RightButton" and self.psRight) then ownerScript(self, "OnClick", mouse) end
+		-- Navigation can change the step and reuse this overlay. Advance the
+		-- kind whose macro just ran, after the ordinary click has finished.
+		if mouse == "LeftButton" then ns.QoL.Buttons.AdvanceMark(kind) end
 	end)
 	NameTargets.buttons[i] = b
 	return b
@@ -125,19 +134,24 @@ function NameTargets.Refresh()
 	end
 	active = 0
 	for _, entry in ipairs(provider()) do
-		local macro, name = buttons.GuideNameMacro(entry.goal, entry.raw)
+		local macro, name, kind = buttons.GuideNameMacro(entry.goal, entry.raw)
 		if macro then
 			active = active + 1
 			local b = NameTargets.buttons[active] or createButton(active)
-			if b.psOwner ~= entry.owner or b.psMacro ~= macro then leave(b) end
+			if b.psOwner ~= entry.owner or b.psName ~= name or b.psKind ~= kind then leave(b) end
 			b.psOwner, b.psRegion, b.psName = entry.owner, entry.region, name
+			b.psKind = kind
 			b.psRight = entry.right
 			b.psWholeRow, b.psControls = entry.wholeRow, entry.controls
-			if b.psMacro ~= macro then
+			local changed = b.psMacro ~= macro
+			if changed then
 				b:SetAttribute("macrotext1", macro)
 				b.psMacro = macro
 			end
 			place(b)
+			-- A shared mark cycle changes the macro under a stationary cursor.
+			-- Keep its wash and refresh its hint without waiting for OnEnter.
+			if changed and b.psHover then enter(b) end
 		end
 	end
 	for i = active + 1, #NameTargets.buttons do
@@ -145,6 +159,7 @@ function NameTargets.Refresh()
 		b:Hide()
 		b:SetAttribute("macrotext1", nil)
 		b.psOwner, b.psRegion, b.psName, b.psMacro = nil, nil, nil, nil
+		b.psKind = nil
 		b.psControls = nil
 	end
 	if watcher then watcher:SetShown(active > 0) end
@@ -172,10 +187,13 @@ end
 ns.RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	-- Visibility is the secure driver's job; the ordinary watch can stop.
 	if watcher then watcher:Hide() end
+	for _, b in ipairs(NameTargets.buttons) do leave(b) end
 end)
 ns.RegisterEvent("PLAYER_REGEN_ENABLED", NameTargets.Refresh)
+ns.On("QOL_TARGET_MARK_CHANGED", NameTargets.Refresh)
 ns.On("SETTING_CHANGED", function(path)
-	if path == "" or path == "qol" or path == "qol.guideNameTarget" or path == "qol.guideNameIcon" then
+	if path == "" or path == "qol" or path == "qol.guideNameTarget" or path == "qol.markTarget"
+		or path == "qol.markMob" or path == "qol.markNpc" then
 		NameTargets.Refresh()
 	end
 end)

@@ -1,120 +1,49 @@
 'use strict';
-// A guide name click targets only that goal's NPC; it never borrows the
-// standalone target button's list or marks an unrelated existing target.
+// A guide name uses the same macro and mark cycle as the target button,
+// while resolving only the clicked goal's chosen NPC or explicit source.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
 
 const FILES = { name: 'Polestar', files: ['Core/Init.lua', 'Core/Compat.lua', 'Theme/Theme.xml', 'QoL/QoL.xml'] };
 
-// Actual Forever handler bodies, pinned to Gethe/wow-ui-source forever
-// 172a387e3ab85b26e6640d3058d5ec1e6ccd4c63, not a Retail assumption:
-// Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua
-// https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L489-L497
-// Also L541-L545 and L1451-L1478. Only the registration wrapper is replaced
-// by the local table. Native option parsing, unit selection and permissions
-// are still test doubles below; these tests cannot prove client C behavior.
-const FOREVER_HANDLERS = String.raw`
-local handlers = {}
-handlers.TARGET_EXACT = function(msg)
-	local action, target = SecureCmdOptionParse(msg);
-	if ( action ) then
-		if ( not target or target == "target" ) then
-			target = action;
-		end
-		TargetUnit(target, true);
-	end
-end
-handlers.CLEARTARGET = function(msg)
-	if ( SecureCmdOptionParse(msg) ) then
-		ClearTarget();
-	end
-end
-handlers.TARGET_MARKER = function(msg)
-	local marker, target = SecureCmdOptionParse(msg);
-	if ( not target ) then
-		target = "target";
-	end
-	if ( marker and string.find(marker, "^!") ) then
-		marker = tonumber(string.match(marker, "%d+"));
-		if ( GetRaidTargetIndex(target) == marker ) then
-			return;
-		end
-	elseif ( marker and string.find(marker, "^~") ) then
-		marker = tonumber(string.match(marker, "%d+"));
-		if ( GetRaidTargetIndex(target) ~= nil ) then
-			return;
-		end
-	else
-		marker = tonumber(marker);
-	end
-	if ( marker ) then
-		SetRaidTarget(target, tonumber(marker));
-	end
-end
-`;
 function run(script) {
 	return runAddon({ stubs: ['stub_qol.lua'], addons: [FILES], login: true,
-		script: `local B = Polestar.QoL.Buttons
-		SLASH_CLEARTARGET1, SLASH_TARGET_EXACT1, SLASH_TARGET_MARKER1 = "/cleartarget", "/targetexact", "/tm"
-		Polestar.Set("qol.guideNameTarget", true)
+		script: `local B, q = Polestar.QoL.Buttons, stub.qol
+		local function set(k, v) Polestar.Set("qol." .. k, v); stub.runTimers() end
+		set("guideNameTarget", true)
 		${script}` }).emitted;
 }
 
-// Execute the target/clear/mark commands against nearby units. Conditions
-// are evaluated when each line runs, as the target may have just changed.
-function press(macro, nearby, oldTarget = null, combat = false) {
-	let target = oldTarget;
-	const marks = [];
-	function allowed(options) {
-		return options.split(',').every((option) => {
-			if (option === '@target') return true;
-			if (option === 'nocombat') return !combat;
-			if (option === 'exists') return !!target;
-			if (option === 'dead') return !!target?.dead;
-			if (option === 'nodead') return !target?.dead;
-			throw new Error(`Unknown macro condition: ${option}`);
-		});
-	}
-	for (const line of macro.split('\n')) {
-		const [, command, options, argument = ''] = line.match(/^\/(\w+)(?: \[([^\]]+)\])?(?: (.*))?$/) || [];
-		assert.ok(command, `valid macro line: ${line}`);
-		if (options && !allowed(options)) continue;
-		if (command === 'cleartarget') target = null;
-		else if (command === 'targetexact') target = nearby.filter((unit) => unit.name === argument)
-			.sort((a, b) => (a.distance || 0) - (b.distance || 0))[0] || target;
-		else if (command === 'tm') marks.push({ target, icon: Number(argument.replace(/^!/, '')) });
-		else throw new Error(`Unexpected macro command: ${command}`);
-	}
-	return { target, marks };
-}
-
-test('guide name: exact localized NPC, with one clicked goal rather than the whole step', () => {
+test('guide name: one localized chosen NPC uses the shared macro, with marking off by default', () => {
 	const out = run(`
+		emit({ Polestar.GetDefault("qol.guideNameTarget"), Polestar.GetDefault("qol.markTarget") })
 		Polestar.Names = { Npc = function(id) return ({ [10] = "Loup gris", [20] = "Maître des griffons" })[id] end }
 		Polestar.QoL.CurrentStep = function() error("must not inspect other goals") end
-		local macro, name = B.GuideNameMacro({ t = "kill", npc = 10, subject = "Grey Wolf" }, { npc = 99, target = "Unrelated Wolf" })
-		emit({ macro, name })
-		macro, name = B.GuideNameMacro({ t = "talk", npc = 20, npcName = "Gryphon Master" })
-		emit({ macro, name })
-		macro, name = B.GuideNameMacro({ t = "kill", subject = "O'Brien's Wolf" })
-		emit({ macro, name })
+		local function result(goal, raw)
+			local macro, name, kind = B.GuideNameMacro(goal, raw)
+			emit({ macro, name, kind, macro == B.TargetMacro({ name }, 1, B.MarkLine(kind)) })
+		end
+		result({ t = "kill", npc = 10, subject = "Grey Wolf" }, { npc = 99, target = "Unrelated Wolf" })
+		result({ t = "talk", npc = 20, npcName = "Gryphon Master" })
+		result({ t = "kill", subject = "O'Brien's Wolf" })
 	`);
-	for (const [macro, name] of out) {
-		assert.equal(macro.split('\n').filter((line) => line.startsWith('/targetexact')).length, 1);
-		const wanted = { name };
-		assert.deepEqual(press(macro, [{ name: 'Unrelated Wolf' }, wanted]), { target: wanted, marks: [{ target: wanted, icon: 3 }] });
+	assert.deepEqual(out[0], [false, false]);
+	assert.deepEqual(out.slice(1).map((row) => row.slice(1)), [
+		['Loup gris', 'mob', true], ['Maître des griffons', 'npc', true], ["O'Brien's Wolf", 'mob', true],
+	]);
+	for (const [macro, name] of out.slice(1)) {
+		assert.equal(macro, `/cleartarget [nocombat]\n/targetexact ${name}\n/cleartarget [dead]`);
 	}
-	assert.deepEqual(out.map((row) => row[1]), ['Loup gris', 'Maître des griffons', "O'Brien's Wolf"]);
 });
 
-test('guide name: collect uses the chosen or explicit NPC source, never the item or other droppers', () => {
+test('guide name: collect resolves its chosen or explicit NPC source, never the item or other droppers', () => {
 	const out = run(`
 		Polestar.Names = { Npc = function(id) return ({ [10] = "Araignée choisie", [20] = "Loup source" })[id] end }
 		Polestar.QuestDB = { IsLoaded = function() error("must not inspect unrelated droppers") end }
 		local function result(goal, raw)
-			local macro, name = B.GuideNameMacro(goal, raw)
-			emit(name or "nil")
+			local macro, name, kind = B.GuideNameMacro(goal, raw)
+			emit(macro and { name, kind } or false)
 		end
 		result({ t = "collect", npc = 10, subject = "Spider Silk", source = { kind = "npc", name = "Other Spider" } },
 			{ fromNpcs = { { npc = 99, npcName = "Another Spider" } } })
@@ -124,246 +53,152 @@ test('guide name: collect uses the chosen or explicit NPC source, never the item
 		result({ t = "collect", subject = "Spider Silk", fromNpcs = { { npc = 10, npcName = "Spider" } } })
 		result({ t = "collect", subject = "Spider Silk" })
 	`);
-	assert.deepEqual(out, ['Araignée choisie', 'Loup source', 'Loup source', 'nil', 'nil', 'nil']);
+	assert.deepEqual(out, [['Araignée choisie', 'mob'], ['Loup source', 'mob'], ['Loup source', 'mob'], false, false, false]);
 });
 
-test('guide name: absent or dead NPC clears the old target without marking it; combat changes nothing', () => {
-	const [macro] = run('emit(B.GuideNameMacro({ t = "kill", subject = "Grey Wolf" }))');
-	const oldTarget = { name: 'Unrelated Bear' };
-	assert.deepEqual(press(macro, [oldTarget], oldTarget), { target: null, marks: [] });
-	assert.deepEqual(press(macro, [{ name: 'Grey Wolf', dead: true }], oldTarget), { target: null, marks: [] });
-	assert.deepEqual(press(macro, [{ name: 'Grey Wolf' }], oldTarget, true), { target: oldTarget, marks: [] });
-	assert.deepEqual(press(macro, [{ name: 'Grey Wolf' }], null, true), { target: null, marks: [] });
-	assert.deepEqual(press(macro, [{ name: 'Grey Wolf', dead: true, distance: 1 }, { name: 'Grey Wolf', distance: 2 }]),
-		{ target: null, marks: [] }, 'a nearest corpse is cleared; this macro cannot search past it');
-	assert.equal(press(macro.split('\n').slice(1).join('\n'), [], oldTarget).marks[0].target, oldTarget,
-		'without the initial clear, an unsuccessful exact match can leave and mark an unrelated target');
-});
-
-test('guide name: missing, unsafe and oversized names cannot create an action', () => {
-	const out = run(`
-		local goals = {
-			{}, { t = "note", npcName = "Wolf" }, { t = "talk" },
-			{ t = "kill", subject = "" }, { t = "kill", subject = 123 },
-			{ t = "kill", subject = "Wolf\\n/run Unsafe()" },
-			{ t = "kill", subject = "Wolf\\r/run Unsafe()" },
-			{ t = "talk", npcName = "Wolf\\tOther" },
-			{ t = "kill", subject = "Wolf; [combat] Bear" },
-			{ t = "kill", subject = "[combat] Bear" },
-			{ t = "kill", subject = "   " },
-			{ t = "kill", subject = string.rep("W", 256) },
-			{ t = "kill", subject = string.rep("é", 100) },
-		}
-		for _, goal in ipairs(goals) do emit(B.GuideNameMacro(goal) == nil) end
-		emit(B.GuideNameMacro(nil) == nil)
-		local macro = B.GuideNameMacro({ t = "kill", subject = string.rep("W", 100) })
-		emit(macro and #macro <= 255 or false)
-	`);
-	assert.equal(out.length, 15);
-	assert.ok(out.every(Boolean));
-});
-
-test('guide name: toggle and fixed marker are independent of target-button marking', () => {
-	const out = run(`
-		local goal = { t = "talk", npcName = "Innkeeper" }
-		local function marker()
-			local macro = B.GuideNameMacro(goal)
-			emit(macro and macro:match("!(%d+)$") or "nil")
-		end
-		marker()
-		Polestar.Set("qol.markTarget", true)
-		Polestar.Set("qol.markNpc", "cycle")
-		Polestar.Set("qol.guideNameIcon", "6")
-		marker()
-		marker()
-		for _, value in ipairs({ "cycle", "9", "0", "2.5", "3\\n/run Unsafe()" }) do
-			Polestar.Set("qol.guideNameIcon", value)
-			marker()
-		end
-		Polestar.Set("qol.guideNameTarget", false)
-		marker()
-	`);
-	assert.deepEqual(out, ['3', '6', '6', '3', '3', '3', '3', '3', 'nil']);
-});
-
-test('guide name: disabled by default, Diamond default, eight fixed icon choices', () => {
-	const [defaults, control] = run(`
-		emit({ Polestar.GetDefault("qol.guideNameTarget"), Polestar.GetDefault("qol.guideNameIcon") })
-		local toggle, icon
-		for _, spec in ipairs(Polestar.Widgets.OptionsRegistry) do
-			for _, c in ipairs(spec.controls) do
-				if c.key == "qol.guideNameTarget" then toggle = c end
-				if c.key == "qol.guideNameIcon" then icon = c end
-			end
-		end
-		assert(toggle and icon, "guide-name options registered")
-		local values = {}
-		for _, c in ipairs(icon.choices()) do values[#values + 1] = c.value end
-		local active = not icon.disabled()
-		Polestar.Set("qol.guideNameTarget", false)
-		emit({ toggle.kind, icon.kind, values, active, icon.disabled() })
-	`);
-	assert.deepEqual(defaults, [false, '3']);
-	assert.deepEqual(control, ['toggle', 'dropdown', ['1', '2', '3', '4', '5', '6', '7', '8'], true, true]);
-});
-
-test('guide name: only plain literal names, never unit references, markup or escape syntax', () => {
-	const [rejected, accepted] = run(String.raw`
-		local rejected = {}
-		for _, name in ipairs({ " Wolf", "Wolf ", "\\Wolf", "/target", "Wolf|r", "|cff00ff00Wolf|r",
-			"|Hunit:player|hWolf|h", "|Ttexture:0|tWolf", "|AWolf:0|a", "Wolf\0Other", "Wolf\127Other",
-			"player", "PLAYER", "pet", "vehicle", "target", "targettarget", "focus", "focustarget",
-			"mouseover", "mouseovertarget", "npc", "none", "party1", "partypet1", "party1target",
-			"raid40", "raidpet40", "raid1targettarget", "arena1", "arenapet1", "boss1", "nameplate1",
-			"maintank1", "mainassist1", "playertargetpet" }) do
-			if B.GuideNameMacro({ t = "kill", subject = name }) ~= nil then rejected[#rejected + 1] = name end
-		end
-		emit(rejected)
-		local accepted = {}
-		for _, name in ipairs({ "Bael'dun Excavator", "Prospector Khazgorm", "Maître des griffons", "小狼", "Target Dummy", "Forest Spider" }) do
-			local macro, resolved = B.GuideNameMacro({ t = "kill", subject = name })
-			accepted[#accepted + 1] = macro and resolved or false
-		end
-		emit(accepted)
-	`);
-	assert.deepEqual(rejected, {});
-	assert.deepEqual(accepted, ["Bael'dun Excavator", 'Prospector Khazgorm', 'Maître des griffons', '小狼', 'Target Dummy', 'Forest Spider']);
-});
-
-test('guide name: chosen names stay together and a named primary source never becomes another source', () => {
+test('guide name: chosen IDs and names stay together; a missing chosen NPC never becomes another dropper', () => {
 	const out = run(`
 		Polestar.Names = { Npc = function(id) return id == 99 and "Raw NPC" or nil end }
 		local function result(goal, raw)
 			local macro, name = B.GuideNameMacro(goal, raw)
-			emit(name or false)
+			emit(macro and name or false)
 		end
 		result({ t = "collect", npcName = "Chosen NPC" }, { npc = 99, npcName = "Raw NPC", from = "Source NPC" })
-		result({ t = "kill", npc = 10, subject = "View NPC" }, { npc = 10, target = "Raw NPC" })
+		result({ t = "kill", npc = 10, subject = "View NPC" }, { npc = 99, target = "Raw NPC" })
+		result({ t = "collect", npc = 10, source = { kind = "npc", name = "Other NPC" } }, { npc = 99 })
+		result({ t = "talk", npc = 10 }, { npc = 99, npcName = "Raw NPC" })
 		result({ t = "collect", source = { kind = "npc", name = "Primary NPC", also = "Other NPC" } })
 		result({ t = "collect" }, { from = "Primary NPC", fromAlso = "Other NPC", fromKind = "npc" })
-		result({ t = "collect", source = { kind = "npc", name = "player", also = "Other NPC" } })
-		result({ t = "collect" }, { fromNpcs = { { npcName = "First NPC" }, { npcName = "Other NPC" } } })
 	`);
-	assert.deepEqual(out, ['Chosen NPC', 'View NPC', 'Primary NPC', 'Primary NPC', false, false]);
+	assert.deepEqual(out, ['Chosen NPC', 'View NPC', false, false, 'Primary NPC', 'Primary NPC']);
 });
 
-test('guide name: client command aliases, fail closed when absent or malformed, byte limit includes aliases', () => {
-	const [localized, bad, boundary] = run(String.raw`
-		local goal = { t = "talk", npcName = "Innkeeper" }
-		SLASH_CLEARTARGET1, SLASH_TARGET_EXACT1, SLASH_TARGET_MARKER1 = "/effacercible", "/cibleexacte", "/marquecible"
-		emit(B.GuideNameMacro(goal))
-		local bad = {}
-		for _, key in ipairs({ "SLASH_CLEARTARGET1", "SLASH_TARGET_EXACT1", "SLASH_TARGET_MARKER1" }) do
-			local original = _G[key]
-			_G[key] = nil
-			bad[#bad + 1] = B.GuideNameMacro(goal) == nil
-			for _, value in ipairs({ "", "targetexact", "/run X()", "/tm\n/run X()", "/tm;", "/tm[combat]", "/tm|r", "/tm\\", "//tm", 123 }) do
-				_G[key] = value
-				bad[#bad + 1] = B.GuideNameMacro(goal) == nil
-			end
-			_G[key] = original
+test('guide name: unavailable names and control characters use the shared safety check; disabling removes the action', () => {
+	const out = run(String.raw`
+		local rejected = {}
+		for _, goal in ipairs({ {}, { t = "note", npcName = "Wolf" }, { t = "talk" },
+			{ t = "kill", subject = "" }, { t = "kill", subject = 123 } }) do
+			rejected[#rejected + 1] = B.GuideNameMacro(goal) == nil
 		end
-		emit(bad)
-		SLASH_CLEARTARGET1 = "/" .. string.rep("清", 8)
-		SLASH_TARGET_EXACT1 = "/" .. string.rep("目", 8)
-		SLASH_TARGET_MARKER1 = "/" .. string.rep("印", 8)
-		local base = B.GuideNameMacro({ t = "kill", subject = "W" })
-		assert(base and #base < 255)
-		local count = 255 - #base + 1
-		local exact = B.GuideNameMacro({ t = "kill", subject = string.rep("W", count) })
-		local oversized = B.GuideNameMacro({ t = "kill", subject = string.rep("W", count + 1) })
-		emit({ #exact, oversized == nil })
+		for _, name in ipairs({ "Wolf\n/run Unsafe()", "Wolf\rOther", "Wolf\tOther", "Wolf\0Other", "Wolf\127Other" }) do
+			rejected[#rejected + 1] = not B.MacroSafeName(name) and B.GuideNameMacro({ t = "kill", subject = name }) == nil
+		end
+		emit(rejected)
+		emit(B.GuideNameMacro(nil) == nil)
+		set("guideNameTarget", false)
+		emit(B.GuideNameMacro({ t = "kill", subject = "Wolf" }) == nil)
 	`);
-	assert.match(localized, /^\/effacercible \[nocombat\]\n\/cibleexacte \[nocombat\] Innkeeper\n\/effacercible \[nocombat,dead\]\n\/marquecible /);
-	assert.equal(bad.length, 33);
-	assert.ok(bad.every(Boolean));
-	assert.deepEqual(boundary, [255, true]);
+	assert.deepEqual(out[0], Array(10).fill(true));
+	assert.deepEqual(out.slice(1), [true, true]);
 });
 
-test('guide name: Forever handler bodies keep marks on repeat and never mark a stale target', () => {
-	const out = run(FOREVER_HANDLERS + String.raw`
-		-- Import the command aliases by the client's key/number convention:
-		-- ChatFrameUtil.lua:794-818. Artificial localized aliases ensure the
-		-- generated macro and dispatch agree without assuming English support.
-		SLASH_CLEARTARGET1, SLASH_TARGET_EXACT1, SLASH_TARGET_MARKER1 = "/clear-local", "/exact-local", "/mark-local"
-		local dispatch = {}
-		for key, fn in pairs(handlers) do
-			local i, tag = 1, _G["SLASH_" .. key .. "1"]
-			while tag do
-				dispatch[string.upper(tag)] = fn
-				i = i + 1
-				tag = _G["SLASH_" .. key .. i]
-			end
-		end
-		local target, nearby, combat, marks, targetCalls
-		function SecureCmdOptionParse(msg)
-			local conditions, action = msg:match("^%[([^%]]+)%]%s*(.*)$")
-			assert(conditions, "test double accepts only generated conditional lines")
-			local unit
-			for condition in conditions:gmatch("[^,]+") do
-				if condition == "@target" then unit = "target"
-				elseif condition == "nocombat" then if combat then return nil end
-				elseif condition == "exists" then if not target then return nil end
-				elseif condition == "dead" then if not (target and target.dead) then return nil end
-				elseif condition == "nodead" then if target and target.dead then return nil end
-				else error("Unexpected condition: " .. condition) end
-			end
-			return action, unit
-		end
-		function ClearTarget() target = nil end
-		function TargetUnit(name, exact)
-			targetCalls[#targetCalls + 1] = { name, exact }
-			-- Model a failed native lookup retaining the target and a corpse
-			-- winning the nearest match. The macro must be safe in both cases.
-			local best
-			for _, unit in ipairs(nearby) do
-				if unit.name == name and (not best or unit.distance < best.distance) then best = unit end
-			end
-			if best then target = best end
-		end
-		function GetRaidTargetIndex(unit)
-			assert(unit == "target")
-			return target and target.icon
-		end
-		function SetRaidTarget(unit, icon)
-			assert(unit == "target" and target and not target.dead)
-			marks[#marks + 1] = { target.name, icon }
-			target.icon = icon
-		end
-		local macro = B.GuideNameMacro({ t = "collect", source = { kind = "npc", name = "Prospector Khazgorm", also = "Other NPC" } })
-		local function play(units, old, inCombat, count, text)
-			nearby, target, combat, marks, targetCalls = units, old, inCombat, {}, {}
-			for i = 1, count or 1 do
-				for line in (text or macro):gmatch("[^\n]+") do
-					local command, msg = line:match("^(%S+)%s*(.*)$")
-					local fn = assert(dispatch[string.upper(command)], "registered client alias")
-					fn(msg:match("^%s*(.-)%s*$"))
+test('guide name: the complete shared macro must fit 255 bytes, with and without marks or multibyte names', () => {
+	const out = run(`
+		for _, marking in ipairs({ false, true }) do
+			set("markTarget", marking)
+			for _, kind in ipairs({ "mob", "npc" }) do
+				local overhead = #B.TargetMacro({ "W" }, 1, B.MarkLine(kind)) - 1
+				local budget = 255 - overhead
+				for _, unit in ipairs({ "W", "狼" }) do
+					local name = string.rep(unit, math.floor(budget / #unit)) .. string.rep("W", budget % #unit)
+					local goal = { t = kind == "mob" and "kill" or "talk", npcName = name }
+					local macro, resolved = B.GuideNameMacro(goal)
+					goal.npcName = name .. "W"
+					emit({ macro and #macro or 0, resolved == name, B.GuideNameMacro(goal) == nil })
 				end
 			end
-			emit({ name = target and target.name or false, icon = target and target.icon or false,
-				marks = marks, targetCalls = targetCalls })
 		end
-		local old = { name = "Unrelated Bear", distance = 1 }
-		local live = { name = "Prospector Khazgorm", distance = 2 }
-		play({ live }, old, false, 2)
-		play({ old }, old, false)
-		play({ { name = "Prospector Khazgorm", distance = 1, dead = true }, live }, old, false)
-		play({ live }, old, true)
-		-- The real handler calls TargetUnit(name,true); it does not itself
-		-- clear on failed lookup. Removing our initial clear demonstrates why
-		-- it is required before an exists/nodead mark condition.
-		play({ old }, old, false, 1, macro:match("^[^\n]+\n(.*)$"))
 	`);
-	assert.equal(out[0].name, 'Prospector Khazgorm');
-	assert.equal(out[0].icon, 3);
-	assert.deepEqual(out[0].marks, [['Prospector Khazgorm', 3]], 'the real ! handler skips an already assigned marker');
-	assert.deepEqual(out[0].targetCalls, [['Prospector Khazgorm', true], ['Prospector Khazgorm', true]]);
-	for (const row of out.slice(1, 3)) {
-		assert.equal(row.name, false);
-		assert.deepEqual(row.marks, {});
-	}
-	assert.equal(out[3].name, 'Unrelated Bear');
-	assert.deepEqual(out[3].marks, {});
-	assert.deepEqual(out[3].targetCalls, {});
-	assert.deepEqual(out[4].marks, [['Unrelated Bear', 3]], 'control case proves the initial clear is necessary');
+	assert.equal(out.length, 8);
+	for (const row of out) assert.deepEqual(row, [255, true, true]);
+});
+
+test('guide name: kills and collect sources use mob marks; all NPC verbs use NPC marks', () => {
+	const out = run(`
+		set("markTarget", true)
+		set("markMob", "6")
+		set("markNpc", "4")
+		for _, verb in ipairs({ "kill", "collect", "accept", "turnin", "talk", "train", "vendor", "buy", "sethome", "getfp", "learn" }) do
+			local macro, name, kind = B.GuideNameMacro({ t = verb, npcName = "Chosen NPC" })
+			emit({ kind, macro:match("[~!]%d$"), macro == B.TargetMacro({ name }, 1, B.MarkLine(kind)) })
+		end
+		set("markTarget", false)
+		emit(B.GuideNameMacro({ t = "talk", npcName = "Chosen NPC" }))
+	`);
+	assert.deepEqual(out.slice(0, 2), [['mob', '!6', true], ['mob', '!6', true]]);
+	for (const row of out.slice(2, 11)) assert.deepEqual(row, ['npc', '!4', true]);
+	assert.equal(out[11], '/cleartarget [nocombat]\n/targetexact Chosen NPC\n/cleartarget [dead]');
+});
+
+test('mark cycle: guide names, target button and step key advance together without losing name cycles', () => {
+	const out = run(`
+		set("markTarget", true)
+		set("markMob", "cycle")
+		q.step({ { t = "kill", target = "Wolf" }, { t = "kill", target = "Boar" } })
+		local t, s, changes = PolestarTargetButton, PolestarStepButton, {}
+		Polestar.On("QOL_TARGET_MARK_CHANGED", function(kind) changes[#changes + 1] = kind end)
+		local function snapshot()
+			local macro = B.GuideNameMacro({ t = "kill", subject = "Wolf" })
+			emit({ t:GetAttribute("macrotext"):match("/targetexact ([^\\n]+)"), s:GetAttribute("macrotext"):match("/targetexact ([^\\n]+)"),
+				t:GetAttribute("macrotext"):match("[~!]%d$"), s:GetAttribute("macrotext"):match("[~!]%d$"), macro:match("[~!]%d$") })
+		end
+		snapshot()
+		assert(B.AdvanceMark("mob"))
+		snapshot()
+		q.click(t, true)
+		q.click(t, false)
+		snapshot()
+		q.click(s, true)
+		q.click(s, false)
+		snapshot()
+		emit(changes)
+	`);
+	assert.deepEqual(out, [
+		['Wolf', 'Wolf', '~2', '~2', '~2'], ['Wolf', 'Wolf', '~3', '~3', '~3'],
+		['Boar', 'Wolf', '~4', '~4', '~4'], ['Boar', 'Boar', '~5', '~5', '~5'],
+		['mob', 'mob', 'mob'],
+	]);
+});
+
+test('mark cycle: NPCs skip the fixed mob icon; off and fixed settings do not advance or notify', () => {
+	const out = run(`
+		local changes = {}
+		Polestar.On("QOL_TARGET_MARK_CHANGED", function(kind) changes[#changes + 1] = kind end)
+		emit(B.AdvanceMark("mob"))
+		set("markTarget", true)
+		emit(B.AdvanceMark("mob"))
+		emit(B.AdvanceMark(nil))
+		set("markNpc", "cycle")
+		q.step({ { t = "talk", npcName = "Innkeeper" } })
+		local seen = {}
+		for i = 1, 8 do
+			local macro = B.GuideNameMacro({ t = "talk", npcName = "Innkeeper" })
+			assert(macro == PolestarStepButton:GetAttribute("macrotext"))
+			seen[#seen + 1] = macro:match("[~!]%d$")
+			assert(B.AdvanceMark("npc"))
+		end
+		emit(seen)
+		emit(changes)
+	`);
+	assert.deepEqual(out.slice(0, 3), [false, false, false]);
+	assert.deepEqual(out[3], ['~1', '~2', '~3', '~4', '~5', '~6', '~7', '~1']);
+	assert.deepEqual(out[4], Array(8).fill('npc'));
+});
+
+test('mark cycle: existing target and step macros stay frozen in combat, then apply the latest cycle once safe', () => {
+	const out = run(`
+		set("markTarget", true)
+		set("markMob", "cycle")
+		q.step({ { t = "kill", target = "Wolf" }, { t = "kill", target = "Boar" } })
+		local t, s = PolestarTargetButton, PolestarStepButton
+		local oldT, oldS = t:GetAttribute("macrotext"), s:GetAttribute("macrotext")
+		q.combat(true)
+		q.click(t, false)
+		q.click(s, false)
+		emit({ t:GetAttribute("macrotext") == oldT, s:GetAttribute("macrotext") == oldS })
+		q.combat(false)
+		emit({ t:GetAttribute("macrotext"):match("/targetexact ([^\\n]+)"), s:GetAttribute("macrotext"):match("/targetexact ([^\\n]+)"),
+			t:GetAttribute("macrotext"):match("[~!]%d$"), s:GetAttribute("macrotext"):match("[~!]%d$") })
+	`);
+	assert.deepEqual(out, [[true, true], ['Boar', 'Boar', '~4', '~4']]);
 });
