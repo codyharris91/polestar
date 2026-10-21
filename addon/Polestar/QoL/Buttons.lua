@@ -669,6 +669,86 @@ end
 -- Goals done with an NPC, whom the step key targets by name.
 local NPC_VERBS = { accept = true, turnin = true, talk = true, train = true, vendor = true, buy = true, sethome = true, getfp = true, learn = true }
 
+-- TARGET_EXACT still passes its argument to the native TargetUnit API.
+-- Reject common unit-reference spellings rather than rely on undocumented
+-- native precedence between a literal creature name and a unit token.
+local GUIDE_UNIT_NAMES = { [""] = true, player = true, vehicle = true, focus = true, mouseover = true, npc = true, none = true }
+local function guideNameSafe(name)
+	if not Buttons.MacroSafeName(name) or #name > MACRO_LIMIT or name:find("[\\|/;%[%]]")
+		or name:match("^%s") or name:match("%s$") then return false end
+	local unit = name:lower()
+	while true do
+		local shorter = unit:gsub("target$", ""):gsub("pet$", "")
+		if shorter == unit then break end
+		unit = shorter
+	end
+	return not (GUIDE_UNIT_NAMES[unit] or unit:match("^party%d+$") or unit:match("^partypet%d+$")
+		or unit:match("^raid%d+$") or unit:match("^raidpet%d+$") or unit:match("^arena%d+$")
+		or unit:match("^arenapet%d+$") or unit:match("^boss%d+$") or unit:match("^nameplate%d+$")
+		or unit:match("^maintank%d+$") or unit:match("^mainassist%d+$"))
+end
+
+-- Forever imports every SLASH_<key><n> into its command registry. Use the
+-- client's first alias so command spelling follows its locale; a missing
+-- or malformed alias disables this action rather than risking a partial
+-- macro (particularly a mark whose preceding clear/target never ran).
+local function guideCommand(key)
+	local command = _G["SLASH_" .. key .. "1"]
+	if type(command) == "string" and command:match("^/[^%s%c/;%[%]|\\]+$") then return command end
+end
+
+-- One clicked guide name, independent of the standalone target button's
+-- list and marking settings. The view's chosen NPC wins over the raw goal;
+-- collect subjects are items, so only their chosen or named NPC source can
+-- be targeted. No world-wide dropper lookup or other goal is consulted.
+function Buttons.GuideNameMacro(goal, raw)
+	if not QoL.On("guideNameTarget") or type(goal) ~= "table" then return nil end
+	raw = type(raw) == "table" and raw or goal
+	local t = goal.t
+	if t ~= "kill" and t ~= "collect" and not NPC_VERBS[t] then return nil end
+	local N = ns.Names
+	-- Keep a chosen name with its chosen ID: an unnamed/raw candidate must
+	-- not replace the view's named candidate with another localized NPC.
+	local chosen = goal.npc ~= nil or goal.npcName ~= nil
+	local npc, name
+	if chosen then npc, name = goal.npc, goal.npcName else npc, name = raw.npc, raw.npcName end
+	name = (npc and N and N.Npc and N.Npc(npc)) or name
+	if chosen and not name and t ~= "kill" then return nil end
+	if not name then
+		if t == "kill" then
+			name = goal.subject or raw.target
+		elseif t == "collect" then
+			local source = goal.source
+			if type(source) == "table" then
+				if source.kind == "npc" then name = source.name end
+			elseif raw.from and (raw.fromKind == nil or raw.fromKind == "npc") then
+				name = (raw.fromId and N and N.Npc and N.Npc(raw.fromId)) or raw.from
+			end
+		end
+	end
+	-- Names are plain data, never macro conditions, markup or escape text.
+	if not guideNameSafe(name) then return nil end
+	local clear, target, mark = guideCommand("CLEARTARGET"), guideCommand("TARGET_EXACT"), guideCommand("TARGET_MARKER")
+	if not (clear and target and mark) then return nil end
+	local icon = tonumber(ns.Get("qol.guideNameIcon"))
+	if not icon or icon < 1 or icon > 8 or icon ~= math.floor(icon) then icon = 3 end
+	-- Every line is out-of-combat only, even if an old secure action survives
+	-- a layout change. Clearing first also makes an absent/dead name mark
+	-- nothing rather than the player's previous target. "!" keeps the icon
+	-- on repeated clicks instead of toggling it off. A nearer corpse can
+	-- still win the native lookup; clearing it does not search past it.
+	-- Verified in Forever's SlashCommands.lua at 172a387e3ab85b26e6640d3058d5ec1e6ccd4c63:
+	-- TARGET_EXACT (489-497), CLEARTARGET (541-545), TARGET_MARKER (1451-1478).
+	local macro = concat({
+		clear .. " [nocombat]",
+		target .. " [nocombat] " .. name,
+		clear .. " [nocombat,dead]",
+		mark .. " [@target,exists,nodead,nocombat] !" .. icon,
+	}, "\n")
+	if #macro > MACRO_LIMIT then return nil end
+	return macro, name
+end
+
 -- What the step key does now. view, raw: QoL.CurrentStep()'s, when the
 -- caller has them. -> "item", itemID | "target", names (reused list) |
 -- "npc", name | nil. The route's own goals come first, in guide order, then

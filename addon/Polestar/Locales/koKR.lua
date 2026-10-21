@@ -755,6 +755,10 @@ L["When the step sets your home and you talk to its innkeeper, binds your Hearth
 -- L["At level 40 and 60, if you have not learned riding yet, says the cost in chat (with any Honored discount) and points the arrow at your race's riding trainer when you can afford it. Warlocks and Alliance Paladins are sent to their free-mount quest NPC instead. Once per tier per character."] = ""
 -- L["Hide the game's quest tracker"] = ""
 -- L["Hides the game's tracker on the right of the screen, with its quests, achievements and professions, as Questie can. Not with the gamepad interface."] = ""
+-- L["Click objectives to target"] = ""
+-- L["Clicking an objective row or NPC heading also targets and marks its NPC outside combat. This replaces your current target; a failed search clears it."] = ""
+-- L["Objective target icon"] = ""
+-- L["The raid icon placed on the NPC targeted by an objective click."] = ""
 
 -- Lookup/Sources.lua
 L["Alliance only"] = "얼라이언스 전용"
@@ -2341,6 +2345,10 @@ L["Bound your Hearthstone."] = "귀환석이 묶였습니다."
 -- L["After: level %d"] = ""
 -- L["After: %d%% into level %d"] = ""
 -- L["Recommended: level %d"] = ""
+
+-- UI/NameTargets.lua
+-- L["Click to target and mark %s (out of combat)."] = ""
+-- L["%s not found nearby."] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["Shortest Path Forever is guiding. Turn off \"Guide with Shortest Path Forever when it's installed\" (Options, Arrow & routes) to use Polestar's arrow."] = "Shortest Path Forever가 가이드 중입니다. Polestar 화살표를 쓰려면 \"설치 시 Shortest Path Forever로 가이드\"를 끄십시오(설정, 화살표 및 경로)."

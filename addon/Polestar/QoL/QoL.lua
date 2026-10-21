@@ -38,6 +38,8 @@ end
 local defaults = {
 	itemButton = true,       -- quest item button
 	targetButton = true,     -- target macro button
+	guideNameTarget = false, -- opt in: extend navigation clicks to targeting and marking
+	guideNameIcon = "3",      -- its fixed raid icon (1-8): diamond
 	rareButton = true,       -- target button for a rare the addon spotted
 	hearthButton = true,     -- Hearthstone button while a hearth goal is active
 	markTarget = false,      -- raid icon on what the target button and step key target

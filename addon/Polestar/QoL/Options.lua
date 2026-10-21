@@ -24,13 +24,19 @@ end
 
 local function repairOff() return not QoL.On("autoRepair") end
 local function markOff() return not QoL.On("markTarget") end
+local function guideNameOff() return not QoL.On("guideNameTarget") end
 
--- The eight raid icons, by the client's names, then a new one each press.
-local function markChoices()
+-- The eight raid icons, by the client's names.
+local function iconChoices()
 	local list = {}
 	for i = 1, 8 do
 		list[i] = { value = tostring(i), label = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i .. ":0|t " .. (_G["RAID_TARGET_" .. i] or i) }
 	end
+	return list
+end
+
+local function markChoices()
+	local list = iconChoices()
 	list[9] = { value = "cycle", label = L["A new one each press"] }
 	return list
 end
@@ -40,6 +46,10 @@ register(QUESTING, L["Buttons"], L["Action buttons"], {
 		help = L["A button for the current step's quest item, with count, cooldown and range. Bind it under Key Bindings > AddOns."] },
 	{ kind = "toggle", key = "qol.targetButton", label = L["Target button"],
 		help = L["Targets the current step's mobs by name; each click moves to the next name. Bindable."] },
+	{ kind = "toggle", key = "qol.guideNameTarget", label = L["Click objectives to target"],
+		help = L["Clicking an objective row or NPC heading also targets and marks its NPC outside combat. This replaces your current target; a failed search clears it."] },
+	{ kind = "dropdown", key = "qol.guideNameIcon", label = L["Objective target icon"], choices = iconChoices, disabled = guideNameOff,
+		help = L["The raid icon placed on the NPC targeted by an objective click."] },
 	{ kind = "toggle", key = "qol.rareButton", label = L["Rare button"],
 		help = L["Shows a button that targets a rare Polestar spotted nearby, until it dies or is out of sight. Bindable."] },
 	{ kind = "toggle", key = "qol.hearthButton", label = L["Hearthstone button"],

@@ -3299,6 +3299,38 @@ flight timer and the instance tracker are set under Quality of Life.
 
 ## QoL — quality-of-life helpers
 
+### Clickable objectives
+
+`qol.guideNameTarget` is off by default. Enabling it extends objective-row
+navigation clicks to target the objective's NPC and mark it
+(`qol.guideNameIcon`, diamond by default). Opt-in is a product decision:
+existing navigation clicks should not unexpectedly replace the player's
+target. The default can be changed independently of the targeting code.
+`QoL.Buttons.GuideNameMacro` resolves one NPC belonging to that
+goal, never a collect item's name or another objective, and prepares a
+bounded, sanitized macro. It clears an unmatched old target and dead matches
+before marking. For a collect with two named sources, it uses the primary
+source; the hover tooltip identifies that NPC. The client determines
+targeting range and marker permission. An exact-name search can select a
+nearer corpse instead of a living namesake; clearing that corpse does not
+make the macro search farther.
+
+The command sequence is checked against Forever 1.60.1 (70450):
+[exact targeting and clearing](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L489),
+[marker commands](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/SlashCommands.lua#L1451),
+and [client command aliases](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua#L794).
+
+`UI/NameTargets.lua` pools secure buttons over objective rows (and the NPC
+heading's text), independently of the guide's frame tree. Absolute UIParent
+positions follow the guide's layout, animation and dragging. A secure
+visibility driver hides the buttons
+in combat; no protected attributes or geometry change under lockdown, and a
+combat reload defers button creation. The normal guide remains interactive.
+After combat the buttons use the latest displayed goals. Left clicks retain
+arrow navigation; right-click completion and adjacent controls keep working.
+A left-click that finds no living target reports the NPC name through
+`UIErrorsFrame` (chat fallback), before navigation can reuse the button.
+
 ### Quest reward marks — QoL, reads Gear
 
 One system marks the client's reward choices: `QoL/Rewards.lua`. Gear only
