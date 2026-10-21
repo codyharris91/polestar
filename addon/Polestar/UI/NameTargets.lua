@@ -61,7 +61,7 @@ local function createButton(i)
 	b:SetScript("OnLeave", leave)
 	b:SetScript("OnHide", leave)
 	-- OnClick belongs to SecureActionButtonTemplate. Keep the ordinary row
-	-- navigation and right-click completion, once, after the secure action.
+	-- navigation and right-click actions, once, after the secure action.
 	b:HookScript("PostClick", function(self, mouse, down)
 		if down or locked() then return end
 		local kind = self.psKind

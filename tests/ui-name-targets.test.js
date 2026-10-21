@@ -88,6 +88,22 @@ end
 local function postClick(button, mouse, down)
 	stub.RunScript(button, "PostClick", mouse, down)
 end
+local function menuItems()
+	local items = {}
+	if PolestarMenu and PolestarMenu:IsShown() then
+		for _, row in ipairs(PolestarMenu.rows) do
+			if row:IsShown() then items[#items + 1] = row.Text:GetText() end
+		end
+	end
+	return items
+end
+local function pickMenu(text)
+	assert(PolestarMenu and PolestarMenu:IsShown(), "missing context menu")
+	for _, row in ipairs(PolestarMenu.rows) do
+		if row:IsShown() and row.Text:GetText() == text then row:Click(); return end
+	end
+	error("missing menu item: " .. text)
+end
 -- Hit-test the ordinary row, its real child controls and its independent
 -- overlay by geometry and frame level. Equal levels are an ambiguous test
 -- failure: the feature must not depend on client creation-order tie breaks.
@@ -307,12 +323,16 @@ test('targeting is off by default and ordinary row actions remain available with
 		local row = rowFor("Kobold Vermin")
 		row:Click("LeftButton")
 		row:Click("RightButton")
+		local items, beforePick = menuItems(), callCount("ToggleGoal")
+		pickMenu("Tick it done")
 		emit({ enabled = Polestar.Get("qol.guideNameTarget"), count = #NT.buttons, holder = NT.holder ~= nil,
-			aim = lastCall("AimGoal"), tick = lastCall("ToggleGoal") })`, { enabled: false });
+			items = items, beforePick = beforePick, aim = lastCall("AimGoal"), tick = lastCall("ToggleGoal") })`, { enabled: false });
 	assert.equal(out.enabled, false);
 	assert.equal(out.count, 0);
 	assert.equal(out.holder, false);
 	assert.deepEqual(out.aim, ['AimGoal', 3, 3]);
+	assert.deepEqual(out.items, ['Tick it done', 'Skip this quest']);
+	assert.equal(out.beforePick, 0, 'right-click opens the menu without ticking the goal');
 	assert.deepEqual(out.tick, ['ToggleGoal', 3, 3]);
 });
 
@@ -395,7 +415,7 @@ test('the real gear-reward link remains above the objective overlay and keeps it
 	assert.equal(out.navigation, 0);
 });
 
-test('objective clicks retain row navigation and right-click completion', () => {
+test('objective clicks retain row navigation and the quest right-click menu', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)
 		settle()
@@ -408,20 +428,43 @@ test('objective clicks retain row navigation and right-click completion', () => 
 		local released = callCount("AimGoal")
 		local aim = lastCall("AimGoal")
 		postClick(button, "RightButton", false)
+		local items, beforePick = menuItems(), callCount("ToggleGoal")
+		pickMenu("Tick it done")
 		local right = lastCall("ToggleGoal")
 		row.Check:Click()
-		emit({ before = before, pressed = pressed, released = released, aim = aim, right = right,
-			check = lastCall("ToggleGoal"), checkbox = row.Check:IsShown(), useOnKeyDown = button:GetAttribute("useOnKeyDown"),
-			noRightMacro = button:GetAttribute("type2") == nil, wholeRow = button.psRegion == row and button.psWholeRow })`);
+		local checkbox = row.Check:IsShown()
+		local wholeRow = button.psRegion == row and button.psWholeRow
+		postClick(assert(targetFor(row)), "RightButton", false)
+		pickMenu("Skip this quest")
+		emit({ before = before, pressed = pressed, released = released, aim = aim, right = right, items = items, beforePick = beforePick,
+			skip = lastCall("SkipQuest"),
+			check = lastCall("ToggleGoal"), checkbox = checkbox, useOnKeyDown = button:GetAttribute("useOnKeyDown"),
+			noRightMacro = button:GetAttribute("type2") == nil, wholeRow = wholeRow })`);
 	assert.equal(out.pressed, out.before, 'a press does not duplicate navigation');
 	assert.equal(out.released, out.before + 1);
 	assert.deepEqual(out.aim, ['AimGoal', 3, 3]);
+	assert.deepEqual(out.items, ['Tick it done', 'Skip this quest']);
+	assert.equal(out.beforePick, 0, 'the overlay delegates right-click without ticking the goal');
 	assert.deepEqual(out.right, ['ToggleGoal', 3, 3]);
 	assert.deepEqual(out.check, ['ToggleGoal', 3, 3]);
+	assert.deepEqual(out.skip, ['SkipQuest', 7, true]);
 	assert.equal(out.checkbox, true);
 	assert.equal(out.useOnKeyDown, false);
 	assert.equal(out.noRightMacro, true);
 	assert.equal(out.wholeRow, true);
+});
+
+test('a non-quest objective still toggles completion directly through the overlay', () => {
+	const [out] = run(`
+		uistub.guides[uistub.elwynn].steps[3].goals[3].quest = nil
+		uistub.setGuide(uistub.elwynn, 3)
+		settle()
+		local row = assert(rowFor("Kobold Vermin"))
+		assert(not row.psGoal.quest, "fixture should have no quest")
+		postClick(assert(targetFor(row)), "RightButton", false)
+		emit({ tick = lastCall("ToggleGoal"), menu = PolestarMenu and PolestarMenu:IsShown() or false })`);
+	assert.deepEqual(out.tick, ['ToggleGoal', 3, 3]);
+	assert.equal(out.menu, false);
 });
 
 test('name overlays track region movement and guide scale, hide with the guide, and return on show', () => {

@@ -3439,7 +3439,8 @@ visibility driver hides the buttons
 in combat; no protected attributes or geometry change under lockdown, and a
 combat reload defers button creation. The normal guide remains interactive.
 After combat the buttons use the latest displayed goals. Left clicks retain
-arrow navigation; right-click completion and adjacent controls keep working.
+arrow navigation; the quest's right-click menu, non-quest completion and
+adjacent controls keep working.
 A left-click that finds no living target reports the NPC name through
 `UIErrorsFrame` (chat fallback), before navigation can reuse the button.
 
