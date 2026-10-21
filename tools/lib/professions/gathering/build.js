@@ -155,8 +155,7 @@ function render(ctx, prof) {
 		if (e.kind === 'learn') {
 			L.push('', '# ---------------------------------------------------------------- Apprentice', '');
 			L.push(`step Learn ${prof.skill}`);
-			L.push(`  tip Any ${prof.skill} trainer of your faction teaches Apprentice ${prof.skill} (character level 5); the arrow picks the nearest.${prof.tool ? ` Buy a ${prof.tool.name} from a trade goods or general vendor: ${prof.tool.why}` : ''}`);
-			L.push('  level 5');
+			L.push(`  tip Any ${prof.skill} trainer of your faction teaches Apprentice ${prof.skill} at any level, and so does the Junior ${prof.skill} Trainer in each starting zone; the arrow picks the nearest.${prof.tool ? ` Buy a ${prof.tool.name} from a trade goods or general vendor: ${prof.tool.why}` : ''}`);
 			L.push(`  train ${prof.skill} Apprentice`);
 			if (prof.tool) L.push(`  buy ${prof.tool.item} x1 nearest`);
 		} else if (e.kind === 'train') {

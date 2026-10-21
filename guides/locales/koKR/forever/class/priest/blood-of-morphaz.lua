@@ -28,14 +28,14 @@ return {
 	["{npc:8405} lives atop the cliffs north-east of the {area:1221}. Alliance: fly to {area:3137}; Horde: fly to {area:1237}."] = "{npc:8405}은(는) {area:1221} 북동쪽 절벽 위에 삽니다. 얼라이언스: {area:3137}(으)로 날아가십시오. 호드: {area:1237}(으)로 날아가십시오.",
 
 	-- Step 4: Of Coursers We Know
-	-- {zone:1447} Azshara · {item:20027} Healthy Courser Gland
+	-- {zone:1447} Azshara · {item:20027} Healthy Courser Gland · {item:7972} Ichor of Undeath · {npc:8405} Ogtinc
 	-- plural, as words: Mosshoof Coursers = {npc:8761} Mosshoof Courser
-	["Mosshoof Coursers graze all over {zone:1447}; about one in three drops a {item:20027}."] = "덩치큰 이끼발굽순록이 {zone:1447} 전역에서 풀을 뜯습니다. 셋 중 하나 정도가 {item:20027}을(를) 떨어뜨립니다.",
+	["Mosshoof Coursers graze all over {zone:1447}; about one in three drops a {item:20027}. Keep any {item:7972} you loot: {npc:8405}'s next stage asks for one."] = "",
 
 	-- Step 6: The Ichor of Undeath
-	-- {npc:7864} Lingering Highborne · {area:1221} Ruins of Eldarath · {npc:8405} Ogtinc · {area:3137} Talrendis Point
+	-- {item:7972} Ichor of Undeath · {npc:7864} Lingering Highborne · {area:1221} Ruins of Eldarath · {npc:8405} Ogtinc · {area:3137} Talrendis Point
 	-- plural, as words: Highborne Apparitions = {npc:6116} Highborne Apparition
-	["Any undead can drop it. The {npc:7864} in the {area:1221}, below {npc:8405}'s cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near {area:3137}."] = "모든 언데드가 떨어뜨릴 수 있습니다. {npc:8405}의 절벽 아래 {area:1221}의 {npc:7864}이(가) 가장 가깝습니다. 명가의 유령과 명가의 망령은 {area:3137} 근처 폐허에 출몰합니다.",
+	["Already carrying an {item:7972}? It counts as soon as you take this stage. Otherwise any undead can drop it. The {npc:7864} in the {area:1221}, below {npc:8405}'s cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near {area:3137}."] = "",
 
 	-- Step 8: Morphaz in the Sunken Temple
 	-- {area:1417} Sunken Temple
@@ -48,4 +48,8 @@ return {
 	-- Step 9: Greta Mosshoof
 	-- {npc:10922} Greta Mosshoof · {area:2479} Emerald Sanctuary · {zone:1448} Felwood
 	["{npc:10922} is at the {area:2479} in southern {zone:1448}."] = "{npc:10922}은(는) {zone:1448} 남쪽의 {area:2479}에 있습니다.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any undead can drop it. The {npc:7864} in the {area:1221}, below {npc:8405}'s cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near {area:3137}."] = "모든 언데드가 떨어뜨릴 수 있습니다. {npc:8405}의 절벽 아래 {area:1221}의 {npc:7864}이(가) 가장 가깝습니다. 명가의 유령과 명가의 망령은 {area:3137} 근처 폐허에 출몰합니다.",
+	-- ["Mosshoof Coursers graze all over {zone:1447}; about one in three drops a {item:20027}."] = "덩치큰 이끼발굽순록이 {zone:1447} 전역에서 풀을 뜯습니다. 셋 중 하나 정도가 {item:20027}을(를) 떨어뜨립니다.",
 }

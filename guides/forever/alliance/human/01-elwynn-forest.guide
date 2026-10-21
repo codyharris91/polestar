@@ -79,6 +79,14 @@ next forever/alliance/02-westfall
 #   handed in to McBride, and Report to Goldshire (54) and The Adventurer
 #   (96627) when Skirmish is: he offers each at once (#310).
 # - Eastvale: Sara Timberlain, on the way in, before Hagar Lowe.
+# - Goldshire, back from the east: The Escape (114) is taken after Marshal
+#   Dughan's turn-ins. Handing in Collecting Kelp (112) starts a short scene
+#   while William Pestle brews the liquor ("just one moment while I concoct
+#   the potion"), and Dughan stands a few yards away (#613).
+# - The Jasperlode Mine: the Mining Tools (91732) lie along the tunnel from
+#   the entrance, so they are picked up on the walk in to the mine's far end
+#   (76), and the Kobold Geomancers (91723) are killed on the way back out,
+#   towards the Tower of Azora (#612).
 #
 # Class quests, as class-only steps (the level 10-12 ones from the last
 # Goldshire stop, about level 12):
@@ -427,9 +435,9 @@ step The Jasperlode Mine's entrance
 
 step The Jasperlode Mine
   tip The mine is south-west of the gnoll camps. Mining Tools lie near the entrance; Kobold Geomancers hold the tunnels.
+  collect 247816 quest 91732                  -- Mining Tools
   complete 76 @60.2,49.2                      -- Walk into the mine
   kill 476 quest 91723                        -- Kobold Geomancer
-  collect 247816 quest 91732                  -- Mining Tools
 
 step The Tower of Azora
   tip Follow the hills south to the tower.
@@ -448,11 +456,11 @@ step Goldshire
   turnin 91751 optional                       -- Helene Peltskinner
   turnin 99131                                -- Jason Mathers
   turnin 112                                  -- William Pestle
-  accept 114
-  turnin 39                                   -- Marshal Dughan
+  turnin 39                                   -- Marshal Dughan, while William brews
   turnin 76
   accept 59
   accept 239
+  accept 114                                  -- William Pestle
   train class
 
 step Maybell Maclure

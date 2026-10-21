@@ -49,6 +49,13 @@ function loadCodex() {
 
 const codex = loadCodex();
 const HOME = Object.keys(codex.frames).map(Number).sort((a, b) => a - b)[0];
+// #610: a mob spawning at three places far apart, near the giver and across the map.
+const CREEPERS = [[50, 52], [20, 70], [24, 78]];
+codex.npcs[5014] = { id: 5014, name: 'Marsh Creeper', level: 19, levelMax: 20, faction: null, rare: false, elite: false, boss: false, instance: null, roles: [],
+	spawns: CREEPERS.map(([x, y]) => ({ map: HOME, x, y, f: 'e' })) };
+codex.quests[7010] = { id: 7010, title: 'Creepers in the Marsh', level: 18, minLevel: 15, faction: 'A', races: null, classes: null,
+	start: { npc: [5008], object: [], item: [] }, end: { npc: [5008], object: [] },
+	objectives: [{ type: 'kill', id: 5014, count: 6, text: 'Marsh Creeper' }], pre: [], preAny: [], zone: HOME, rewards: [], choices: [] };
 const MAPS = Object.entries(codex.frames)
 	.map(([id, f]) => `w.addMap(${id}, { name = ${JSON.stringify(codex.zones[id].name)}, c = ${f.c}, left = ${f.left}, right = ${f.right}, top = ${f.top}, bottom = ${f.bottom} })`)
 	.join('\n');
@@ -204,4 +211,44 @@ test('NPC, quest and dungeon lookups lead there', () => {
 	assertPlays('rare', 5011, [{ title: 'Gnash the Unseen', goals: 'goto kill' }]);
 	assertPlays('quest', 7001, [{ title: 'Trouble in the Vale', goals: 'accept kill collect turnin' }]);
 	assertPlays('instance', 'ashen_crypt', [{ title: 'Ashen Crypt', goals: 'goto' }]);
+});
+
+// Tazul (#610): a Lookup quest step sent the arrow for a kill objective to the
+// one spawn nearest the giver, with no other places to move on to, while most
+// of the mobs were elsewhere. Its kill, collect and interact goals now carry
+// every Codex spawn of the target as spawn areas (`spots`), as compiled guide
+// goals do, so the arrow takes the place where the player is.
+test("Tazul's report (#610): a Lookup quest objective lists every place its mob spawns, and the arrow takes the one the player is at", () => {
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${pack.stubLua}
+local w = stub.world
+${MAPS}
+w.level = 20
+w.onQuest(7010, { { text = "Marsh Creeper slain: 0/6", required = 6 } }, "Creepers in the Marsh")
+w.moveTo(${HOME}, 21, 71)`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+Polestar.Set("behavior.autoNextGuide", false)
+local id = Polestar.Lookup.Guide("quest", 7010)
+local kill
+for _, s in ipairs(Polestar.Guides.Get(id).steps) do
+	for _, g in ipairs(s.goals) do
+		if g.t == "kill" and g.npc == 5014 then kill = g end
+	end
+end
+stub.advance(0.6)
+local p = Polestar.Engine.GetWaypoint()
+local spots = {}
+for i, s in ipairs(kill.spots or {}) do spots[i] = { x = s.x, y = s.y } end
+emit({ x = kill.x, y = kill.y, spread = kill.spread or false, spots = spots, arrow = p and { kind = p.kind, x = p.x, y = p.y } or false })`,
+	}).emitted;
+	assert.deepEqual({ x: out.x, y: out.y }, { x: 50, y: 52 }, 'the goal keeps the spawn nearest the giver as its point');
+	const key = ({ x, y }) => `${x},${y}`;
+	const spots = Array.isArray(out.spots) ? out.spots : []; // an empty Lua table comes back as {}
+	assert.deepEqual(spots.map(key).sort(), CREEPERS.map(([x, y]) => key({ x, y })).sort(), 'every place the mob spawns is a spot');
+	assert.equal(key(spots[0]), '50,52', 'the search starts at the goal point');
+	assert.equal(out.spread, true, 'places this far apart are searched one after another');
+	assert.deepEqual(out.arrow, { kind: 'kill', x: 20, y: 70 }, 'the arrow takes the place the player stands at');
 });

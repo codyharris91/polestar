@@ -11,6 +11,8 @@
 //   expert  { Alliance: [names], Horde: [names] }   the city trainers that also
 //           teach Expert (a subset of `train`; they teach the lower ranks too)
 //   artisan { Alliance: [names], Horde: [names] }   Artisan trainers
+//   junior  { Alliance: [names], Horde: [names] }   Forever's Junior trainers
+//           in the starting zones: they teach Apprentice only
 //   book / quest                                    secondary skills: Expert
 //           comes from a book bought from a vendor, Artisan from a quest
 //   main    { Alliance: name, Horde: name }         the trainer a guide sends
@@ -24,6 +26,9 @@ const RANKS = [
 	{ name: 'Expert', max: 225, minLevel: 20, minSkill: 125 },
 	{ name: 'Artisan', max: 300, minLevel: 35, minSkill: 200 },
 ];
+// Forever teaches Apprentice gathering skills from level 1 (Warcraft Tavern's
+// Forever professions guide; the Junior trainers in every starting zone).
+const GATHERING_APPRENTICE_LEVEL = 1;
 
 const CURATED = {
 	171: {
@@ -106,12 +111,16 @@ const CURATED = {
 		artisan: { Alliance: ['Timothy Worthington'], Horde: ['Daryl Stack'] },
 		main: { Alliance: 'Georgio Bolero', Horde: 'Magar' },
 	},
-	// Gathering skills: every trainer listed teaches all four ranks.
+	// Gathering skills: every `train` trainer teaches all four ranks.
 	182: {
 		name: 'Herbalism',
 		train: {
 			Alliance: ['Tannysa', 'Shylamiir', 'Reyna Stonebranch', 'Firodren Mooncaller', 'Malorne Bladeleaf', 'Alma Jainrose', 'Kali Healtouch'],
 			Horde: ['Jandi', 'Komin Winterhoof', 'Martha Alliestar', 'Faruza', 'Aranae Venomblood'],
+		},
+		junior: {
+			Alliance: ['Nancy Songflower', 'Emrys Flintbeard', 'Eleyna Duskbreeze'],
+			Horde: ["Zor'la", 'Garan Sunstrider', 'Florence Nightshade'],
 		},
 		main: { Alliance: 'Tannysa', Horde: 'Jandi' },
 	},
@@ -121,6 +130,10 @@ const CURATED = {
 			Alliance: ['Gelman Stonehand', 'Geofram Bouldertoe', 'Yarr Hammerstone', 'Brock Stoneseeker', 'Kurdram Stonehammer'],
 			Horde: ['Makaru', 'Krunn', 'Brek Stonehoof', 'Brom Killian', 'Johan Focht'],
 		},
+		junior: {
+			Alliance: ['Kelsey Fargo', 'Sally Swiftwrench', 'Fanorran Stilloak'],
+			Horde: ['Norzsh', 'Vartha Rockmane', 'Walter Mason'],
+		},
 		main: { Alliance: 'Gelman Stonehand', Horde: 'Makaru' },
 	},
 	393: {
@@ -128,6 +141,10 @@ const CURATED = {
 		train: {
 			Alliance: ['Maris Granger', 'Helene Peltskinner', 'Balthus Stoneflayer', 'Radnaal Maneweaver'],
 			Horde: ['Thuwd', 'Mooranta', 'Rand Rhobart', 'Killian Sanatha'],
+		},
+		junior: {
+			Alliance: ['Riley Peltskinner', 'Brighid Stormflayer', 'Terunne Bearshaper'],
+			Horde: ['Kagil', 'Nawka Wildsong', 'Margaret Weaver'],
 		},
 		main: { Alliance: 'Maris Granger', Horde: 'Thuwd' },
 	},
@@ -218,11 +235,15 @@ function resolveTrainers(skillLine, npcs, { kind } = {}) {
 	const train = per(c.train);
 	const expert = c.expert ? per(c.expert) : null;
 	const artisan = c.artisan ? per(c.artisan, { allowNoSpawn: true }) : null;
+	const junior = c.junior ? per(c.junior) : null;
 	const merge = (...lists) => [...new Set(lists.flat())].sort((a, b) => a - b);
 	const trainers = Object.fromEntries(sides.map((s) => [s, merge(train[s], expert ? expert[s] : [], artisan ? artisan[s] : [])]));
 	const ranks = RANKS.map((r) => {
 		const rank = { ...r };
-		if (r.name === 'Apprentice' || r.name === 'Journeyman' || kind === 'gathering') {
+		if (r.name === 'Apprentice' && kind === 'gathering') rank.minLevel = GATHERING_APPRENTICE_LEVEL;
+		if (r.name === 'Apprentice' && junior) {
+			rank.trainers = Object.fromEntries(sides.map((s) => [s, merge(train[s], expert ? expert[s] : [], junior[s])]));
+		} else if (r.name === 'Apprentice' || r.name === 'Journeyman' || kind === 'gathering') {
 			rank.trainers = Object.fromEntries(sides.map((s) => [s, merge(train[s], expert ? expert[s] : [])]));
 		} else if (r.name === 'Expert') {
 			if (expert) rank.trainers = Object.fromEntries(sides.map((s) => [s, merge(expert[s])]));
@@ -243,4 +264,4 @@ function resolveTrainers(skillLine, npcs, { kind } = {}) {
 	return { ranks, trainers, main, warnings };
 }
 
-module.exports = { resolveTrainers, CURATED, RANKS };
+module.exports = { resolveTrainers, CURATED, RANKS, GATHERING_APPRENTICE_LEVEL };

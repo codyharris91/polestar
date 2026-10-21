@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "{skill:186} erlernen",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Jeder Lehrer für {skill:186} deiner Fraktion bringt dir {skill:186} (Lehrling) bei (Charakterstufe 5); der Pfeil wählt den nächsten. Kauf eine {item:2901} bei einem Handwerkswaren- oder Gemischtwarenhändler: Behalte sie in deinen Taschen, ohne sie kannst du nicht abbauen.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "Baue unterwegs jedes dieser Vorkommen ab: {object:147516} (230, gelb), Echtsilberablagerung (230, gelb), Kleines Thoriumvorkommen (245, gelb), Reiches Thoriumvorkommen (275, orange). Lauf die Wegpunkte ab, bis {skill:186} 300 erreicht ist. Schmilz das Erz an einer Schmiede, wenn deine Taschen voll sind: Auch Schmelzen steigert {skill:186}. Gebietsstufe 50-58.",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}, Reiches Thoriumvorkommen",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Jeder Lehrer für {skill:186} deiner Fraktion bringt dir {skill:186} (Lehrling) bei (Charakterstufe 5); der Pfeil wählt den nächsten. Kauf eine {item:2901} bei einem Handwerkswaren- oder Gemischtwarenhändler: Behalte sie in deinen Taschen, ohne sie kannst du nicht abbauen.",
 }

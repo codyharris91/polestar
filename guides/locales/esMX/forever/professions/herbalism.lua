@@ -10,7 +10,7 @@ return {
 	-- {skill:182} Herbalism
 	["Learn {skill:182}"] = "Aprende {skill:182}",
 	-- {skill:182} Herbalism
-	["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} (character level 5); the arrow picks the nearest."] = "Cualquier instructor de {skill:182} de tu facción enseña Aprendiz de {skill:182} (nivel de personaje 5); la flecha elige el más cercano.",
+	["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} at any level, and so does the Junior Herbalism Trainer in each starting zone; the arrow picks the nearest."] = "",
 
 	-- Step 2: Silverleaf & Earthroot: Elwynn Forest (1-50)
 	-- {item:2447} Peacebloom · {item:765} Silverleaf · {item:2449} Earthroot · {skill:182} Herbalism
@@ -95,4 +95,7 @@ return {
 	-- Step 27: Mountain Silversage & Plaguebloom: Felwood (285-300)
 	-- {item:8836} Arthas' Tears · {item:8838} Sungrass · {item:8846} Gromsblood · {item:13464} Golden Sansam · {item:13463} Dreamfoil · {item:13465} Mountain Silversage · {item:13466} Plaguebloom · {skill:182} Herbalism
 	["Pick every {item:8836} (220, green), {item:8838} (230, green), {item:8846} (250, yellow), {item:13464} (260, yellow), {item:13463} (270, orange), {item:13465} (280, orange), {item:13466} (285, orange) you pass and circle the waypoints until {skill:182} 300. Zone level 48-55."] = "Recolecta cada {item:8836} (220, verde), {item:8838} (230, verde), {item:8846} (250, amarillo), {item:13464} (260, amarillo), {item:13463} (270, naranja), {item:13465} (280, naranja), {item:13466} (285, naranja) que encuentres y recorre los puntos de ruta hasta {skill:182} 300. Nivel de la zona: 48-55.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} (character level 5); the arrow picks the nearest."] = "Cualquier instructor de {skill:182} de tu facción enseña Aprendiz de {skill:182} (nivel de personaje 5); la flecha elige el más cercano.",
 }

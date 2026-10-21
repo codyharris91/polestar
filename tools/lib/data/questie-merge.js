@@ -19,7 +19,7 @@ const { ALL_RACES, ALL_CLASSES } = require('../game/races');
 const SOURCE = 'questie-forever';
 // Questie npcFlags (Classic values) -> npcs.json roles.
 const NPC_FLAG_ROLES = [
-	[4, 'vendor'], [8, 'flightmaster'], [16, 'trainer'], [32, 'spirithealer'], [128, 'innkeeper'], [256, 'banker'],
+	[4, 'vendor'], [8, 'flightmaster'], [16, 'trainer'], [32, 'spirithealer'], [64, 'spirithealer'], [128, 'innkeeper'], [256, 'banker'],
 	[2048, 'battlemaster'], [4096, 'auctioneer'], [8192, 'stablemaster'], [16384, 'repair'],
 ];
 
@@ -128,6 +128,21 @@ function npcRecord(r, spawns) {
 	return rec;
 }
 
+function objectRecord(r, spawns, factionTemplates) {
+	const rec = { id: r.id, name: typeof r.name === 'string' ? r.name : null };
+	if (rec.name === 'Mailbox') {
+		rec.roles = ['mailbox'];
+		// Questie's Townsfolk mailbox lists treat factionID 0 as available to both sides.
+		const factionID = Number(r.factionID);
+		const enemies = factionID === 0 ? 0 : factionTemplates && factionTemplates.get(factionID);
+		// EnemyGroup bits 2/4 name the player sides excluded; unknown or hostile to both is not neutral.
+		const hostile = Number.isInteger(enemies) && enemies >= 0 ? enemies & 6 : null;
+		rec.faction = hostile === 0 ? 'AH' : hostile === 2 ? 'H' : hostile === 4 ? 'A' : null;
+	}
+	rec.spawns = spawns;
+	return rec;
+}
+
 // Yards within which a pfQuest point on another map is the same spawn.
 const SAME_SPAWN_YARDS = 30;
 
@@ -166,7 +181,7 @@ function mergeSpawns(pfSpawns, qSpawns, toWorld, allMaps = false) {
 	return sorted;
 }
 
-// Questie over pfQuest for one npc. `faction` stays pfQuest's (see npcFaction).
+// Questie over pfQuest; service flags can supply a side pfQuest did not know.
 function mergeNpc(pf, q, toWorld, counter = { n: 0 }) {
 	if (!pf) return { ...q, source: [SOURCE] };
 	const out = { id: pf.id, name: q.name || pf.name };
@@ -175,7 +190,7 @@ function mergeNpc(pf, q, toWorld, counter = { n: 0 }) {
 	if (levelMax !== undefined && levelMax !== null) out.levelMax = levelMax;
 	const rank = q.level !== null ? q.rank : pf.rank;
 	if (rank !== undefined && rank !== null) out.rank = rank;
-	out.faction = pf.faction ?? null;
+	out.faction = pf.faction ?? ((q.roles || []).length ? q.faction : null);
 	// Roles are a union: QuestieDB's npc flags plus pfQuest's categories (rare,
 	// and services QuestieDB's flags miss).
 	const roles = new Set([...(q.roles || []), ...(pf.roles || [])]);
@@ -195,7 +210,10 @@ const GATHER_ROLES = new Set(['herb', 'mine', 'fishing', 'chest']);
 function mergeObject(pf, q, toWorld) {
 	if (!pf) return { ...q, source: [SOURCE] };
 	const out = { id: pf.id, name: q.name || pf.name };
-	if (pf.roles) out.roles = pf.roles;
+	const roles = new Set([...(q.roles || []), ...(pf.roles || [])]);
+	if (roles.size) out.roles = sortedRoles(roles);
+	if (q.roles && q.roles.includes('mailbox')) out.faction = q.faction;
+	else if (pf.faction !== undefined) out.faction = pf.faction;
 	out.spawns = mergeSpawns(pf.spawns, q.spawns, toWorld, (pf.roles || []).some((r) => GATHER_ROLES.has(r)));
 	out.source = [...(pf.source || ['pfquest']), SOURCE];
 	return out;
@@ -496,7 +514,9 @@ function applyQuestie(tables, qz, ctx) {
 	};
 	const merge = (kind, table, source, build, mergeFn, key) => {
 		for (const [id, r] of source) {
-			const { spawns, counts, unmapped } = questieSpawns(r.spawns, ctx);
+			const service = kind === 'npc' ? Number(r.npcFlags) > 3 : r.name === 'Mailbox';
+			const spawnContext = service ? { ...ctx, spawnOptions: { ...ctx.spawnOptions, dedupe: 0 } } : ctx;
+			const { spawns, counts, unmapped } = questieSpawns(r.spawns, spawnContext);
 			stats.unmappedQuestiePoints += unmapped;
 			const m = mainOf(counts);
 			if (m) mains[kind].set(id, m);
@@ -509,7 +529,7 @@ function applyQuestie(tables, qz, ctx) {
 		}
 	};
 	merge('npc', tables.npcs, qz.npcs, npcRecord, mergeNpc, 'Npcs');
-	merge('object', tables.objects, qz.objects, (r, spawns) => ({ id: r.id, name: typeof r.name === 'string' ? r.name : null, spawns }), mergeObject, 'Objects');
+	merge('object', tables.objects, qz.objects, (r, spawns) => objectRecord(r, spawns, qz.factionTemplates), mergeObject, 'Objects');
 	const addedItems = { n: 0 };
 	for (const [id, r] of qz.items) {
 		if (!tables.items[id]) stats.questieOnlyItems++;

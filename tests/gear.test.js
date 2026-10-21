@@ -317,9 +317,9 @@ test('options: the gear advice on Questing with the class spec dropdown, registe
 		local out = {}
 		for _, def in ipairs(seen) do
 			local keys = {}
-			for _, c in ipairs(def.controls) do keys[#keys + 1] = c.key .. "=" .. c.kind .. ":" .. (c.help and "help" or "nohelp") end
+			for _, c in ipairs(def.controls) do keys[#keys + 1] = (c.key or c.label) .. "=" .. c.kind .. ":" .. (c.help and "help" or "nohelp") end
 			out[#out + 1] = { page = def.page, section = def.section, keys = keys,
-				choices = def.controls[2].choices and #def.controls[2].choices or 0 }
+				choices = def.controls[2].choices and #def.controls[2].choices() or 0 }
 		end
 		emit(out)
 	`,
@@ -330,8 +330,10 @@ test('options: the gear advice on Questing with the class spec dropdown, registe
 	assert.deepEqual(defs[0].keys, [
 		'gear.enabled=toggle:help',
 		'gear.spec.WARRIOR=dropdown:help',
+		'Manage custom weights=button:help',
 		'gear.tooltip=toggle:help',
 		'gear.bagArrows=toggle:help',
+		'gear.hideForPawn=toggle:help',
 		'gear.rewards=toggle:help',
 		'gear.pickTooltip=toggle:help',
 	]);
@@ -345,4 +347,60 @@ test('gains read in whole percents, and in words past doubling', () => {
 		local function t(p) local s, big = G.GainText(p); return { s, big } end
 		emit({ t(62.14), t(-88.4), t(0.2), t(-0.3), t(99.4), t(100), t(625) })`);
 	assert.deepEqual(out, [['+62%', false], ['-88%', false], ['+<1%', false], ['-<1%', false], ['+99%', false], ['big upgrade', true], ['big upgrade', true]]);
+});
+
+test('specs with no melee weapon DPS weight get a small one: a harder-hitting staff counts for a Druid and a Priest, a warrior keeps its own', () => {
+	const staff = (id, dps, extra = '') => `g.defineItem("item:${id}", { equipLoc = "INVTYPE_2HWEAPON", classID = 2, subclassID = 10, minLevel = 1, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = ${dps}${extra} } })`;
+	const probe = (cls, className, classID, spec) => run(`
+		${staff(7001, 1.2)}
+		${staff(7002, 2.6)}
+		g.equip(16, "item:7001")
+		Polestar.Set("gear.spec.${cls}", "${spec}")
+		local up, delta, pct = G.IsUpgrade("item:7002")
+		emit({ up = up, delta = delta, w = G.GetWeights().dps })
+	`, { cls, className, classID, level: 8 })[0];
+	const druid = probe('DRUID', 'Druid', 11, 'feral');
+	assert.equal(druid.up, true, 'the cane beats the knife on weapon DPS alone');
+	assert.equal(druid.w, 0.01);
+	assert.equal(probe('PRIEST', 'Priest', 5, 'shadow').up, true);
+	assert.equal(probe('WARRIOR', 'Warrior', 1, 'arms').w, 7, 'a weight the spec has is never changed');
+});
+
+test('a wand fills an empty ranged slot for a caster: the ranged DPS weight already counts it; a Druid has no wand to wear', () => {
+	const wand = `g.defineItem("item:7101", { equipLoc = "INVTYPE_RANGEDRIGHT", classID = 2, subclassID = 19, minLevel = 5, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 3.1 } })`;
+	const mage = run(`${wand}
+		local c = G.CompareToEquipped("item:7101")
+		emit({ G.IsUpgrade("item:7101"), c.empty, c.slot })`, { cls: 'MAGE', className: 'Mage', classID: 8, level: 8 })[0];
+	assert.deepEqual(mage, [true, true, 18]);
+	const druid = run(`${wand}
+		local c = G.CompareToEquipped("item:7101")
+		emit({ G.IsUpgrade("item:7101"), c.usable, c.reason })`, { cls: 'DRUID', className: 'Druid', classID: 11, level: 8 })[0];
+	assert.deepEqual(druid, [false, false, 'weapon']);
+});
+
+test('the melee DPS weight is only a tiebreaker: a stat on the item outweighs any weapon DPS gap, and a DPS-only gain keeps its percent', () => {
+	const [out] = run(`
+		g.defineItem("item:7201", { equipLoc = "INVTYPE_2HWEAPON", classID = 2, subclassID = 10, minLevel = 1, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 12 } })
+		g.defineItem("item:7202", { equipLoc = "INVTYPE_2HWEAPON", classID = 2, subclassID = 10, minLevel = 1, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 2, ITEM_MOD_INTELLECT_SHORT = 1 } })
+		g.defineItem("item:7203", { equipLoc = "INVTYPE_2HWEAPON", classID = 2, subclassID = 10, minLevel = 1, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 2.6 } })
+		g.defineItem("item:7204", { equipLoc = "INVTYPE_2HWEAPON", classID = 2, subclassID = 10, minLevel = 1, stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 1.3 } })
+		Polestar.Set("gear.spec.PRIEST", "shadow")
+		g.equip(16, "item:7201")
+		local intWins = { G.IsUpgrade("item:7202") }
+		g.equip(16, "item:7204")
+		local dpsOnly = { G.IsUpgrade("item:7203") }
+		emit({ intWins = intWins[1], dpsPct = dpsOnly[3] })
+	`, { cls: 'PRIEST', className: 'Priest', classID: 5, level: 8 });
+	assert.equal(out.intWins, true, '+1 Intellect beats 10 DPS less');
+	assert.ok(Math.abs(out.dpsPct - 100) < 0.5, 'doubling the DPS of a bare weapon is +100%, at any weight');
+});
+
+test('Feral loses the melee DPS weight from the level Bear Form is learned; Balance keeps it', () => {
+	const w = (spec, level) => run(`
+		Polestar.Set("gear.spec.DRUID", "${spec}")
+		emit({ dps = G.GetWeights().dps or false })
+	`, { cls: 'DRUID', className: 'Druid', classID: 11, level })[0].dps;
+	assert.equal(w('feral', 9), 0.01, 'before any form the Druid fights with the weapon');
+	assert.equal(w('feral', 10), false, 'cat and bear damage ignores weapon DPS');
+	assert.equal(w('balance', 20), 0.01);
 });

@@ -31,6 +31,15 @@ why The Pyrewood Signet Ring, C's payment for a solo job inside Shadowfang Keep.
 # The quest says you must do the job alone: Shadowfang Keep is a dungeon
 # full of elites; stealth through.
 
+# Interior route: Forever player reports by Ythas and Richlion on
+# wowhead.com/forever/quest=78261 and /forever/cn/object=410369
+# (checked 2026-10-20); item 210212/210213 Forever tooltips confirm
+# combining the half-keys. Reports are not an in-game test of this guide.
+
+# Follow-up, 2026-10-21: Gaunerh on Forever quest 78261 describes Vanish
+# as help at the door, not a proven second-key method; Forever spell
+# 1856 lists Flash Powder. Prepare it only if Vanish is learned.
+
 step C's dead drop
   tip The Dead Drop is a chest near Pyrewood Village in southern Silverpine, just south of Shadowfang Keep. Read C's note.
   level 23
@@ -46,11 +55,11 @@ step Veenix
 
 step Shadowfang Keep
   zone Silverpine Forest
-  tip Go in alone. The Breaching Charge gets you past the courtyard gate; the data does not say where in the keep the horn lies.
+  tip Go in alone and use the Breaching Charge at the courtyard gate. If you know Vanish, bring Flash Powder and check its cooldown before entering; keep it ready for a failed approach. Pickpocket the sister in the dining hall for the Sister's Half-Key, then the brother in the room reached by turning right at the top of the stairs for the Brother's Half-Key. Combine them somewhere safe: this breaks stealth. Return to the courtyard stables and use the combined key on the chest for the horn. Stay clear of the nearby elites; the minimum quest level does not guarantee a safe approach.
   collect 210183 quest 78261.1 @44.8,67.8 live -- Horn of Xelthos, inside Shadowfang Keep
 
 step Back to the dead drop
-  tip Place the horn in the Dead Drop near Pyrewood. C's payment is the second Horn of Xelthos quest at the same chest.
+  tip Place the horn in the Dead Drop near Pyrewood. The payment may not appear immediately: check a capital mailbox for C's follow-up letter on your next planned city visit, then return to this chest for the reward quest. Do not repeat the dungeon just because the payment is not yet offered.
   turnin 78261 object 410369                  -- Dead Drop
   accept 78307 object 410369
   turnin 78307 object 410369 reward 277210    -- Pyrewood Signet Ring

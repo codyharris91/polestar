@@ -49,6 +49,7 @@ const SUPPORT = {
 	xp: 'support/Forever/QuestXP/xpDB-classic.lua',
 	drops: 'support/Forever/DropTables/classicItemDrops.lua',
 	dropCorrections: 'support/Forever/DropTables/itemDropCorrections.lua',
+	factionTemplates: 'support/Forever/FactionTemplates/factionTemplateClassic.lua',
 	areaToUiMap: 'support/Forever/Zones/areaIdToUiMapId.lua',
 	uiMapToArea: 'support/Forever/Zones/uiMapIdToAreaId.lua',
 	subZones: 'support/Forever/Zones/subZoneToParentZone.lua',
@@ -381,6 +382,7 @@ return {
   wowhead = nested(decode(drops.wowheadData)),
   pserver = nested(decode(drops.cmangosData)),
   corrections = nested(corr.Era),
+  factionTemplates = list((m.QuestieDB or {}).factionTemplate),
   areaToUiMap = list(decode(zone.areaIdToUiMapId)),
   areaToUiMapOverride = list(decode(zone.areaIdToUiMapIdOverride)),
   uiMapToArea = list(decode(zone.uiMapIdToAreaId)),
@@ -419,7 +421,7 @@ function readEraToForever(file) {
 }
 
 function loadSupport(dir) {
-	const files = [SUPPORT.xp, SUPPORT.drops, SUPPORT.dropCorrections, SUPPORT.areaToUiMap, SUPPORT.uiMapToArea, SUPPORT.subZones]
+	const files = [SUPPORT.xp, SUPPORT.drops, SUPPORT.dropCorrections, SUPPORT.factionTemplates, SUPPORT.areaToUiMap, SUPPORT.uiMapToArea, SUPPORT.subZones]
 		.map((f) => path.join(dir, f))
 		.filter((f) => fs.existsSync(f));
 	const raw = luaToJson({ files, prelude: SUPPORT_PRELUDE, expr: SUPPORT_EXPR });
@@ -428,6 +430,7 @@ function loadSupport(dir) {
 	return {
 		xp,
 		drops: { wowhead: rates(raw.wowhead), pserver: rates(raw.pserver), corrections: rates(raw.corrections) },
+		factionTemplates: pairsMap(raw.factionTemplates, Number),
 		areaToUiMap: merged(raw.areaToUiMap, raw.areaToUiMapOverride),
 		uiMapToArea: merged(raw.uiMapToArea, raw.uiMapToAreaOverride),
 		subZoneToParent: merged(raw.subZones, raw.subZonesOverride),

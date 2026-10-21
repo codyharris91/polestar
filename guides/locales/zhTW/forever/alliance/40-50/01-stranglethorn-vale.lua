@@ -24,6 +24,8 @@ return {
 
 	-- Step 4: Swamplight Manor
 	["Take the road north to the ruined manor; Jarl lives in the shack beside it and the loose dirt is at the corner of the house."] = "沿著道路向北前往毀壞的莊園；加爾住在旁邊的棚屋裡，鬆動的泥土在房子的轉角處。",
+	-- {quest:1218} Soothing Spices
+	["{quest:1218}, for \"Swamp Eye\" Jarl"] = "",
 	["with the spices from Theramore"] = "帶著從塞拉摩買來的香料",
 
 	-- Step 5: Mudrock tortoises

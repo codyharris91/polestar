@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "{skill:186} 배우기",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "진영의 {skill:186} 상급자 누구에게서나 초급 {skill:186}을(를) 배울 수 있습니다(캐릭터 레벨 5). 화살표가 가장 가까운 상급자를 가리킵니다. 직업용품 상인이나 잡화 상인에게서 {item:2901}을(를) 사서 가방에 넣어 두세요. 없으면 채광할 수 없습니다.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "지나가는 {object:147516}(230, 노란색), 진은(230, 노란색), 작은 토륨(245, 노란색), 풍부한 토륨(275, 주황색) 광맥을 모두 캐고, {skill:186} 300까지 경유지를 도세요. 가방이 차면 제련소에서 광석을 제련하세요. 제련도 {skill:186}을(를) 올립니다. 지역 레벨 50-58.",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}, 풍부한 토륨",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "진영의 {skill:186} 상급자 누구에게서나 초급 {skill:186}을(를) 배울 수 있습니다(캐릭터 레벨 5). 화살표가 가장 가까운 상급자를 가리킵니다. 직업용품 상인이나 잡화 상인에게서 {item:2901}을(를) 사서 가방에 넣어 두세요. 없으면 채광할 수 없습니다.",
 }

@@ -10,7 +10,7 @@ return {
 	-- {skill:393} Skinning
 	["Learn {skill:393}"] = "{skill:393} 배우기",
 	-- {skill:393} Skinning · {item:7005} Skinning Knife
-	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "진영의 모든 {skill:393} 상급자가 초급 {skill:393}을(를) 가르칩니다(캐릭터 레벨 5). 화살표가 가장 가까운 곳을 가리킵니다. 직업용품 상인이나 잡화 상인에게서 {item:7005}을(를) 사세요. 없으면 가죽을 벗길 수 없으니 가방에 넣어 두세요.",
+	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} at any level, and so does the Junior Skinning Trainer in each starting zone; the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "",
 
 	-- Step 2: Beasts 1-9: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -218,4 +218,7 @@ return {
 	["{npc:9164}, Diemetradon"] = "{npc:9164}, 디메트로돈",
 	-- {npc:9164} Elder Diemetradon
 	["Pterrordax, {npc:9164}"] = "테러닥스, {npc:9164}",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "진영의 모든 {skill:393} 상급자가 초급 {skill:393}을(를) 가르칩니다(캐릭터 레벨 5). 화살표가 가장 가까운 곳을 가리킵니다. 직업용품 상인이나 잡화 상인에게서 {item:7005}을(를) 사세요. 없으면 가죽을 벗길 수 없으니 가방에 넣어 두세요.",
 }

@@ -517,6 +517,34 @@ function Engine.ToggleGoal(s, g)
 	Polestar.Fire("STEP_UPDATED", s)
 	return true
 end
+-- A quest skips, with every goal of it, and comes back (on = false).
+uistub.skippedQuests = {}
+function Engine.SkipQuest(q, on)
+	record("SkipQuest", q, on ~= false)
+	uistub.skippedQuests[q] = on ~= false or nil
+	for _, step in ipairs(guide and guide.steps or {}) do
+		for _, goal in ipairs(step.goals) do
+			if goal.quest == q then
+				if on ~= false then
+					goal.psWas = goal.psWas or goal.status
+					goal.status, goal.unavailable, goal.unavailableText = "skipped", "skipped", "You skipped this quest"
+				else
+					goal.status, goal.unavailable, goal.unavailableText, goal.psWas = goal.psWas or goal.status, nil, nil, nil
+				end
+			end
+		end
+	end
+	Polestar.Fire("STEP_UPDATED", current)
+	if on ~= false then
+		local title
+		for _, step in ipairs(guide and guide.steps or {}) do
+			for _, goal in ipairs(step.goals) do if goal.quest == q and not title then title = goal.subject end end
+		end
+		Polestar.Fire("PLAYER_SKIPPED_QUEST", q, title)
+	end
+	return true
+end
+function Engine.IsQuestSkipped(q) return uistub.skippedQuests[q] == true end
 -- Optional goals skip and come back.
 function Engine.SkipGoal(s, g)
 	record("SkipGoal", s, g)
@@ -569,6 +597,23 @@ function Engine.DungeonChosen(map) return Polestar.CharState().dungeons[map] == 
 function Engine.ChooseDungeon(map, on)
 	record("ChooseDungeon", map, on)
 	Polestar.CharState().dungeons[map] = on and true or nil
+end
+-- Group quests (`when group`): uistub.groupQuestion = { quest, title } is the
+-- one the live step waits on until answered; answers per character
+-- (CharState().groupQuests). uistub.groupQuests: the character's guides'
+-- group quests ({ { quest, title } }, Engine.GroupQuests).
+uistub.groupQuestion = nil
+uistub.groupQuests = {}
+function Engine.GroupQuests() return uistub.groupQuests end
+function Engine.GroupQuestion()
+	local g = uistub.groupQuestion
+	if not g or Polestar.CharState().groupQuests[g.quest] ~= nil then return nil end
+	return g.quest, g.title
+end
+function Engine.GroupAnswer(q) return Polestar.CharState().groupQuests[q] end
+function Engine.AnswerGroup(q, answer)
+	record("AnswerGroup", q, answer)
+	Polestar.CharState().groupQuests[q] = answer
 end
 -- Candidate goals: the next-best trainer/vendor/inn.
 function Engine.CycleCandidate(s, g)
@@ -699,7 +744,7 @@ function uistub.install(opts)
 			arrowColor = false, arrowNearColor = false })
 	end
 	if Polestar.GetDefault("behavior.autoAccept") == nil then
-		Polestar.RegisterDefaults("behavior", { autoAccept = true, autoTurnin = true, autoNextGuide = true, autoSelectGuide = true, skipGrey = false })
+		Polestar.RegisterDefaults("behavior", { autoAccept = true, autoTurnin = true, autoNextGuide = true, autoSelectGuide = true, skipGrey = false, offerClassQuests = true, groupQuests = "ask" })
 	end
 	-- An account and a character that have seen the welcome, so it never
 	-- opens over windows under test; tests/ui-welcome.test.js restores the

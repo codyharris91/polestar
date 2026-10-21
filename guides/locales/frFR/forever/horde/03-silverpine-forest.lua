@@ -187,8 +187,12 @@ return {
 	["{npc:4949}: {quest:93739}, a tour of the Horde's leaders"] = "{npc:4949} : {quest:93739}, une tournée des chefs de la Horde",
 	-- {npc:3230} Nazgrel
 	["Speak with {npc:3230}, in Grommash Hold"] = "Parlez à {npc:3230}, dans le fort Grommash",
+	-- {npc:3230} Nazgrel
+	["Talk to {npc:3230}"] = "",
 	-- {npc:10540} Vol'jin
 	["Speak with {npc:10540}, in Grommash Hold"] = "Parlez à {npc:10540}, dans le fort Grommash",
+	-- {npc:10540} Vol'jin
+	["Talk to {npc:10540}"] = "",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["Cast Teleport: {zone:1450}; {npc:11802} is in {area:2361}. The Shrine Baubles lie on the bed of {area:656} and fade within minutes: swim one straight to the {area:2362} on the north-west shore, use it there and speak to {npc:11799}."] = "Lancez Téléportation : {zone:1450} ; {npc:11802} est à {area:2361}. Les Colifichets du sanctuaire reposent au fond de {area:656} et disparaissent en quelques minutes : nagez avec l'un d'eux directement jusqu'à {area:2362}, sur la rive nord-ouest, utilisez-le là-bas et parlez à {npc:11799}.",

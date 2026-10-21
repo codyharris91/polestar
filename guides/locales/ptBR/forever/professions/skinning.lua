@@ -10,7 +10,7 @@ return {
 	-- {skill:393} Skinning
 	["Learn {skill:393}"] = "Aprender {skill:393}",
 	-- {skill:393} Skinning · {item:7005} Skinning Knife
-	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "Qualquer instrutor de {skill:393} da sua facção ensina {skill:393} Aprendiz (nível de personagem 5); a seta escolhe o mais próximo. Compre uma {item:7005} de um mercador de mercadorias ou de artigos gerais: mantenha-a nas bolsas, sem ela você não pode esfolar.",
+	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} at any level, and so does the Junior Skinning Trainer in each starting zone; the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "",
 
 	-- Step 2: Beasts 1-9: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -218,4 +218,7 @@ return {
 	["{npc:9164}, Diemetradon"] = "{npc:9164}, Dimetrodonte",
 	-- {npc:9164} Elder Diemetradon
 	["Pterrordax, {npc:9164}"] = "Pterrordax, {npc:9164}",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "Qualquer instrutor de {skill:393} da sua facção ensina {skill:393} Aprendiz (nível de personagem 5); a seta escolhe o mais próximo. Compre uma {item:7005} de um mercador de mercadorias ou de artigos gerais: mantenha-a nas bolsas, sem ela você não pode esfolar.",
 }

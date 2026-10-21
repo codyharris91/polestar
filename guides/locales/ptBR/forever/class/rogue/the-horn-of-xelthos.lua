@@ -21,13 +21,17 @@ return {
 	["{npc:4086}, a goblin friendly to both factions, stands among the Venture Co. in the {area:461}, east Stonetalon. Horde fly to {area:460}; Alliance to {area:467}. He wants a {item:210187} before he hands over explosives: the Venture Co. Loggers around him carry them."] = "{npc:4086}, um goblin amigável às duas facções, fica entre a Empreendimentos S.A. no {area:461}, no leste da Cordilheira das Torres de Pedra. A Horda voa até o {area:460}; a Aliança, até o {area:467}. Ele quer uma {item:210187} antes de entregar explosivos: os Madeireiros da Empreendimentos S.A. em volta dele as carregam.",
 
 	-- Step 3: Shadowfang Keep
-	-- {item:210186} Breaching Charge
-	["Go in alone. The {item:210186} gets you past the courtyard gate; the data does not say where in the keep the horn lies."] = "Entre sozinho. A {item:210186} passa pelo portão do pátio; os dados não dizem onde a trompa está no castelo.",
+	-- {item:210186} Breaching Charge · {item:5140} Flash Powder · {item:210213} Sister's Half-Key · {item:210212} Brother's Half-Key
+	["Go in alone and use the {item:210186} at the courtyard gate. If you know Vanish, bring {item:5140} and check its cooldown before entering; keep it ready for a failed approach. Pickpocket the sister in the dining hall for the {item:210213}, then the brother in the room reached by turning right at the top of the stairs for the {item:210212}. Combine them somewhere safe: this breaks stealth. Return to the courtyard stables and use the combined key on the chest for the horn. Stay clear of the nearby elites; the minimum quest level does not guarantee a safe approach."] = "",
 	-- {item:210183} Horn of Xelthos · {area:236} Shadowfang Keep
 	["{item:210183}, inside {area:236}"] = "{item:210183}, dentro do {area:236}",
 
 	-- Step 4: Back to the dead drop
 	["Back to the dead drop"] = "Volte ao esconderijo",
-	-- {object:410369} Dead Drop · {item:210183} Horn of Xelthos
-	["Place the horn in the {object:410369} near Pyrewood. C's payment is the second {item:210183} quest at the same chest."] = "Coloque a trompa na {object:410369} perto da vila. O pagamento de C é a segunda missão {item:210183} no mesmo baú.",
+	-- {object:410369} Dead Drop
+	["Place the horn in the {object:410369} near Pyrewood. The payment may not appear immediately: check a capital mailbox for C's follow-up letter on your next planned city visit, then return to this chest for the reward quest. Do not repeat the dungeon just because the payment is not yet offered."] = "",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Go in alone. The {item:210186} gets you past the courtyard gate; the data does not say where in the keep the horn lies."] = "Entre sozinho. A {item:210186} passa pelo portão do pátio; os dados não dizem onde a trompa está no castelo.",
+	-- ["Place the horn in the {object:410369} near Pyrewood. C's payment is the second {item:210183} quest at the same chest."] = "Coloque a trompa na {object:410369} perto da vila. O pagamento de C é a segunda missão {item:210183} no mesmo baú.",
 }

@@ -207,6 +207,8 @@ function goalLabel(goal, names = null) {
 		case 'accept': return `Accept ${quest}`;
 		case 'turnin': return `Turn in ${quest}`;
 		case 'complete': return `Complete ${quest}`;
+		case 'abandon': return `Abandon ${quest}`;
+		case 'destroy': return `Destroy ${goal.itemName || `item ${goal.item}`}`;
 		case 'kill': return `Kill ${goal.target || npc || 'target'}${times(goal.count)}`;
 		case 'collect': return `Collect ${goal.itemName || `item ${goal.item}`}${times(goal.count)}`;
 		case 'interact': return `Use ${goal.objName || `object ${goal.object}`}${times(goal.count)}`;
@@ -1021,7 +1023,8 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 		}
 		const entry = goal.quest != null ? log.get(goal.quest) || null : null;
 		const objective = ['kill', 'collect', 'interact', 'use'].includes(v) && goal.quest != null;
-		if ((v === 'turnin' || v === 'complete' || objective) && !entry) return skip('quest not in log');
+		if ((v === 'turnin' || v === 'complete' || v === 'abandon' || objective) && !entry) return skip('quest not in log');
+		if (v === 'destroy' && have(goal.item) <= 0) return skip('item not in the bags');
 		if (v === 'accept') {
 			if (done.has(goal.quest)) return skip('quest already done');
 			if (entry) return skip('quest already in the log');
@@ -1031,7 +1034,7 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 			warn(line, 'hearth without a bind point (no `sethome` before it); skipped');
 			return skip('no bind point');
 		}
-		const needsPlace = !['fly', 'hearth', 'level', 'complete'].includes(v);
+		const needsPlace = !['fly', 'hearth', 'level', 'complete', 'abandon', 'destroy'].includes(v);
 		if (needsPlace && !place.at && v !== 'use') step.estimate = true;
 
 		switch (v) {
@@ -1141,6 +1144,16 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 					if (entry && oi >= 0) setProgress(entry, oi, base + k);
 				}, 0);
 				if (entry && oi >= 0) setProgress(entry, oi, Math.max(entry.objectives[oi].cur, base + need));
+				return;
+			}
+			case 'abandon': {
+				spend('interact', p.talkSec);
+				log.delete(goal.quest);
+				return;
+			}
+			case 'destroy': {
+				spend('interact', p.talkSec);
+				setItem(goal.item, null, 0);
 				return;
 			}
 			case 'use': {

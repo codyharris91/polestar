@@ -46,7 +46,7 @@ return {
 	["Spider eye and bear claw"] = "Spinnenauge und Bärenklaue",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "In {zone:1422} lassen die Giftnebellauerer {item:20610} und die Kranken Schwarzbären {item:20611} fallen (jeweils etwa bei jedem fünften Kill).",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple
@@ -55,5 +55,6 @@ return {
 	["The {area:1417} ({area:1477}) lies under the {area:74}; the arrow points at its entrance. Gasher or {npc:5716} drop the {item:20606}, Hukku or Mijan the Blue, Zolo or Loro the Green: all six are elite trolls inside. Bring a group."] = "{area:1417} ({area:1477}) liegt unter {area:74}; der Pfeil zeigt auf den Eingang. Schlitzer oder {npc:5716} lassen {item:20606} fallen, Hukku oder Mijan die blaue, Zolo oder Loro die grüne: Alle sechs sind Elitetrolle drinnen. Nimm eine Gruppe mit.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "In {zone:1422} lassen die Giftnebellauerer {item:20610} und die Kranken Schwarzbären {item:20611} fallen (jeweils etwa bei jedem fünften Kill).",
 	-- ["One each of {item:7069}, Fire, Earth and Water. The Exiles of {zone:1417} drop them, one element each, about one kill in ten: Thundering (air), Burning (fire), Rumbling (earth) and Cresting (water). Or buy them at the auction house."] = "Je eins von {item:7069}, Elementarfeuer, Elementarerde und Elementarwasser. Die Verbannten in {zone:1417} lassen sie fallen, je ein Element pro Art, etwa bei jedem zehnten Kill: Donnernde (Luft), Brennende (Feuer), Rumpelnde (Erde) und Schäumende (Wasser). Oder kauf sie im Auktionshaus.",
 }

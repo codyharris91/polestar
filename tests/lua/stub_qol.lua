@@ -417,6 +417,9 @@ function GetQuestItemLink(kind, i)
 	return "|Hitem:" .. c.id .. "|h[" .. ((q.items[c.id] or {}).name or "?") .. "]|h"
 end
 function GetQuestMoneyToGet() return q.questMoney end
+-- The quest whose reward panel is open (QuestInfo_GetQuestID's npc branch).
+q.questID = 1
+function GetQuestID() return q.questID end
 function GetQuestReward(i)
 	call("GetQuestReward", i)
 	if not q.landRewards then return end

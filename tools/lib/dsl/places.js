@@ -118,7 +118,7 @@ function checkLocation(data, verb, location) {
 }
 
 // The verbs whose `location` names a place; `goto` names one with its label.
-const LOCATION_VERBS = new Set(['sethome', 'hearth', 'fly', 'getfp']);
+const LOCATION_VERBS = new Set(['sethome', 'hearth', 'fly', 'getfp', 'enter']);
 // travel.json faction mask bits.
 const SIDE_MASK = { Alliance: 1, Horde: 2 };
 

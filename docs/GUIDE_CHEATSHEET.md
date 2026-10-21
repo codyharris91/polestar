@@ -70,6 +70,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `hearth "<Location>"` | Use the hearthstone; done on landing there | `hearth "Goldshire"` |
 | `getfp "<Flight point>"` | Learn a flight path from its flight master | `getfp "Stormwind"` |
 | `fly "<Town>"` | Take a flight; done on landing there | `fly "Stormwind"` |
+| `enter "<Place>"` | Be in that zone or area (the zone or subzone text); `@x,y` points the arrow (needs Polestar 0.3.0) | `enter "Goldshire"` |
 
 `polestar find --kind inn` and `polestar find --kind flight` list the names
 `sethome`, `hearth`, `getfp` and `fly` take.
@@ -81,6 +82,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `accept <quest> ["Title"]` | Take a quest; the giver and title come from the data | `accept 783` |
 | `turnin <quest> ["Title"]` | Hand a quest in | `turnin 783` |
 | `lvl <N>` | On `accept`: the level the quest needs, shown beside it | `accept 7 lvl 2` |
+| `abandon <quest> ["Title"]` | Drop a quest from the log; done once it is out, and its `accept` stays done (needs Polestar 0.3.0) | `abandon 783` |
 | `complete <quest> ["Title"]` | Finish every objective of a quest; give it a place (`@x,y`, or a `goto` before it) when its objectives have one, or the arrow has nowhere to point | `complete 7 @48.5,31.0` |
 | `npc <id>` | Which NPC gives or takes the quest, when the data knows several | `accept 5261 npc 196` |
 | `object <id>` / `item <id>` | The same for a quest started or ended at an object, or started by an item | `accept 9400 object 1617` |
@@ -111,6 +113,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `vendor nearest` / `vendor <npc>` | Sell and repair, at the closest vendor or that one | `vendor nearest` |
 | `buy <item> ["Name"]` | Buy an item; `nearest` picks the closest vendor selling it | `buy 159 x5 nearest` |
 | `money <amount>` | Hold that much money (`1g50s`, `7s`, `25c` or copper); stays done for the rest of the step (needs Polestar 0.3.0) | `money 1s` |
+| `destroy <item> ["Name"]` | Delete an item from the bags; done once the bags hold none (needs Polestar 0.3.0) | `destroy 6948 "Hearthstone"` |
 | `task "<text>"` | Something Polestar cannot see: the player ticks it, and it holds the step until then unless `optional` (needs Polestar 0.3.0) | `task "Tame a Venomtail Scorpid"` |
 
 ## Professions
@@ -120,6 +123,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `train <Profession> [Rank]` | Learn a profession or its next rank (`Apprentice`, `Journeyman`, `Expert`, `Artisan`) at the nearest trainer | `train Mining Journeyman` |
 | `skill <Profession> <N>` | Reach skill N (quote names of two words) | `skill "First Aid" 40` |
 | `learn <spell> ["Name"]` | Learn a recipe; from a trainer, or with `nearest` from the closest vendor of its recipe | `learn 3276` |
+| `cast <spellId> ["Name"]` | Cast that spell while the goal is open (needs Polestar 0.3.0) | `cast 818 "Basic Campfire"` |
 | `craft <spell> ["Name"]` | Craft a recipe, `x<N>` times | `craft 3275 x5` |
 | `until <N>` | On `craft`: until the profession reaches N | `craft 3275 until 40` |
 
@@ -160,10 +164,14 @@ the outcome stays.
 | `when turnedin <quest>` | the quest is handed in | `when !turnedin 9201` |
 | `when available <quest>` | the quest can be taken now | `when available 9200` |
 | `when has <item> [xN]` | the bags hold N or more | `when !has 159 x5` |
+| `when upgrade <item>` | Polestar's gear advice rates the item an upgrade now (an item it cannot judge counts as one; needs Polestar 0.3.0) | `when upgrade 2488` |
 | `when zone "<Name>"` / `when subzone "<Name>"` | the player is there | `when subzone "Goldshire"` |
 | `when bound "<Location>"` | the hearthstone is bound there | `when !bound "Goldshire"` |
 | `when dungeon "<Name>"` | the player chose to run that dungeon (Options, Discovery, Dungeons; all off at first); `!dungeon` is the route without it (needs Polestar 0.3.0) | `when dungeon "Ragefire Chasm"` |
 | `when done <label>` | the labelled step of this guide was completed, not skipped or jumped over; not on a `next` line (needs Polestar 0.3.0) | `when done camp` |
+| `when skill <Profession> <N>` | the profession's rank is N or more; not learned counts as 0 (needs Polestar 0.3.0) | `when !skill Cooking 50` |
+| `when cooldown item <item>` / `when cooldown spell <spell>` | the item or spell is on cooldown, the global cooldown aside (needs Polestar 0.3.0) | `when !cooldown item 6948` |
+| `when group <quest>` | the player chose to do that group quest; unanswered, the route waits and asks "Skip it" or "Do it with a group"; `!group` is the solo way; not on `next` or `skipto` (needs Polestar 0.3.0) | `when group 7` |
 
 ## Route choices and optional steps
 

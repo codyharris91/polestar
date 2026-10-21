@@ -133,6 +133,8 @@ return {
 	-- {npc:2094} James Halloran
 	["{npc:2094}, by the north gate"] = "{npc:2094}，在北门旁",
 	-- {npc:2096} Tarrel Rockweaver
+	["{npc:2096}: he won't offer 305 while you carry it"] = "",
+	-- {npc:2096} Tarrel Rockweaver
 	["{npc:2096}, by the north gate"] = "{npc:2096}，在北门旁",
 
 	-- Step 34: Spoils of War
@@ -183,17 +185,17 @@ return {
 	-- Step 48: Black Oozes
 	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
 	["Black Oozes"] = "{npc:1032}",
-	-- {area:1025} Green Belt · {npc:2093} Einar Stonegrip · {npc:2111} Sida
-	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
-	["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "{npc:1032}在{area:1025}道路北边、{npc:2093}营地西边的沼泽里蠕动。任何软泥怪都可能带着{npc:2111}的包。",
+	-- {area:309} Ironbeard's Tomb · {area:205} Dun Modr · {npc:2093} Einar Stonegrip · {npc:2111} Sida
+	-- plural, as words: Monstrous Oozes = {npc:1033} Monstrous Ooze
+	["Black, Crimson and Monstrous Oozes fill {area:309}, just west of the road to {area:205} and north of {npc:2093}'s camp. Any ooze there may hold {npc:2111}'s bag."] = "",
 
-	-- Step 49: Green Belt
+	-- Step 49: The Green Belt
 	-- {npc:2093} Einar Stonegrip · {npc:1244} Rethiel the Greenwarden
 	["{npc:2093} camps by the road; {npc:1244} stands farther east, by the river."] = "{npc:2093}在路边扎营；{npc:1244}站在更东边的河旁。",
 
 	-- Step 50: The Mosshide gnolls
 	["The Mosshide gnolls"] = "藓皮豺狼人",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Mosshide Gnolls = {npc:1007} Mosshide Gnoll
 	["Mosshide Gnolls and Mongrels hold the hills south-east of the {area:1025}."] = "{npc:1007}和混血藓皮豺狼人占据着{area:1025}东南方的山丘。",
 
@@ -205,7 +207,7 @@ return {
 	-- Step 54: Fen Creepers
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers"] = "{npc:1040}",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers hide in the marsh pools north-west of the {area:1025}."] = "{npc:1040}躲在{area:1025}西北方的沼泽水塘里。",
 
@@ -213,17 +215,17 @@ return {
 	-- {area:205} Dun Modr · {area:881} Thandol Span · {npc:1071} Longbraid the Grim
 	["Follow the road north to {area:205}, at the foot of the {area:881}. {npc:1071} stands in the dwarves' camp."] = "沿道路向北到{area:881}脚下的{area:205}。{npc:1071}站在矮人营地里。",
 
-	-- Step 57: Dragonmaw camp
+	-- Step 57: Hearth to Menethil
+	["Hearth to Menethil"] = "用炉石返回米奈希尔港",
+	["For the giant crocolisks of the north coast, on your next visit"] = "留给北部海岸的巨型湿地鳄鱼，下次来时完成",
+
+	-- Step 58: Dragonmaw camp
 	["Dragonmaw camp"] = "龙喉营地",
-	-- {area:1025} Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
+	-- {area:1025} The Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
 	["The Dragonmaw camp lies south of the road, just west of the {area:1025}: Raiders, Swamprunners and Bonewarders. {npc:2092}'s quest in {zone:1426} needs level 28."] = "龙喉营地在道路南边、{area:1025}西边不远处：龙喉袭击者、龙喉沼泽行者和龙喉白骨守卫。{npc:2092}在{zone:1426}的任务需要28级。",
 	-- {zone:1437} Wetlands
 	-- plural, as words: Dragonmaw Raiders = {npc:1034} Dragonmaw Raider
 	["grind on Dragonmaw Raiders and Swamprunners at the Dragonmaw camp, {zone:1437}"] = "在{zone:1437}的龙喉营地刷{npc:1034}和龙喉沼泽行者",
-
-	-- Step 58: Hearth to Menethil
-	["Hearth to Menethil"] = "用炉石返回米奈希尔港",
-	["For the giant crocolisks of the north coast, on your next visit"] = "留给北部海岸的巨型湿地鳄鱼，下次来时完成",
 
 	-- Step 59: Ironforge
 	-- {zone:1437} Wetlands · {area:836} Dun Algaz · {zone:1432} Loch Modan · {zone:1426} Dun Morogh · {area:1537} Ironforge
@@ -275,6 +277,7 @@ return {
 	["Next: fly to {area:42}."] = "下一步：飞往{area:42}。",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "{npc:1032}在{area:1025}道路北边、{npc:2093}营地西边的沼泽里蠕动。任何软泥怪都可能带着{npc:2111}的包。",
 	-- ["Follow the coast north to the {area:414}. {npc:3846} camps on the beach; Wrathtail nagas fill the shore."] = "沿海岸向北到{area:414}。{npc:3846}在海滩上扎营；岸边满是怒尾纳迦。",
 	-- ["From {area:17203} take the boat to {area:442}; {npc:3649} stands at the north end of the village. Then ride south along the road through {zone:1439}."] = "从{area:17203}乘船前往{area:442}；{npc:3649}站在村子北端。然后沿道路向南骑行穿过{zone:1439}。",
 	-- ["Hearthstone on cooldown? Ride back north through the {area:1276}."] = "炉石在冷却？向北骑行穿过{area:1276}返回。",

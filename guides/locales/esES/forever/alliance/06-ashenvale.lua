@@ -133,6 +133,8 @@ return {
 	-- {npc:2094} James Halloran
 	["{npc:2094}, by the north gate"] = "{npc:2094}, junto a la puerta norte",
 	-- {npc:2096} Tarrel Rockweaver
+	["{npc:2096}: he won't offer 305 while you carry it"] = "",
+	-- {npc:2096} Tarrel Rockweaver
 	["{npc:2096}, by the north gate"] = "{npc:2096}, junto a la puerta norte",
 
 	-- Step 34: Spoils of War
@@ -183,17 +185,17 @@ return {
 	-- Step 48: Black Oozes
 	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
 	["Black Oozes"] = "Mocos negros",
-	-- {area:1025} Green Belt · {npc:2093} Einar Stonegrip · {npc:2111} Sida
-	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
-	["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "Los Mocos negros se arrastran por la marisma al norte del camino de {area:1025}, al oeste del campamento de {npc:2093}. Cualquier moco puede llevar la bolsa de {npc:2111}.",
+	-- {area:309} Ironbeard's Tomb · {area:205} Dun Modr · {npc:2093} Einar Stonegrip · {npc:2111} Sida
+	-- plural, as words: Monstrous Oozes = {npc:1033} Monstrous Ooze
+	["Black, Crimson and Monstrous Oozes fill {area:309}, just west of the road to {area:205} and north of {npc:2093}'s camp. Any ooze there may hold {npc:2111}'s bag."] = "",
 
-	-- Step 49: Green Belt
+	-- Step 49: The Green Belt
 	-- {npc:2093} Einar Stonegrip · {npc:1244} Rethiel the Greenwarden
 	["{npc:2093} camps by the road; {npc:1244} stands farther east, by the river."] = "{npc:2093} acampa junto al camino; {npc:1244} está más al este, junto al río.",
 
 	-- Step 50: The Mosshide gnolls
 	["The Mosshide gnolls"] = "Los gnols Pellejomusgo",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Mosshide Gnolls = {npc:1007} Mosshide Gnoll
 	["Mosshide Gnolls and Mongrels hold the hills south-east of the {area:1025}."] = "Los Gnolls Pellejomusgo y los bastardos ocupan las colinas al sureste de {area:1025}.",
 
@@ -205,7 +207,7 @@ return {
 	-- Step 54: Fen Creepers
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers"] = "Trepadores del cubil",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers hide in the marsh pools north-west of the {area:1025}."] = "Los Trepadores del cubil se esconden en las charcas de la marisma al noroeste de {area:1025}.",
 
@@ -213,17 +215,17 @@ return {
 	-- {area:205} Dun Modr · {area:881} Thandol Span · {npc:1071} Longbraid the Grim
 	["Follow the road north to {area:205}, at the foot of the {area:881}. {npc:1071} stands in the dwarves' camp."] = "Sigue el camino al norte hasta {area:205}, al pie de {area:881}. {npc:1071} está en el campamento de los enanos.",
 
-	-- Step 57: Dragonmaw camp
+	-- Step 57: Hearth to Menethil
+	["Hearth to Menethil"] = "Usa la piedra de hogar para ir a Puerto de Menethil",
+	["For the giant crocolisks of the north coast, on your next visit"] = "Para los crocoliscos gigantes de la costa norte, en tu próxima visita",
+
+	-- Step 58: Dragonmaw camp
 	["Dragonmaw camp"] = "Campamento Faucedraco",
-	-- {area:1025} Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
+	-- {area:1025} The Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
 	["The Dragonmaw camp lies south of the road, just west of the {area:1025}: Raiders, Swamprunners and Bonewarders. {npc:2092}'s quest in {zone:1426} needs level 28."] = "El campamento Faucedraco está al sur del camino, justo al oeste de {area:1025}: asaltantes, correpantanos y guardahuesos. La misión de {npc:2092} en {zone:1426} requiere nivel 28.",
 	-- {zone:1437} Wetlands
 	-- plural, as words: Dragonmaw Raiders = {npc:1034} Dragonmaw Raider
 	["grind on Dragonmaw Raiders and Swamprunners at the Dragonmaw camp, {zone:1437}"] = "mata Asaltantes Faucedraco y correpantanos en el campamento Faucedraco, {zone:1437}",
-
-	-- Step 58: Hearth to Menethil
-	["Hearth to Menethil"] = "Usa la piedra de hogar para ir a Puerto de Menethil",
-	["For the giant crocolisks of the north coast, on your next visit"] = "Para los crocoliscos gigantes de la costa norte, en tu próxima visita",
 
 	-- Step 59: Ironforge
 	-- {zone:1437} Wetlands · {area:836} Dun Algaz · {zone:1432} Loch Modan · {zone:1426} Dun Morogh · {area:1537} Ironforge
@@ -275,6 +277,7 @@ return {
 	["Next: fly to {area:42}."] = "Siguiente: vuela a {area:42}.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "Los Mocos negros se arrastran por la marisma al norte del camino de {area:1025}, al oeste del campamento de {npc:2093}. Cualquier moco puede llevar la bolsa de {npc:2111}.",
 	-- ["Follow the coast north to the {area:414}. {npc:3846} camps on the beach; Wrathtail nagas fill the shore."] = "Sigue la costa al norte hasta {area:414}. {npc:3846} acampa en la playa; los nagas Colafuria llenan la orilla.",
 	-- ["From {area:17203} take the boat to {area:442}; {npc:3649} stands at the north end of the village. Then ride south along the road through {zone:1439}."] = "Desde {area:17203}, toma el barco a {area:442}; {npc:3649} está en el extremo norte del pueblo. Después cabalga al sur por el camino a través de {zone:1439}.",
 	-- ["Hearthstone on cooldown? Ride back north through the {area:1276}."] = "¿Piedra de hogar en reutilización? Cabalga de vuelta al norte por {area:1276}.",

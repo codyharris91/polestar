@@ -69,6 +69,8 @@ otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 | `accept <quest> ["Title"]` | Take a quest; giver, title and place from the data | `npc`, `object`, `item`, `lvl` |
 | `turnin <quest> ["Title"]` | Hand a quest in | `npc`, `object`, `choose`, `reward`, `xp`, `money`, `direct` |
 | `complete <quest> ["Title"]` | Finish every objective of a quest with nothing more specific to track | |
+| `abandon <quest> ["Title"]` | Drop a quest from the log; done once it is out, the quest's `accept` stays done (Polestar 0.3.0) | no place modifiers, no `group` |
+| `destroy <item> ["Name"]` | Delete an item from the bags; done once the bags hold none (Polestar 0.3.0) | no place modifiers, no `group` |
 | `kill <npc>` / `kill "<Name>"` | Kill a mob; with `quest Q.O` the quest log counts it, without it the player ticks it | `npc`, `quest`, `xN` |
 | `collect <item> ["Name"]` | Loot or gather items; without `quest`, counted in the bags | `npc`, `quest`, `xN`, `nearest` |
 | `goto <x>,<y> ["Label"]` | Walk there; for travel and places the data has no target for | `map`, `r`, `era` / `live` only |
@@ -77,6 +79,7 @@ otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 | `use <item> ["Name"]` | Use an item | `quest` |
 | `sethome "<Location>"` / `sethome nearest` | Bind the hearthstone at an inn (`polestar find --kind inn`) | `npc` |
 | `hearth "<Location>"` | Use the hearthstone; done on landing there | no place modifiers |
+| `enter "<Place>"` | Be in that zone or area (the zone or subzone text; Polestar 0.3.0) | `@x,y` only points the arrow |
 | `getfp "<Flight point>"` | Learn a flight path (`polestar find --kind flight`) | `npc` |
 | `fly "<Town>"` | Take a flight; done on landing | no place modifiers |
 | `train class` / `train <npc>` / `train <Profession> [Rank]` | Visit a trainer: the nearest of the player's class, that one, or the nearest of a profession | `npc` |
@@ -88,6 +91,7 @@ otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 | `note <text>` | A line of information; never holds the step. With `only`, quote the text | no `"text"`, no `group` |
 | `skill <Profession> <N>` | Reach skill N (`"First Aid"` quoted) | |
 | `learn <spell> ["Name"]` | Learn a recipe or spell | `npc`, `item`, `nearest` |
+| `cast <spellId> ["Name"]` | Cast that spell while the goal is open (Polestar 0.3.0); name it unless it is a recipe in the data | coordinates |
 | `craft <spell> ["Name"]` | Craft a recipe | `xN`, `until` |
 | `rep <Faction> <Standing>` | Reach a standing, `Hated` to `Exalted`, with a faction by name or id | |
 | `explore <x>,<y> ["Area"]` | Discover the map area there | `map`, `r`, `era` / `live` only |
@@ -137,15 +141,22 @@ Warrior or Paladin).
 
 `when` checks the character's state instead, one predicate per line:
 `level<N` (also `<=`, `>`, `>=`; N may be `12.5` or `12+2500`), `money>=1s` (also `<`, `<=`, `>`), `onquest <quest>, ...`, `complete <quest>`,
-`turnedin <quest>`, `available <quest>`, `has <item> [xN]`, `zone "<Name>"`,
+`turnedin <quest>`, `available <quest>`, `has <item> [xN]`, `upgrade <item>`
+(Polestar's gear advice rates the item an upgrade now), `zone "<Name>"`,
 `subzone "<Name>"`, `bound "<Location>"`, `dungeon "<Name>"` (the player
 chose to run that dungeon in Options, Discovery, Dungeons; all are off at
 first, so `!dungeon "<Name>"` is the solo route), `done <label>` (the labelled
-step was completed, not skipped or jumped over; not on a `next` line); `!` in front of any but
+step was completed, not skipped or jumped over; not on a `next` line),
+`skill <Profession> <N>` (the profession's rank is N or more; not learned is
+0), `cooldown item <item>` / `cooldown spell <spell>` (on cooldown, the global
+cooldown aside), `group <quest>` (the player chose to do that group quest;
+unanswered, the route waits and asks; on the accept step, `!group` for a solo
+way; not on `next` or `skipto`); `!` in front of any but
 `level` and `money` turns it around. Once the route has passed the step, the
 outcome stays. A pack with `when` (on a step or a `next` line), `along` or
-`label` needs Polestar 0.2.6; with `money` or `task` goals, a `when money`,
-`when dungeon` or `when done` predicate, or `skipto`, needs Polestar 0.3.0.
+`label` needs Polestar 0.2.6; with `money`, `task`, `enter`, `cast`, `abandon` or `destroy` goals, a `when money`,
+`when dungeon`, `when upgrade`, `when done`, `when skill`, `when cooldown` or
+`when group` predicate, or `skipto`, needs Polestar 0.3.0.
 
 ## Lint errors that come up most
 

@@ -10,7 +10,7 @@ return {
 	-- {skill:393} Skinning
 	["Learn {skill:393}"] = "學習{skill:393}",
 	-- {skill:393} Skinning · {item:7005} Skinning Knife
-	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "你陣營的任何{skill:393}訓練師都會教授初級{skill:393}（角色等級 5）；箭頭會指向最近的一位。向商業物品或雜貨商人購買{item:7005}：放在背包裡，沒有它就無法剝皮。",
+	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} at any level, and so does the Junior Skinning Trainer in each starting zone; the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "",
 
 	-- Step 2: Beasts 1-9: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -218,4 +218,7 @@ return {
 	["{npc:9164}, Diemetradon"] = "{npc:9164}、雙帆龍",
 	-- {npc:9164} Elder Diemetradon
 	["Pterrordax, {npc:9164}"] = "翼手龍、{npc:9164}",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "你陣營的任何{skill:393}訓練師都會教授初級{skill:393}（角色等級 5）；箭頭會指向最近的一位。向商業物品或雜貨商人購買{item:7005}：放在背包裡，沒有它就無法剝皮。",
 }

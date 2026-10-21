@@ -93,9 +93,13 @@ version throughout.
    node tools/polestar.js questdb build
    node tools/polestar.js itemdb build && node tools/polestar.js gear build
    node tools/polestar.js codex build        # release-safe; never --local-extras here
+   node tools/polestar.js credits            # Guiding Stars: tools/lib/credits.json + merged PRs (needs gh)
    node tools/polestar.js lint
    node tools/polestar.js compile
    ```
+
+   Before `credits`, add new Ko-fi supporters to `tools/lib/credits.json`
+   (names only, highest total first; amounts are never stored).
 
 3. Run the whole suite with the data built (nothing skips for missing data
    now):

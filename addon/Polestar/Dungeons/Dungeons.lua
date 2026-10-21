@@ -426,4 +426,25 @@ if ns.RegisterOptions then
 	end
 	ok, err = ns.RegisterOptions({ page = L["Discovery"], tab = L["Dungeons"], section = L["Dungeons in leveling guides"], controls = controls })
 	if not ok and geterrorhandler then geterrorhandler()(err) end
+
+	-- The group quests of this character's guides (`when group`), one toggle
+	-- each: on, do it with a group; off, skip it (or not answered yet: the
+	-- guide asks when it gets there). Per character (Engine.AnswerGroup). Read
+	-- at login, once the guides are registered; none: no tab.
+	ns.OnLogin(function()
+		local E = ns.Engine
+		local list = E and E.GroupQuests and E.GroupQuests() or {}
+		if #list == 0 then return end
+		local quests = {}
+		for _, gq in ipairs(list) do
+			local q = gq.quest
+			quests[#quests + 1] = { kind = "toggle",
+				label = function() return ns.Names and ns.Names.Quest and ns.Names.Quest(q) or gq.title or ("#" .. q) end,
+				help = L["Off: the guide skips this group quest and keeps to the solo route. Until you choose, it asks when it gets there."],
+				get = function() return E.GroupAnswer(q) == "do" end,
+				set = function(on) E.AnswerGroup(q, on and "do" or "skip") end }
+		end
+		local done, why = ns.RegisterOptions({ page = L["Discovery"], tab = L["Group quests"], section = L["Group quests in leveling guides"], controls = quests })
+		if not done and geterrorhandler then geterrorhandler()(why) end
+	end)
 end

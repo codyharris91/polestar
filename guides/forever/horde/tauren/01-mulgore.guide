@@ -364,7 +364,9 @@ step Dwarven Digging
 
 step Sharing the Land
   tip The Palemane gnolls hold Palemane Rock, south of the digsite and west of Bloodhoof. Perith Stormhoof is held in their camp: lead him out.
-  complete 745
+  kill 2949 quest 745.1               -- Palemane Tanner
+  kill 2950 quest 745.2               -- Palemane Skinner
+  kill 2951 quest 745.3               -- Palemane Poacher
   accept 98430
   complete 98430
 

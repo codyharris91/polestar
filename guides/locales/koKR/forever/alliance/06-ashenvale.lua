@@ -133,6 +133,8 @@ return {
 	-- {npc:2094} James Halloran
 	["{npc:2094}, by the north gate"] = "{npc:2094}, 북문 옆",
 	-- {npc:2096} Tarrel Rockweaver
+	["{npc:2096}: he won't offer 305 while you carry it"] = "",
+	-- {npc:2096} Tarrel Rockweaver
 	["{npc:2096}, by the north gate"] = "{npc:2096}, 북문 옆",
 
 	-- Step 34: Spoils of War
@@ -183,17 +185,17 @@ return {
 	-- Step 48: Black Oozes
 	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
 	["Black Oozes"] = "검은 수액괴물",
-	-- {area:1025} Green Belt · {npc:2093} Einar Stonegrip · {npc:2111} Sida
-	-- plural, as words: Black Oozes = {npc:1032} Black Ooze
-	["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "검은 수액괴물은 {area:1025} 길 북쪽, {npc:2093}의 야영지 서쪽 늪을 기어다닙니다. 어느 수액괴물이든 {npc:2111}의 가방을 지니고 있을 수 있습니다.",
+	-- {area:309} Ironbeard's Tomb · {area:205} Dun Modr · {npc:2093} Einar Stonegrip · {npc:2111} Sida
+	-- plural, as words: Monstrous Oozes = {npc:1033} Monstrous Ooze
+	["Black, Crimson and Monstrous Oozes fill {area:309}, just west of the road to {area:205} and north of {npc:2093}'s camp. Any ooze there may hold {npc:2111}'s bag."] = "",
 
-	-- Step 49: Green Belt
+	-- Step 49: The Green Belt
 	-- {npc:2093} Einar Stonegrip · {npc:1244} Rethiel the Greenwarden
 	["{npc:2093} camps by the road; {npc:1244} stands farther east, by the river."] = "{npc:2093}은(는) 길가에 진을 치고 있고, {npc:1244}은(는) 더 동쪽 강가에 서 있습니다.",
 
 	-- Step 50: The Mosshide gnolls
 	["The Mosshide gnolls"] = "이끼가죽 놀",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Mosshide Gnolls = {npc:1007} Mosshide Gnoll
 	["Mosshide Gnolls and Mongrels hold the hills south-east of the {area:1025}."] = "이끼가죽 놀과 이끼가죽일족 싸움꾼이 {area:1025} 남동쪽 언덕을 차지하고 있습니다.",
 
@@ -205,7 +207,7 @@ return {
 	-- Step 54: Fen Creepers
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers"] = "수렁이끼괴물",
-	-- {area:1025} Green Belt
+	-- {area:1025} The Green Belt
 	-- plural, as words: Fen Creepers = {npc:1040} Fen Creeper
 	["Fen Creepers hide in the marsh pools north-west of the {area:1025}."] = "수렁이끼괴물은 {area:1025} 북서쪽 늪 웅덩이에 숨어 있습니다.",
 
@@ -213,17 +215,17 @@ return {
 	-- {area:205} Dun Modr · {area:881} Thandol Span · {npc:1071} Longbraid the Grim
 	["Follow the road north to {area:205}, at the foot of the {area:881}. {npc:1071} stands in the dwarves' camp."] = "길을 따라 북쪽으로 {area:881} 기슭의 {area:205}까지 가세요. {npc:1071}은(는) 드워프 야영지에 서 있습니다.",
 
-	-- Step 57: Dragonmaw camp
+	-- Step 57: Hearth to Menethil
+	["Hearth to Menethil"] = "메네실로 귀환",
+	["For the giant crocolisks of the north coast, on your next visit"] = "북쪽 해안의 거대한 습지악어는 다음 방문 때",
+
+	-- Step 58: Dragonmaw camp
 	["Dragonmaw camp"] = "용아귀부족 야영지",
-	-- {area:1025} Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
+	-- {area:1025} The Green Belt · {npc:2092} Pilot Longbeard · {zone:1426} Dun Morogh
 	["The Dragonmaw camp lies south of the road, just west of the {area:1025}: Raiders, Swamprunners and Bonewarders. {npc:2092}'s quest in {zone:1426} needs level 28."] = "용아귀부족 야영지는 {area:1025} 바로 서쪽, 길 남쪽에 있습니다. 약탈자, 늪길잡이, 해골감시자가 있습니다. {zone:1426}에서 {npc:2092}의 퀘스트는 28레벨이 필요합니다.",
 	-- {zone:1437} Wetlands
 	-- plural, as words: Dragonmaw Raiders = {npc:1034} Dragonmaw Raider
 	["grind on Dragonmaw Raiders and Swamprunners at the Dragonmaw camp, {zone:1437}"] = "{zone:1437}의 용아귀부족 야영지에서 용아귀부족 약탈자와 늪길잡이를 사냥하세요",
-
-	-- Step 58: Hearth to Menethil
-	["Hearth to Menethil"] = "메네실로 귀환",
-	["For the giant crocolisks of the north coast, on your next visit"] = "북쪽 해안의 거대한 습지악어는 다음 방문 때",
 
 	-- Step 59: Ironforge
 	-- {zone:1437} Wetlands · {area:836} Dun Algaz · {zone:1432} Loch Modan · {zone:1426} Dun Morogh · {area:1537} Ironforge
@@ -275,6 +277,7 @@ return {
 	["Next: fly to {area:42}."] = "다음: {area:42}(으)로 날아가세요.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Black Oozes creep through the marsh north of the {area:1025} road, west of {npc:2093}'s camp. Any ooze may hold {npc:2111}'s bag."] = "검은 수액괴물은 {area:1025} 길 북쪽, {npc:2093}의 야영지 서쪽 늪을 기어다닙니다. 어느 수액괴물이든 {npc:2111}의 가방을 지니고 있을 수 있습니다.",
 	-- ["Follow the coast north to the {area:414}. {npc:3846} camps on the beach; Wrathtail nagas fill the shore."] = "해안을 따라 북쪽으로 {area:414}까지 가세요. {npc:3846}은(는) 해변에 진을 치고 있고, 해안에는 성난지느러미일족 나가가 가득합니다.",
 	-- ["From {area:17203} take the boat to {area:442}; {npc:3649} stands at the north end of the village. Then ride south along the road through {zone:1439}."] = "{area:17203}에서 배를 타고 {area:442}(으)로 가세요. {npc:3649}은(는) 마을 북쪽 끝에 서 있습니다. 그런 다음 길을 따라 남쪽으로 {zone:1439}을(를) 지나가세요.",
 	-- ["Hearthstone on cooldown? Ride back north through the {area:1276}."] = "귀환석이 재사용 대기 중인가요? {area:1276}을(를) 지나 북쪽으로 돌아가세요.",

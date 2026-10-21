@@ -162,12 +162,13 @@ end
 -- Where to collect a quest item: the nearest spawn of its best drop or object
 -- source; else, with `inside` (see questStep), where its best source without
 -- a known spawn is, unless that source rarely gives it (under INSIDE_CHANCE
--- percent: Razorgore's 1.5% Nexus Crystal is no errand) -> point, its name.
+-- percent: Razorgore's 1.5% Nexus Crystal is no errand) -> point, its name
+-- (an inside source only), the best source's spawns (a placed source only).
 local function itemSpot(itemId, from, inside)
 	local C = Codex()
 	local item = C.Item(itemId)
 	if not item then return nil end
-	local best, bestChance, placed, placedChance, placedName
+	local best, bestChance, bestSpawns, placed, placedChance, placedName
 	for _, src in ipairs(item.sources or {}) do
 		local rec, kind, id
 		if src.type == "drop" and src.npc then
@@ -178,15 +179,91 @@ local function itemSpot(itemId, from, inside)
 		local chance = src.chance or 0
 		if rec and rec.spawns and #rec.spawns > 0 then
 			if not best or chance > bestChance then
-				best, bestChance = Lookup.Nearest(rec.spawns, from), chance
+				best, bestChance, bestSpawns = Lookup.Nearest(rec.spawns, from), chance, rec.spawns
 			end
 		elseif kind and inside and not best and (src.chance == nil or chance >= INSIDE_CHANCE) and (not placed or chance > placedChance) then
 			local p = inside(kind, id)
 			if p then placed, placedChance, placedName = p, chance, (rec and rec.name) or (C.Name(kind, id)) end
 		end
 	end
-	if best then return best end
+	if best then return best, nil, bestSpawns end
 	return placed, placedName
+end
+
+-- Spawn areas (docs/GUIDE_FORMAT.md, "Spawn areas"), as compiled goals get
+-- them (tools/lib/dsl/resolve.js, spawnSpots), for a kill, collect or interact
+-- goal placed at one of its target's spawns: every Codex spawn of the target
+-- on the goal's map and frame is a spot, so the arrow goes to the place
+-- nearest the player, or searches them one after another, instead of only the
+-- one nearest the giver (#610). The Codex keeps a target's spawns as a few
+-- clusters per map (tools/lib/codex/build.js, SPAWN: CODEX_CLUSTER map percent
+-- wide), each one place, its radius that width in yards. Places whose 90%
+-- extent reaches past SPREAD_YARDS from their centre are an area objective
+-- (`spread`): searched as a walk from the goal's point, each spot SPREAD_R
+-- wide; closer ones are camps (CAMP_R), nearest to the goal's point first.
+-- Past the caps the rest are alternatives (`alt`). Fewer than two places, or
+-- a map without world bounds: none (the point stays).
+local SPOTS = { CODEX_CLUSTER = 3, SPREAD_YARDS = 250, CAMP_R = { 15, 70 }, SPREAD_R = { 40, 150 }, CAMP_CAP = 6, SPREAD_CAP = 12 }
+
+local function spawnSpots(goal, spawns)
+	local map, f = goal.map, goal.f
+	if not (map and goal.x and type(spawns) == "table") then return goal end
+	local toWorld = ns.Compat.MapToWorld
+	local c0, gx, gy = toWorld(map, goal.x, goal.y, f)
+	if not c0 then return goal end
+	local pts, sx, sy = {}, 0, 0
+	for _, s in ipairs(spawns) do
+		if s.map == map and s.f == f and s.x and s.y then
+			local c, wx, wy = toWorld(map, s.x, s.y, f)
+			if c ~= c0 then return goal end
+			pts[#pts + 1] = { x = s.x, y = s.y, wx = wx, wy = wy }
+			sx, sy = sx + s.x, sy + s.y
+		end
+	end
+	local n = #pts
+	if n < 2 then return goal end
+	local function yards(ax, ay, bx, by) return ((ax - bx) ^ 2 + (ay - by) ^ 2) ^ 0.5 end
+	-- 90% extent from the centre.
+	local _, cx, cy = toWorld(map, sx / n, sy / n, f)
+	local ds = {}
+	for i, p in ipairs(pts) do ds[i] = yards(p.wx, p.wy, cx, cy) end
+	table.sort(ds)
+	local spread = ds[math.min(n, math.floor(n * 0.9) + 1)] > SPOTS.SPREAD_YARDS
+	-- The Codex cluster's width in yards, clamped for camps or searched areas.
+	local _, ex, ey = toWorld(map, goal.x + SPOTS.CODEX_CLUSTER, goal.y + SPOTS.CODEX_CLUSTER, f)
+	local bounds = spread and SPOTS.SPREAD_R or SPOTS.CAMP_R
+	local r = math.floor(math.min(bounds[2], math.max(bounds[1], yards(ex, ey, gx, gy) / 2 ^ 0.5)) + 0.5)
+	-- Order: a walk from the goal's point (spread), else nearest to it first.
+	local order, at = {}, { wx = gx, wy = gy }
+	local function before(a, b, from)
+		local da, db = yards(a.wx, a.wy, from.wx, from.wy), yards(b.wx, b.wy, from.wx, from.wy)
+		if da ~= db then return da < db end
+		if a.x ~= b.x then return a.x < b.x end
+		return a.y < b.y
+	end
+	if spread then
+		local left = {}
+		for i, p in ipairs(pts) do left[i] = p end
+		while #left > 0 do
+			local bi = 1
+			for i = 2, #left do
+				if before(left[i], left[bi], at) then bi = i end
+			end
+			at = table.remove(left, bi)
+			order[#order + 1] = at
+		end
+	else
+		for i, p in ipairs(pts) do order[i] = p end
+		table.sort(order, function(a, b) return before(a, b, at) end)
+	end
+	local cap = spread and SPOTS.SPREAD_CAP or SPOTS.CAMP_CAP
+	local spots = {}
+	for i, p in ipairs(order) do
+		spots[i] = { x = p.x, y = p.y, r = r, n = 1, alt = i > cap or nil }
+	end
+	goal.spots = spots
+	if spread then goal.spread = true end
+	return goal
 end
 
 -- Quests to do in order to get questId, prerequisites first: every one of
@@ -326,14 +403,14 @@ local function questStep(q, from, isTarget, opts)
 				s = inside("npc", o.id)
 				mark(s, target)
 			end
-			goals[#goals + 1] = at({ t = "kill", target = target, npc = o.id, tame = o.tame,
-				quest = q.id, oi = oi, count = count, title = q.title }, s)
+			goals[#goals + 1] = spawnSpots(at({ t = "kill", target = target, npc = o.id, tame = o.tame,
+				quest = q.id, oi = oi, count = count, title = q.title }, s), npc and npc.spawns)
 		elseif o.type == "item" and o.id then
 			local name = (C.Name("item", o.id)) or o.text or itemName(o.id)
-			local s, source = itemSpot(o.id, here, inside)
+			local s, source, spawns = itemSpot(o.id, here, inside)
 			if source then mark(s, name) end
-			goals[#goals + 1] = at({ t = "collect", item = o.id, itemName = name,
-				quest = q.id, oi = oi, count = count, title = q.title }, s)
+			goals[#goals + 1] = spawnSpots(at({ t = "collect", item = o.id, itemName = name,
+				quest = q.id, oi = oi, count = count, title = q.title }, s), spawns)
 		elseif o.type == "object" and o.id then
 			local obj = C.Object(o.id)
 			local objName = (obj and obj.name) or o.text or (L["Object"] .. " " .. o.id)
@@ -342,8 +419,8 @@ local function questStep(q, from, isTarget, opts)
 				s = inside("object", o.id)
 				mark(s, objName)
 			end
-			goals[#goals + 1] = at({ t = "interact", object = o.id, objName = objName,
-				quest = q.id, oi = oi, count = count, title = q.title }, s)
+			goals[#goals + 1] = spawnSpots(at({ t = "interact", object = o.id, objName = objName,
+				quest = q.id, oi = oi, count = count, title = q.title }, s), obj and obj.spawns)
 		else
 			event = event or o
 		end

@@ -13,18 +13,23 @@ return {
 	-- Step 1: C's dead drop
 	["C's dead drop"] = "La boîte aux lettres de C",
 	-- {object:410369} Dead Drop · {area:204} Pyrewood Village · {area:236} Shadowfang Keep
-	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369} est un coffre près de {area:204}, dans le sud de la Forêt des Pins argentés (Silverpine Forest), juste au sud du {area:236}. La note suivante de C vous y attend une fois au niveau 25.",
+	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. After the horn job and C's next letter, check it for the new job. The data lists a minimum of 25, but beta players report receiving the invitation at 30 after the horn job and a city visit; this is not a guaranteed mail level. If no new note is offered, continue leveling and check after C writes."] = "",
 
 	-- Step 2: The Scarlet Monastery
 	-- {area:796} Scarlet Monastery
 	["The {area:796}"] = "Le {area:796}",
-	-- {zone:1420} Tirisfal Glades
-	["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "Le monastère se dresse à l'extrême nord-est de {zone:1420}. Entrez seul ; C conseille de prendre un déguisement aux abords du monastère avant d'entrer.",
-	-- {area:796} Scarlet Monastery
-	["Find the Eye of Bhossca inside the {area:796}."] = "Trouvez l'Œil de Bhossca dans le {area:796}.",
+	-- {zone:1420} Tirisfal Glades · {npc:4293} Scarlet Scryer · {item:210963} Scryer's Key · {item:210968} Reliquary Key
+	["The monastery stands in the far north-east of {zone:1420}. Go in alone. Before entering, find the disguise in the chest by the outside stables. Recheck it after changing wings: stealth and suspicious actions can remove it. In the Graveyard, pickpocket a {npc:4293} for the {item:210963}; use it on the Personal Letterbox in the Library and read the message. It sends you back to sit at both benches between the statues in the graveyard. Watch for the mechanism's messages, take the {item:210968} from the stone coffer, then return to the Library for the locked reliquary. Avoid fighting through the instance."] = "",
+	["Solo route: Graveyard key, Library letter, Graveyard benches and coffer, then Library reliquary for the eye. Read the letter before the bench puzzle; check the disguise each time you change wings."] = "",
 
 	-- Step 3: Back to the dead drop
 	["Back to the dead drop"] = "Retour à la boîte aux lettres",
 	-- {object:410369} Dead Drop
-	["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "Déposez l'œil dans {object:410369}, près de Bois-du-Bûcher. Le paiement de C est la seconde quête « L'Œil de Bhossca », au même coffre.",
+	["Place the eye in the {object:410369} near Pyrewood. Check a capital mailbox for C's payment letter on your next planned city visit, then return here for the reward quest. The payment may not be available immediately; do not repeat the infiltration just because the reward has not appeared."] = "",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Find the Eye of Bhossca inside the {area:796}."] = "Trouvez l'Œil de Bhossca dans le {area:796}.",
+	-- ["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "Déposez l'œil dans {object:410369}, près de Bois-du-Bûcher. Le paiement de C est la seconde quête « L'Œil de Bhossca », au même coffre.",
+	-- ["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "Le monastère se dresse à l'extrême nord-est de {zone:1420}. Entrez seul ; C conseille de prendre un déguisement aux abords du monastère avant d'entrer.",
+	-- ["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369} est un coffre près de {area:204}, dans le sud de la Forêt des Pins argentés (Silverpine Forest), juste au sud du {area:236}. La note suivante de C vous y attend une fois au niveau 25.",
 }

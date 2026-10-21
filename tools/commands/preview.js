@@ -1178,6 +1178,14 @@ end`,
 		],
 	},
 	{
+		file: 'options-thanks.svg',
+		title: 'Options: Guiding Stars, with sample supporters; "Special thanks to" in the header leads here',
+		panels: [
+			{ roots: OPTIONS, script: `Polestar.Credits.supporters = { "Sample Supporter", "Another Supporter", "Third Supporter", "Fourth", "Fifth", "Sixth" }
+				Polestar.UI.ShowOptions("thanks")` },
+		],
+	},
+	{
 		file: 'options-integrations.svg',
 		title: 'Options: Integrations: Questie\'s section while Questie is loaded; with no supported addon, one line says so',
 		panels: [

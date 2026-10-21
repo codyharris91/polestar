@@ -182,6 +182,7 @@ never in saved variables.
 | `GuideFrame.lua` | `UI.GuideFrame` | The guide window |
 | `GearPick.lua` | `UI.GearPick` | The reward pick under a turn-in goal |
 | `Picker.lua` | `UI.Picker` | The hub: its section rail, sidebar and search, and its built-in Guides section (the guide menu); defines `UI.RegisterSection` |
+| `QuestLinks.lua` | (local) | Quest log and objective tracker menu entries: open the guide search at that quest, with its matching steps |
 | `Lookup.lua` | `UI.Lookup` | The hub's Lookup section |
 | `Dungeons.lua` | `UI.DungeonsSection` | The hub's Dungeons section |
 | `RouteChoice.lua` | `UI.RouteChoice` | "Choose your path": one card per zone where a guide offers several next guides |

@@ -164,6 +164,12 @@
 			},
 			"note": "Flawed Power Stone: Forever's quest data (page snapshot 2026-10-17) starts with Flawed Power Stones (object 5621); as its giver the merged data also listed Flawed Power Stone (object 5619) and Flawed Power Stones (object 5620)."
 		},
+		"940": {
+			"set": {
+				"xp": 440
+			},
+			"note": "Teldrassil (from the Oracle Tree Bark to Fandral) rewards 440 XP on Forever; the merged data had 220, the Classic value. Forever's quest data (page snapshot), ForeverDB's player captures and Factoruide's database all give 440, as The Enchanted Glade (937) at the same level does. Issue #647."
+		},
 		"959": {
 			"set": {
 				"xp": 2650

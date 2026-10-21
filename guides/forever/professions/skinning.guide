@@ -3,7 +3,7 @@ guide forever/professions/skinning
 title Skinning 1-300
 category Professions
 coords era
-levels 5-60
+levels 1-60
 zone Ironforge
 
 # Skinning 1-300 for both factions: loops through the densest skinnable beasts
@@ -21,8 +21,7 @@ zone Ironforge
 # ---------------------------------------------------------------- Apprentice
 
 step Learn Skinning
-  tip Any Skinning trainer of your faction teaches Apprentice Skinning (character level 5); the arrow picks the nearest. Buy a Skinning Knife from a trade goods or general vendor: keep it in your bags, you cannot skin without it.
-  level 5
+  tip Any Skinning trainer of your faction teaches Apprentice Skinning at any level, and so does the Junior Skinning Trainer in each starting zone; the arrow picks the nearest. Buy a Skinning Knife from a trade goods or general vendor: keep it in your bags, you cannot skin without it.
   train Skinning Apprentice
   buy 7005 x1 nearest
 

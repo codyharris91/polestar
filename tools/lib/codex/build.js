@@ -36,6 +36,7 @@ const { emitPack, packOrder, ADDON, SCHEMA } = require('./pack');
 const { instanceFacts, buildInstances, curatedEntrances, loadEntranceTable } = require('./instances');
 const { loadWowhead, chanceOf } = require('./wowhead');
 const { blockingPrereqs } = require('../data/prereqs');
+const { reduceSpawns } = require('../data/spawns');
 const { isEscort } = require('../dsl/escort');
 
 const { ROOT, DATA, SOURCES } = require('../paths');
@@ -79,6 +80,7 @@ const CAP = { drop: 10, object: 6, vendor: 10, container: 6 };
 const WORLD_DROP_NPCS = 12;
 // Spawns: clusters per map, maps per entity.
 const SPAWN = { radius: 3, perMap: 5, maps: 4 };
+const SERVICE_ROLES = new Set(['vendor', 'repair', 'innkeeper', 'banker', 'auctioneer', 'flightmaster', 'battlemaster', 'spirithealer', 'stablemaster', 'trainer', 'weapon']);
 // Loot listed on a rare NPC or treasure (Codex.Loot; the Rares view picks its
 // signature drop from it): its own drops (items nothing else drops or holds)
 // first, then best-known chance. A rare's candidates run to hundreds (the
@@ -389,13 +391,14 @@ function samePlace(a, b) {
 // Silverpine Forest and Western Plaguelands, whose frames it overlaps without
 // either holding it (#350). Maps holding different places keep their order,
 // so a mob on a zone border stays in the zone it is mostly seen in.
-function spawnsOf(byMap, zones, frames) {
+function spawnsOf(byMap, zones, frames, exact = false) {
 	const maps = Object.entries(byMap || {})
 		.filter(([map]) => !zones || zones[map])
-		.map(([map, s]) => ({ map: Number(map), f: s && s.f === 'e' ? 'e' : null, clusters: cluster((s && s.pts) || []) }))
+		.map(([map, s]) => ({ map: Number(map), f: s && s.f === 'e' ? 'e' : null,
+			clusters: exact ? reduceSpawns([...((s && s.pts) || []), ...((s && s.more) || [])], { cap: Infinity, dedupe: 0 }).pts.map(([x, y]) => ({ x, y, n: 1 })) : cluster((s && s.pts) || []) }))
 		.filter((m) => m.clusters.length)
 		.sort((a, b) => b.clusters.reduce((n, c) => n + c.n, 0) - a.clusters.reduce((n, c) => n + c.n, 0) || a.map - b.map)
-		.slice(0, SPAWN.maps);
+		.slice(0, exact ? Infinity : SPAWN.maps);
 	if (frames) {
 		for (const m of maps) {
 			m.at = worldOf(frames, m.map, m.f, m.clusters[0].x, m.clusters[0].y);
@@ -410,7 +413,7 @@ function spawnsOf(byMap, zones, frames) {
 		}
 	}
 	const out = [];
-	for (const m of maps) for (const c of m.clusters.slice(0, SPAWN.perMap)) out.push({ map: m.map, x: c.x, y: c.y, f: m.f });
+	for (const m of maps) for (const c of m.clusters.slice(0, exact ? Infinity : SPAWN.perMap)) out.push({ map: m.map, x: c.x, y: c.y, f: m.f });
 	return out;
 }
 
@@ -559,6 +562,7 @@ function mergeCodex(inputs) {
 		npcs[id] = {
 			id: Number(id),
 			name: n.name,
+			subName: n.subName || undefined,
 			level: int(n.level),
 			levelMax: int(n.levelMax),
 			faction: ['A', 'H', 'AH'].includes(n.faction) ? n.faction : null,
@@ -780,7 +784,31 @@ function mergeCodex(inputs) {
 			if (npcRoles[npc]) npcRoles[npc].delete('rare');
 		}
 	}
-	for (const [id, set] of Object.entries(npcRoles)) if (npcs[id]) npcs[id].roles = [...set].sort();
+	for (const [id, set] of Object.entries(npcRoles)) {
+		const npc = npcs[id], source = fv.npcs && fv.npcs[id];
+		if (!npc) continue;
+		if (set.has('trainer')) {
+			const title = (npc.subName || '').toLowerCase();
+			for (const [name, cls] of Object.entries(CLASSES)) if (new RegExp(`\\b${name}\\b`).test(title)) set.add(`class:${cls.file}`);
+			if (/\bweapon master\b/.test(title)) set.add('weapon');
+		}
+		npc.roles = [...set].sort();
+		// A service waypoint must be an actual spawn, never a cluster's midpoint.
+		if (source && npc.roles.some((role) => SERVICE_ROLES.has(role))) {
+			let spawns = spawnsOf(source.spawns, zonesIn, fv.mapFrames, true);
+			const facts = wh && wh.npc[id];
+			if (!spawns.length && facts) {
+				const live = Object.fromEntries(Object.entries(facts.spawns || {}).map(([map, pts]) => [map, { f: null, pts }]));
+				spawns = spawnsOf(live, zonesIn, fv.mapFrames, true);
+			}
+			if (spawns.length) npc.spawns = spawns;
+		}
+	}
+	// Titles are for the map's NPC services (the tooltip, and the class roles
+	// above): any other NPC's would only add to the pack.
+	for (const npc of Object.values(npcs)) {
+		if (npc.subName && !(npc.roles || []).some((role) => SERVICE_ROLES.has(role))) delete npc.subName;
+	}
 
 	// ----- items
 	const cands = {}; // item -> [source]
@@ -1172,9 +1200,11 @@ function mergeCodex(inputs) {
 	const objects = {};
 	for (const [id, o] of Object.entries(fv.objects || {})) {
 		const treasure = (o.roles || []).includes('chest');
-		if (!treasure && !wantObjects.has(Number(id))) continue;
+		const mailbox = (o.roles || []).includes('mailbox');
+		if (!treasure && !mailbox && !wantObjects.has(Number(id))) continue;
 		if (!o.name || JUNK.test(o.name)) continue;
-		objects[id] = { id: Number(id), name: o.name, treasure, spawns: spawnsOf(o.spawns, zonesIn, fv.mapFrames) };
+		objects[id] = { id: Number(id), name: o.name, treasure, spawns: spawnsOf(o.spawns, zonesIn, fv.mapFrames, mailbox) };
+		if (mailbox) Object.assign(objects[id], { mailbox: true, faction: ['A', 'H', 'AH'].includes(o.faction) ? o.faction : null });
 	}
 	const treasureLoot = {}; // object -> Set(items) (RareScanner)
 	for (const t of (rs && rs.treasures) || []) {

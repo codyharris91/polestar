@@ -46,7 +46,7 @@ return {
 	["Spider eye and bear claw"] = "Ojo de araña y garra de oso",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "En {zone:1422}, los Rondadores Brumatósigo sueltan {item:20610} y los Osos negros malsanos, {item:20611} (cada uno, más o menos una de cada cinco muertes).",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple
@@ -55,5 +55,6 @@ return {
 	["The {area:1417} ({area:1477}) lies under the {area:74}; the arrow points at its entrance. Gasher or {npc:5716} drop the {item:20606}, Hukku or Mijan the Blue, Zolo or Loro the Green: all six are elite trolls inside. Bring a group."] = "{area:1417} ({area:1477}) está bajo {area:74}; la flecha apunta a su entrada. Gasher o {npc:5716} sueltan {item:20606}; Hukku o Mijar, la azul; Zolo o Lo'hro, la verde: los seis son trols de élite adentro. Lleva un grupo.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "En {zone:1422}, los Rondadores Brumatósigo sueltan {item:20610} y los Osos negros malsanos, {item:20611} (cada uno, más o menos una de cada cinco muertes).",
 	-- ["One each of {item:7069}, Fire, Earth and Water. The Exiles of {zone:1417} drop them, one element each, about one kill in ten: Thundering (air), Burning (fire), Rumbling (earth) and Cresting (water). Or buy them at the auction house."] = "Uno de cada uno: {item:7069}, Fuego elemental, Tierra elemental y Agua elemental. Los exiliados de {zone:1417} los sueltan, un elemento cada tipo, más o menos una de cada diez muertes: tronadores (aire), ardientes (fuego), resonadores (tierra) y acuosos (agua). O cómpralos en la casa de subastas.",
 }

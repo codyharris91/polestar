@@ -2,11 +2,13 @@
 -- Nav's own target). Contract: docs/ARCHITECTURE.md, "Pins".
 --
 --   Pins.SetLayer(layer, pins, opts)   replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1,
---                                      minimapAreas = false }
+--                                      minimapAreas = false, minMapType = nil, worldLayout = nil }
+--   minMapType limits world-map pins to that UIMapType or narrower views; the minimap is unaffected.
+--   worldLayout(projected, view) -> { { pin, x, y }, ... } lays out this layer on the world map only.
 --   Pins.ClearLayer(layer)
 --   Pins.SetLayerVisible(layer, visible)
 --   pin = { map, x, y, f, icon, size, color = { r, g, b, a }, tooltip = string | function(tooltip),
---           onClick = function(button), priority }
+--           onClick = function(button, owner), priority }
 --   Additive pin fields: c, wx, wy (world position instead of map/x/y), glow (soft halo),
 --   area (yards: a soft disc of that radius under the pin, in the pin's colour, on the world
 --   map; on the minimap too in a layer with minimapAreas, cut at the minimap's rim),
@@ -181,6 +183,8 @@ function Pins.SetLayer(name, pins, opts)
 	end
 	layer.pins = type(pins) == "table" and pins or {}
 	layer.world = opts.world ~= false
+	layer.minMapType = tonumber(opts.minMapType)
+	layer.worldLayout = type(opts.worldLayout) == "function" and opts.worldLayout or nil
 	layer.minimap = opts.minimap ~= false
 	layer.edge = opts.edge == true
 	layer.scale = tonumber(opts.scale) or 1
@@ -352,8 +356,8 @@ local function showTooltip(owner, p)
 	GameTooltip:Show()
 end
 
-local function click(p, button)
-	if p and type(p.onClick) == "function" then ns.SafeCall(p.onClick, button) end
+local function click(p, button, owner)
+	if p and type(p.onClick) == "function" then ns.SafeCall(p.onClick, button, owner) end
 end
 
 ---------------------------------------------------------------------------
@@ -765,7 +769,7 @@ do
 		for i = 1, #clickFilters do
 			if clickFilters[i](d.pin, d.layer, button) then return end
 		end
-		click(d.pin, button)
+		click(d.pin, button, f)
 	end)
 
 	local function worldPin(i)
@@ -909,6 +913,28 @@ do
 		return a < b
 	end
 
+	-- Compact service groups reuse native icons; these extra regions stay pooled.
+	local function stackLook(f, p)
+		if not p.stack then
+			for _, t in ipairs(f.stackIcons or {}) do t:Hide() end
+			return
+		end
+		if not f.stackIcons then f.stackIcons = {} end
+		f.icon:Hide()
+		for i = 1, 3 do
+			local t = f.stackIcons[i]
+			if p.stack[i] then
+				if not t then t = f:CreateTexture(nil, "ARTWORK", nil, i); f.stackIcons[i] = t end
+				t:SetTexture(iconPath(p.stack[i]))
+				t:SetSize(21, 21)
+				t:ClearAllPoints()
+				t:SetPoint("CENTER", f, "CENTER", (i - (#p.stack + 1) / 2) * 7, i == 2 and 4 or -1)
+				t:Show()
+			elseif t then t:Hide() end
+		end
+
+	end
+
 	-- Every layer's pins, areas and hulls, and the trail, for the viewed map.
 	local function drawWorld()
 		wDirty = false
@@ -918,12 +944,15 @@ do
 		local n, areas, hulls = 0, 0, 0
 		if mapID then
 			viewMap(mapID)
+			local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
 			local pinLevel, blobLevel = v:Level(PIN_LEVEL), v:Level(BLOB_LEVEL)
 			for _, name in ipairs(order) do
 				local layer = layers[name]
-				if layer and layer.world and not hidden[name] then
+				if layer and layer.world and not hidden[name]
+					and (not layer.minMapType or (info and info.mapType and info.mapType >= layer.minMapType)) then
 					if not layer.resolved then resolveLayer(layer) end
 					local pins = layer.pins
+					local first = n + 1
 					for i = 1, #pins do
 						local p = pins[i]
 						if type(p.hull) == "table" then hulls = hullOn(p, layer, i, hulls, blobLevel) end
@@ -956,6 +985,17 @@ do
 							end
 						end
 					end
+					if layer.worldLayout then
+						local projected = {}
+						for i = first, n do projected[#projected + 1] = { pin = qPin[i], x = qX[i], y = qY[i] } end
+						local arranged = layer.worldLayout(projected, v)
+						for i = first, n do qPin[i], qLayer[i] = nil, nil end
+						n = first - 1
+						for _, d in ipairs(arranged) do
+							n = n + 1
+							queue[n], qPin[n], qLayer[n], qX[n], qY[n], qPri[n] = n, d.pin, layer, d.x, d.y, tonumber(d.pin.priority) or 0
+						end
+					end
 				end
 			end
 			for i = #queue, n + 1, -1 do queue[i] = nil end
@@ -967,6 +1007,7 @@ do
 				local d = f.data
 				d.pin, d.layer, d.x, d.y = qPin[i], qLayer[i], qX[i], qY[i]
 				applyLook(f, d.pin, (tonumber(d.pin.size) or WORLD_SIZE) * d.layer.scale)
+				stackLook(f, d.pin)
 				f:SetFrameLevel(pinLevel)
 				placeAt(f, d.x, d.y, scale)
 				f:Show()
@@ -1052,6 +1093,12 @@ do
 	end
 
 	local function followGamepadCursor(elapsed)
+		if ns.Widgets and ns.Widgets.MenuShown() then
+			if hovered then unhover() end
+			-- The popup owns A until it closes and the button is released.
+			padDown = true
+			return
+		end
 		local cursor = SoftCursor
 		if not (cursor and cursor:IsShown()) then
 			if hovered then unhover() end
@@ -1074,7 +1121,7 @@ do
 			end
 		end
 		local down = IsKeyDown and IsKeyDown(GAMEPAD_FACE_BOTTOM or "PAD1") and true or false
-		if down and not padDown and hovered then click(hoveredPin, "LeftButton") end
+		if down and not padDown and hovered then click(hoveredPin, "LeftButton", hovered) end
 		padDown = down
 	end
 
@@ -1470,7 +1517,7 @@ local function acquireMinimap()
 		buildLook(f)
 		f:SetScript("OnEnter", function(self) showTooltip(self, self.pin) end)
 		f:SetScript("OnLeave", function() GameTooltip:Hide() end)
-		f:SetScript("OnMouseUp", function(self, button) click(self.pin, button) end)
+		f:SetScript("OnMouseUp", function(self, button) click(self.pin, button, self) end)
 	end
 	mmActive[#mmActive + 1] = f
 	return f

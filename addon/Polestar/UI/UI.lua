@@ -419,6 +419,8 @@ function UI.GoalSubline(goal, shownMap, noParty, noMissing, noEscort)
 	if escort then parts[#parts + 1] = escort end
 	local starter = UI.StarterLine(goal)
 	if starter then parts[#parts + 1] = starter end
+	-- A hearth goal while the Hearthstone waits: the time left (#576).
+	if goal.hearthText then parts[#parts + 1] = goal.hearthText end
 	-- A grey accept "Skip grey quests" keeps, and the quest it opens.
 	if goal.keptGreyText and goal.status ~= "skipped" then parts[#parts + 1] = goal.keptGreyText end
 	local source = UI.SourceLine(goal)

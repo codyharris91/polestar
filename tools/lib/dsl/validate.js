@@ -73,7 +73,32 @@ function followProblem(g, other, data) {
 const eliteReported = new WeakSet();
 
 function eliteTip(target) {
-	return `in a Leveling guide make the goal \`optional\` with the tip "${target} is elite: grouping up is advised."`;
+	return `in a Leveling guide put the goal in a step with \`when group <quest>\` (the player chooses it) or make it \`optional\`, with the tip "${target} is elite: grouping up is advised."`;
+}
+
+// A step the route takes only for a player who chose to do a group quest
+// (a `when group <quest>`, not `!group`).
+function groupStep(step) {
+	return (step.when || []).some((p) => p.k === 'group' && !p.neg);
+}
+
+// The quests of g the player takes only by choosing a group quest: every
+// accept of them in g sits in a group step, so their turn-ins and objectives
+// go with it when the player skips (orphaned).
+function groupQuestsOf(g) {
+	const only = new Map();
+	for (const step of g.steps) {
+		for (const goal of step.goals) {
+			if (goal.t === 'accept' && goal.quest !== undefined) only.set(goal.quest, only.get(goal.quest) !== false && groupStep(step));
+		}
+	}
+	return new Set([...only].filter(([, yes]) => yes).map(([q]) => q));
+}
+
+// A goal for a party, not solo leveling: in a group step, or for a quest the
+// player takes only by choosing a group quest. Elite work belongs there.
+function partyWork(step, goal, chosen) {
+	return groupStep(step) || (goal.quest !== undefined && chosen.has(goal.quest));
 }
 
 // Our house rules: errors in our pack, warnings in every other.
@@ -481,14 +506,17 @@ function validateGuides(guides, data, diag) {
 		return out;
 	};
 
-	// Accept and turn-in goals with the characters they apply to, per guide.
+	// Accept, turn-in and abandon goals with the characters they apply to, per guide.
+	// An abandon ends the quest for the guide like a turn-in, but leaves it neither in the log nor done.
+	const QUEST_ENDS = new Set(['accept', 'turnin', 'abandon']);
+	const closes = (goal) => goal.t === 'turnin' || goal.t === 'abandon';
 	const questGoalMemo = new Map();
 	const questGoals = (g) => {
 		if (!questGoalMemo.has(g.id)) {
 			const gl = guideLayer(g);
 			const list = [];
 			for (const { step, goal } of goalsOf(g)) {
-				if (goal.quest === undefined || (goal.t !== 'accept' && goal.t !== 'turnin')) continue;
+				if (goal.quest === undefined || !QUEST_ENDS.has(goal.t)) continue;
 				list.push({ goal, chars: characters([gl, step._only, goal._only], data.quest(goal.quest)) });
 			}
 			questGoalMemo.set(g.id, list);
@@ -514,7 +542,7 @@ function validateGuides(guides, data, diag) {
 		let out = null;
 		if (after) {
 			out = new Set(after);
-			for (const t of questGoals(h)) if (t.goal.t === 'turnin' && t.goal.quest === q) for (const k of t.chars) out.add(k);
+			for (const t of questGoals(h)) if (closes(t.goal) && t.goal.quest === q) for (const k of t.chars) out.add(k);
 		}
 		coveredMemo.set(key, out);
 		return out;
@@ -542,7 +570,7 @@ function validateGuides(guides, data, diag) {
 				if (goal.t === 'turnin') turnedIn.add(goal.quest);
 				if (goal.t === 'learn') learned.add(goal.spell);
 			}
-			for (const t of questGoals(a)) take(t);
+			for (const t of questGoals(a)) if (t.goal.t !== 'abandon') take(t);
 		}
 		const own = new Map(questGoals(g).map((t) => [t.goal, t]));
 		// Quests handed in straight from the NPC's window (`turnin <id> direct`),
@@ -555,10 +583,11 @@ function validateGuides(guides, data, diag) {
 		}
 		const gl = guideLayer(g);
 		const leveling = g.category === 'Leveling';
+		const chosen = groupQuestsOf(g);
 		for (const { step, goal } of goalsOf(g)) {
 			const ln = goal._line;
 			const q = goal.quest !== undefined ? data.quest(goal.quest) : null;
-			if (leveling && !goal.optional) {
+			if (leveling && !goal.optional && !partyWork(step, goal, chosen)) {
 				const elite = eliteGoal(goal, applicable([gl, step._only, goal._only]).factions, data);
 				if (elite) {
 					houseRule(diag, g)(file, ln, elite);
@@ -666,7 +695,7 @@ function validateGuides(guides, data, diag) {
 		qg.forEach((a, i) => {
 			if (a.goal.t !== 'accept' || a.goal.optional || !a.chars.size) return;
 			let open = a.chars;
-			for (const t of qg.slice(i + 1)) if (t.goal.t === 'turnin' && t.goal.quest === a.goal.quest) open = minus(open, t.chars);
+			for (const t of qg.slice(i + 1)) if (closes(t.goal) && t.goal.quest === a.goal.quest) open = minus(open, t.chars);
 			if (!open.size) return;
 			const name = questName(data, a.goal.quest, a.goal.title);
 			const some = (left) => (left.size < a.chars.size ? ' for some of the characters it applies to' : '');
@@ -731,9 +760,10 @@ function validateSoloPolicy(guides, excluded, diag) {
 	for (const g of guides) {
 		if (g.category !== 'Leveling') continue;
 		const gl = guideLayer(g);
+		const chosen = groupQuestsOf(g);
 		for (const step of g.steps) {
 			for (const goal of step.goals) {
-				if (goal.optional || goal.quest === undefined || !SOLO_GOALS.has(goal.t) || eliteReported.has(goal)) continue;
+				if (goal.optional || partyWork(step, goal, chosen) || goal.quest === undefined || !SOLO_GOALS.has(goal.t) || eliteReported.has(goal)) continue;
 				for (const side of applicable([gl, step._only, goal._only]).factions) {
 					const e = excluded[side] && excluded[side].get(goal.quest);
 					const why = e && soloExclusion(e);

@@ -3,7 +3,7 @@ guide forever/professions/mining
 title Mining 1-300
 category Professions
 coords era
-levels 5-60
+levels 1-60
 zone Ironforge
 
 # Mining 1-300 for both factions: loops through the densest skill-up nodes for
@@ -21,8 +21,7 @@ zone Ironforge
 # ---------------------------------------------------------------- Apprentice
 
 step Learn Mining
-  tip Any Mining trainer of your faction teaches Apprentice Mining (character level 5); the arrow picks the nearest. Buy a Mining Pick from a trade goods or general vendor: keep it in your bags, you cannot mine without it.
-  level 5
+  tip Any Mining trainer of your faction teaches Apprentice Mining at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a Mining Pick from a trade goods or general vendor: keep it in your bags, you cannot mine without it.
   train Mining Apprentice
   buy 2901 x1 nearest
 

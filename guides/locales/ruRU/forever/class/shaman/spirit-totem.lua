@@ -46,7 +46,7 @@ return {
 	["Spider eye and bear claw"] = "Паучий глаз и медвежий коготь",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "В зоне {zone:1422} {item:20610} падает с воронковых пауков Ядовитого Тумана, а {item:20611} – с больных черных медведей (примерно в одном случае из пяти).",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple
@@ -55,5 +55,6 @@ return {
 	["The {area:1417} ({area:1477}) lies under the {area:74}; the arrow points at its entrance. Gasher or {npc:5716} drop the {item:20606}, Hukku or Mijan the Blue, Zolo or Loro the Green: all six are elite trolls inside. Bring a group."] = "{area:1417} ({area:1477}) находится под местом {area:74}; стрелка указывает на вход. {item:20606} падает с Ранокола или NPC {npc:5716}, синий – с Хукку или Миджана, зеленый – с Золо или Лоро: все шестеро – элитные тролли внутри. Соберите группу.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "В зоне {zone:1422} {item:20610} падает с воронковых пауков Ядовитого Тумана, а {item:20611} – с больных черных медведей (примерно в одном случае из пяти).",
 	-- ["One each of {item:7069}, Fire, Earth and Water. The Exiles of {zone:1417} drop them, one element each, about one kill in ten: Thundering (air), Burning (fire), Rumbling (earth) and Cresting (water). Or buy them at the auction house."] = "По одному: {item:7069}, огонь, земля и вода. Они падают с изгнанников в зоне {zone:1417}, с каждого своя стихия, примерно в одном случае из десяти: грохочущие изгнанники (воздух), пылающие изгои (огонь), шумные изгнанники (земля) и морские изгои (вода). Или купите на аукционе.",
 }

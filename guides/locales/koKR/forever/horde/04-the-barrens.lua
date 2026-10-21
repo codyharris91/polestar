@@ -120,10 +120,13 @@ return {
 	-- {quest:876} Serena Bloodfeather
 	-- plural, as words: Savannah Patriarchs = {npc:3241} Savannah Patriarch · Sprung Traps = {object:640104} Sprung Trap
 	["Savannah Patriarchs roam the plains east of the hills, and the Sprung Traps lie among them. {quest:876} leads the Witchwing harpies in the hills to the west."] = "우두머리 사바나 사자가 언덕 동쪽 평원을 돌아다니며, 용수철 덫은 그들 사이에 있습니다. {quest:876}이(가) 서쪽 언덕의 칼날바람하피를 이끕니다.",
+	-- {quest:865} Raptor Horns
+	-- plural, as words: Sunscale Scytheclaws = {npc:3256} Sunscale Scytheclaw
+	["{quest:865}, if still open: Sunscale Scytheclaws prowl among the lions"] = "",
 
 	-- Step 26: Trouble in the Valley
 	-- {npc:262119} Corporal Adamore · {npc:261366} Walton
-	["{npc:262119} and his marines hold the wrecked caravan south of {npc:261366}."] = "{npc:262119}와(과) 해병들이 {npc:261366} 남쪽의 부서진 대상단을 차지하고 있습니다.",
+	["{npc:262119} and his marines hold the wrecked caravan south of {npc:261366}. The marines are linked: pulling one calls the rest. Pull from the edge and run; they leash short, so you can thin the camp one at a time before tackling the Corporal."] = "",
 
 	-- Step 27: Walton
 	-- {npc:261366} Walton · {npc:261367} Terry Longdrink · {area:21} Kul Tiras
@@ -194,8 +197,13 @@ return {
 	["{npc:5901} waits on the hill south of {area:392}, on your way north."] = "{npc:5901}은(는) 북쪽으로 가는 길, {area:392} 남쪽 언덕에서 기다립니다.",
 
 	-- Step 43: Ishamuhale
-	-- {quest:882} Ishamuhale · {area:392} Ratchet · {area:380} Crossroads
-	["{quest:882}, a big Sunscale raptor, hunts the plains north of the road from {area:392} to the {area:380}."] = "큰 열대초원랩터 {quest:882}이(가) {area:392}에서 {area:380}(으)로 가는 길 북쪽 평원에서 사냥합니다.",
+	-- {quest:882} Ishamuhale · {item:10338} Fresh Zhevra Carcass · {object:147538} Dead Tree (no name in this language: may be words) · {area:392} Ratchet · {area:380} Crossroads
+	["{quest:882}, a big Sunscale raptor, only comes to a fresh kill: loot a {item:10338} from a zhevra, then use it at the {object:147538} north-west of {area:392}, north of the road to the {area:380}, and be ready when he arrives."] = "",
+	-- {item:10338} Fresh Zhevra Carcass
+	-- plural, as words: Zhevra Chargers = {npc:3426} Zhevra Charger
+	["{item:10338}, from any zhevra; Zhevra Chargers graze around the tree"] = "",
+	-- {object:147538} Dead Tree (no name in this language: may be words) · {quest:882} Ishamuhale
+	["At the {object:147538}: summons {quest:882}"] = "",
 
 	-- Step 44: Crossroads
 	-- {npc:3432} Mankrik · {quest:95774} Her Name Is Olgra · {quest:4921} Lost in Battle
@@ -327,5 +335,7 @@ return {
 	-- ["The {object:177790} lies at the north edge of the {area:382}, by the Venture Co. tower. It holds the {item:15883} for {quest:30}."] = "{object:177790}은(는) {area:382} 북쪽 가장자리, 투자개발회사 탑 옆에 있습니다. {quest:30}용 {item:15883}이(가) 들어 있습니다.",
 	-- ["{npc:2391} in {area:272} teaches {spell:2842}: keep it"] = "{area:272}의 {npc:2391}이(가) {spell:2842}을(를) 가르칩니다: 보관하세요",
 	-- ["{npc:246344} teaches Paladins in {area:1638}. You have no flight path there yet: fly to {area:378}, ride west through {zone:1412} and up a lift, and take the flight path from {npc:2995} on the central rise."] = "{npc:246344}은(는) {area:1638}에서 성기사를 가르칩니다. 아직 그곳 비행 경로가 없으니 {area:378}(으)로 비행한 뒤 서쪽으로 {zone:1412}을(를) 지나 승강기를 타고 올라가, 중앙 언덕의 {npc:2995}에게서 비행 경로를 얻으십시오.",
+	-- ["{npc:262119} and his marines hold the wrecked caravan south of {npc:261366}."] = "{npc:262119}와(과) 해병들이 {npc:261366} 남쪽의 부서진 대상단을 차지하고 있습니다.",
 	-- ["{npc:3401} stands in the {object:172960}. Target him and type /salute to finish {quest:2460}."] = "{npc:3401}은(는) {object:172960}에 있습니다. 그를 대상으로 지정하고 /salute를 입력해 {quest:2460}을(를) 완료하십시오.",
+	-- ["{quest:882}, a big Sunscale raptor, hunts the plains north of the road from {area:392} to the {area:380}."] = "큰 열대초원랩터 {quest:882}이(가) {area:392}에서 {area:380}(으)로 가는 길 북쪽 평원에서 사냥합니다.",
 }

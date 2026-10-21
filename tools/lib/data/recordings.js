@@ -601,7 +601,7 @@ function applyRecordings(db, recordings, { spawnOptions, liveMaps } = {}) {
 
 // Same field order as normalize.js builds, whatever the overlay added.
 const NPC_KEYS = ['id', 'name', 'level', 'levelMax', 'rank', 'faction', 'roles', 'spawns', 'instances', 'encounter'];
-const OBJECT_KEYS = ['id', 'name', 'roles', 'spawns', 'instances'];
+const OBJECT_KEYS = ['id', 'name', 'roles', 'faction', 'spawns', 'instances'];
 const QUEST_KEYS = [
 	'id', 'title', 'level', 'minLevel', 'races', 'classes', 'start', 'end', 'pre', 'excl', 'next',
 	'objectives', 'objectiveText', 'zone', 'xp', 'xpSamples', 'rewards', 'skill', 'event', 'source',

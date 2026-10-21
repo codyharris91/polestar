@@ -205,8 +205,14 @@ return {
 	["Each of Quel'ana's quests hands you a {item:15908}: use it on the beast she names, then bring the rod back to her in {area:16638}. Windsong Crawlers line the shore west of town; Vuldren Alphas and Ornery Galestriders roam the {area:16626} around the Windfield farm. Her sister {npc:254411} stands beside her."] = "奎爾安娜的每個任務都會給你一根{item:15908}：對她指定的野獸使用，然後把馴獸棒帶回{area:16638}交給她。風歌蟹遍布城鎮西邊的海岸；弗德飛狐首領和暴躁的逐風者在荒原農場周圍的{area:16626}遊蕩。她的妹妹{npc:254411}站在她身旁。",
 	-- {npc:254588} Windsong Crawler · {item:15908} Taming Rod
 	["{npc:254588}: tame it with the {item:15908}"] = "{npc:254588}：用{item:15908}馴服牠",
+	-- {npc:254588} Windsong Crawler
+	["Tame {npc:254588}"] = "",
 	-- {item:15908} Taming Rod
 	["Tame it with the {item:15908}"] = "用{item:15908}馴服牠",
+	-- {npc:251707} Ornery Galestrider
+	["Tame {npc:251707}"] = "",
+	-- {npc:250874} Vuldren Alpha
+	["Tame {npc:250874}"] = "",
 
 	-- Step 37: The Windstone Formations
 	-- plural, as words: Windstone Formations = {object:697118} Windstone Formation

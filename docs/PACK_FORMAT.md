@@ -15,7 +15,7 @@ The handbook is [PACKS.md](PACKS.md).
 **On this page:** [`pack.json`](#packjson) ·
 [The addon](#the-addon) · [TOC fields](#toc-fields) ·
 [Rules Polestar enforces](#rules-polestar-enforces) ·
-[Format 3](#format-3) · [Format 4](#format-4) · [Import strings](#import-strings) · [Versioning](#versioning)
+[Format 3](#format-3) · [Format 4](#format-4) · [Format 5](#format-5) · [Import strings](#import-strings) · [Versioning](#versioning)
 
 A community addon is an addon for World of Warcraft: Forever that depends
 on Polestar and registers guides with it. It is built from a pack: a folder
@@ -274,10 +274,14 @@ hold:
 | `"turnedin"` | `q` | the quest is handed in |
 | `"available"` | `q`; optional `minLevel`, `pre`, `preAll`, `closedBy` (as on an `accept`) | the quest is not in the log or done, the level is reached, one of `pre` and every one of `preAll` is done, and none of `closedBy` is in the log or done |
 | `"has"` | `item`; optional `n` (default 1) | the bags hold `n` or more |
+| `"upgrade"` | `item` | Polestar's gear advice rates the item an upgrade for the character now (`Gear.IsUpgrade`); an item it cannot judge, or gear advice turned off, counts as one |
 | `"zone"`, `"subzone"` | `name`; optional `area` | the zone (subzone) text reads as the area's name in the client's language, or as `name` |
 | `"bound"` | `name`; optional `area` | the bind location reads so |
 | `"dungeon"` | `name`; optional `map` (the instance's Map.csv id) | the character chose to run the dungeon with that `map` in leveling guides (Options, Discovery, Dungeons: "Dungeons in leveling guides"); without `map` it never holds |
 | `"done"` | `label`: a step label of the same guide (format 5) | the step so labelled applies, its goals are done and it was not skipped (by the player, a failed `when` or a `skipto` jump); refused in `nextWhen` |
+| `"skill"` | `name`, `n`; optional `skillLine` (format 5) | the character's rank in that profession is `n` or more; one not learned is rank 0 |
+| `"cooldown"` | `item` or `spell` (format 5) | the item or spell is on cooldown for more than the global cooldown (1.5 s) |
+| `"group"` | `q` (format 5) | the player answered "do it" for that group quest (`CharState().groupQuests[q] == "do"`); unanswered, the step applies and is not done, so the route waits there; refused in `nextWhen` and `skipto` |
 
 ```lua
 { title = "Back to Gornek", when = { { k = "onquest", q = { 788 } }, { k = "level", op = "<", n = 6 } }, goals = { ... } }
@@ -285,7 +289,7 @@ hold:
 
 A `when` that is not a non-empty list, or a predicate of another kind or
 without its keys, refuses the guide. Polestar 0.2.6 reads every kind above
-but `"money"`, `"dungeon"` and `"done"`, which came after it: a guide with one, on a
+but `"money"`, `"dungeon"`, `"upgrade"`, `"done"`, `"skill"`, `"cooldown"` and `"group"`, which came after it: a guide with one, on a
 step or a `next` option, is written in format 5, so 0.2.6 says the pack needs
 Polestar 0.3.0 instead of refusing the guide ("bad when"). Once the route has moved past a step,
 Polestar stores whether its `when` held (per character, guide and step) and
@@ -324,10 +328,10 @@ list refuses the guide.
 
 ## Format 5
 
-Format 4 with the **`money`** and **`task`** goals, the **`money`**,
-**`dungeon`** and **`done`** `when` predicates (on a step or a `next` option;
-`done` on a step only) and a step's **`skipto`** jumps. Polestar 0.3.0 and
-later read it.
+Format 4 with the **`money`**, **`task`**, **`enter`**, **`cast`**, **`abandon`** and **`destroy`** goals, the **`money`**,
+**`dungeon`**, **`upgrade`**, **`done`**, **`skill`**, **`cooldown`** and **`group`**
+`when` predicates (on a step or a `next` option; `done` on a step only) and a step's
+**`skipto`** jumps. Polestar 0.3.0 and later read it.
 The compiler writes a pack in format 5 only when its guides use one of them;
 any other pack stays in format 3 or 4. A 0.2.6 client accepts a format-4 pack
 and then refuses a guide with an unknown verb or predicate, so these features
@@ -342,6 +346,18 @@ tick; holds its step until then (with `optional = true` it never holds). May
 have coordinates (`map`, `x`, `y`). A goal whose `text` is not a string
 refuses the guide.
 
+`enter` goal: `{ t = "enter", location = "<Place>", area = <AreaTable id> }`.
+Done while the zone or subzone text is the client's name of `area` (without
+one, `location`), and latched once its live step had it. May have
+coordinates, which only point the arrow. A goal whose `location` is not a
+string refuses the guide.
+
+`cast` goal: `{ t = "cast", spell = <spellId>, spellName = "<Name>" }`. Done
+when the player's own cast of that spell succeeds (`UNIT_SPELLCAST_SUCCEEDED`)
+while the goal is open: its step is the one the guide is at or in view, or an
+along step listed under it. The tick is kept like the player's own. A goal
+without a numeric `spell` or a string `spellName` refuses the guide.
+
 `money` when predicate: `{ k = "money", op = "<" | "<=" | ">" | ">=", n = <copper> }`.
 Like the `level` predicate but compares the character's money in copper.
 
@@ -349,6 +365,24 @@ Like the `level` predicate but compares the character's money in copper.
 step of the same guide (GUIDE_FORMAT.md, "Jumps"). A label no step carries
 refuses the guide ("step N: bad when"), as does `done` in `nextWhen` ("bad
 nextWhen").
+
+`skill` when predicate: `{ k = "skill", name = "<Profession>", skillLine = <id>, n = <rank> }`.
+Holds while the character's rank in the profession is `n` or more (one not
+learned is rank 0). `skillLine` is the profession's SkillLine id, set when the
+compiler knew the name; without it the engine finds the skill by its English
+name (`Compat.GetSkillRank`).
+
+`cooldown` when predicate: `{ k = "cooldown", item = <id> }` or
+`{ k = "cooldown", spell = <id> }`, one of the two. Holds while the item
+(`Compat.GetItemCooldown`) or spell (`Compat.GetSpellCooldown`) has a cooldown
+longer than the global cooldown that has not run out; Polestar evaluates the
+guide again when it does.
+
+`group` when predicate: `{ k = "group", q = <quest> }`. The player's answer for
+that group quest, per character: "do" holds, "skip" fails. Unanswered, the
+predicate holds and the step is not done (an along step aside), so the route
+waits there while the guide window asks. A `group` predicate in `nextWhen`
+refuses the guide ("bad nextWhen"), and in a `skipto` ("step N: bad skipto").
 
 `skipto` on a step: a non-empty list of jumps, each `{ to = "<label>", when =
 <predicate> }`, `to` the label of a later step and `when` one predicate as in
@@ -364,6 +398,16 @@ skipto").
 { title = "Fetch the letter", goals = { ... } },
 { title = "The camp", label = "camp", goals = { ... } },
 ```
+
+`abandon` goal: `{ t = "abandon", quest = <id>, title = "<title>" }`. Done once
+the quest is out of the log (never taken, abandoned or turned in alike). A
+`quest` or `title` that is missing or of the wrong type refuses the guide. The
+quest's `accept` goals stay done once the guide has abandoned it, so the route
+is not sent back to the giver; a player's own abandon still reopens the
+`accept`.
+
+`destroy` goal: `{ t = "destroy", item = <id>, itemName = "<name>" }`. Done
+once the bags hold none of the item; stays done for the rest of its step.
 
 ### `RegisterPack(meta)`
 
@@ -458,6 +502,8 @@ frame; absent: the live frame), `r` (arrival radius in yards), `spots`
 | `accept` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `item`/`itemName`, `minLevel`, `qlvl`, `pre`, `preAll`, `closedBy`, `preTitles` |
 | `turnin` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `rewards = { choices = { { item, itemName, quality } }, items = { ... }, xp, money }`, `direct` |
 | `complete` | `quest`, `title` | — |
+| `abandon` | `quest`, `title` (format 5) | — |
+| `destroy` | `item`, `itemName` (format 5) | — |
 | `kill` | `target` | `title`, `npc`, `count`, `quest`, `oi`, `spread` |
 | `collect` | `item`, `itemName` | `title`, `count`, `quest`, `oi`, `spread`, `from`, `fromAlso`, `fromId`, `fromAlsoId`, `fromKind`, `fromRank`, `fromFaction`, `fromNpcs`, `npc`, `npcName`, `candidates` |
 | `goto` | `map`, `x`, `y` | `text`, `r`, `area` |
@@ -468,6 +514,8 @@ frame; absent: the live frame), `r` (arrival radius in yards), `spots`
 | `hearth` | `location` | `area` |
 | `getfp` | `location` | `npc`, `npcName`, `node`, `area` |
 | `fly` | `location` | `area` |
+| `enter` | `location` (format 5) | `area`, `map`, `x`, `y` |
+| `cast` | `spell`, `spellName` (format 5) | `map`, `x`, `y` |
 | `train` | — | `npc`, `npcName`, `class`, `skill`, `skillLine`, `rank`, `rankMax`, `candidates` |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName`, `candidates` |
 | `vendor` | — | `npc`, `npcName`, `candidates` |
@@ -568,7 +616,7 @@ wrap it). The payload is JSON:
 
 | Key | Required | Value |
 |---|---|---|
-| `format` | yes | the guide data's format (above): 5 when the guide uses `money`/`task` goals or a `money` when predicate, 4 when a step has `when`, `along` or `label` or a `level` goal has `frac`, else 3; Polestar refuses a format it does not read |
+| `format` | yes | the guide data's format (above): 5 when the guide uses `money`/`task`/`enter`/`cast`/`abandon`/`destroy` goals or a `money` when predicate, 4 when a step has `when`, `along` or `label` or a `level` goal has `frac`, else 3; Polestar refuses a format it does not read |
 | `license` | yes | the licence of the guide, from the pack's `pack.json` |
 | `guide` | yes | one guide exactly as `RegisterGuide(def)` takes it, without `pack`: the keys above, numbers rounded as `Guides.lua` writes them, `preTitles` with the quest ids as the object's keys |
 | `frames` | no | `RegisterMapFrames`'s `era` table for the maps its goals use, by uiMapID. Polestar takes a frame only for a map the guide's goals or their smart targets stand on, and only where no one (Polestar, a community addon, an earlier import) has registered one |
@@ -615,8 +663,9 @@ or nothing (equal or lower). Imported guides are listed in the guide menu as
   later, format 2 (the `group`, `reward` and `why` keys) by 0.2.4 and later,
   format 3 (name tokens) by 0.2.5 and later, format 4 (a step's `when`,
   `along` and `label`, a `level` goal's `frac`, a guide's `nextWhen`) by 0.2.6
-  and later, format 5 (the `money` and `task` goals, the `money`, `dungeon`
-  and `done` when predicates, a step's `skipto`) by 0.3.0 and later.
+  and later, format 5 (the `money`, `task`, `enter`, `cast`, `abandon` and `destroy` goals, the `money`, `dungeon`,
+  `upgrade`, `done`, `skill`, `cooldown` and `group` when predicates, a step's
+  `skipto`) by 0.3.0 and later.
 - A pack in a format this Polestar does not read registers nothing; the
   Community guides page shows it as `too-new` with "Needs Polestar <version> or
   newer." (rule 5).

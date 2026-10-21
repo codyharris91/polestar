@@ -341,7 +341,7 @@ test('the Map page gathers every map setting from its modules into the declared 
 	assert.deepEqual(out.tabs, ['Guide & quests', 'Rares & travel', 'Zones']);
 	assert.deepEqual(out.sections, {
 		'Guide & quests': ['Guide', 'Quest markers'],
-		'Rares & travel': ['Rares and treasures', 'Dungeons and travel'],
+		'Rares & travel': ['Rares and treasures', 'Dungeons and travel', 'NPC services'],
 		Zones: ['Zones', 'Coordinates'],
 	});
 	assert.deepEqual(out.keys['Guide & quests'], [
@@ -350,7 +350,10 @@ test('the Map page gathers every map setting from its modules into the declared 
 	]);
 	assert.deepEqual(out.keys['Rares & travel'], [
 		'maps.dockPins', 'maps.dungeonPins', 'maps.innPins', 'maps.taxiPins', 'maps.travelMinimap',
+		'maps.serviceMinimap', 'maps.servicePins',
+		...['repair', 'mailbox', 'class', 'weapon', 'auctioneer', 'banker',
+			'battlemaster', 'spirithealer', 'stablemaster', 'trainer', 'vendor'].map((key) => `maps.serviceFilters.${key}`),
 		'rares.hideGrey', 'rares.minimapRares', 'rares.minimapTreasures', 'rares.worldRares', 'rares.worldTreasures',
-	]);
+	].sort());
 	assert.deepEqual(out.keys.Zones, ['maps.coords', 'maps.minimapCoords', 'maps.reveal', 'maps.zoneLevels']);
 });

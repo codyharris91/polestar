@@ -39,6 +39,8 @@ return {
 	["Swamp Eye Jarl"] = "Jarl \"Oeil-des-marais\"",
 	-- {area:497} Swamplight Manor · {area:502} Witch Hill
 	["Jarl lives in the {area:497} south-east of {area:502}."] = "Jarl vit au {area:497}, au sud-est de la {area:502}.",
+	-- {quest:1218} Soothing Spices
+	["{quest:1218}, for \"Swamp Eye\" Jarl"] = "",
 	-- {object:20985} Loose Dirt
 	["{object:20985}, beside the manor"] = "{object:20985}, à côté du manoir",
 
@@ -90,47 +92,55 @@ return {
 	-- Step 20: Kormek's Hut
 	["Head north up the road to the hut by the road north of the graveyard."] = "",
 
-	-- Step 21: Kodo bones and ghosts
-	["Kodo bones and ghosts"] = "Os de kodo et fantômes",
-	-- {item:15848} Crate of Ghost Magnets
-	["Pick up the kodo bones scattered across the graveyard, and use the {item:15848} among the bones: the ghosts it draws drop the ghost-o-plasm."] = "Ramassez les os de kodo éparpillés dans le cimetière et utilisez {item:15848} parmi les os : les fantômes qu'elle attire laissent tomber l'ectoplasme.",
+	-- Step 21: Kodo bones
+	["Kodo bones"] = "",
+	["Pick up the kodo bones scattered across the graveyard."] = "",
 
-	-- Step 24: Thunder Axe Fortress
+	-- Step 23: Thunder Axe Fortress
 	-- {area:2407} Kormek's Hut · {item:14523} Demon Pick · {npc:11876} Demon Spirit · {item:13542} Demon Box
 	["The Burning Blade hold the fortress north-west of {area:2407}. Use the {item:14523} on the {npc:11876} in the fortress to get the {item:13542}."] = "La Lame ardente tient la forteresse au nord-ouest de la {area:2407}. Utilisez {item:14523} sur {npc:11876} dans la forteresse pour obtenir {item:13542}.",
 
-	-- Step 25: Ethel Rethor
+	-- Step 24: Ethel Rethor
 	-- {npc:11863} Azore Aldamort · {area:2405} Ethel Rethor
 	["Head west to {npc:11863}'s tower at {area:2405} on the north-west coast."] = "",
 
-	-- Step 26: Slitherblade coast
+	-- Step 25: Slitherblade coast
 	["Slitherblade coast"] = "Côte des Ondulame",
 	-- {area:2405} Ethel Rethor · {area:598} Sar'theris Strand · {npc:12369} Lord Kragaru · {quest:6027} Book of the Ancients
 	["The Slitherblade naga hold the coast north of {area:2405}, up to {area:598}. {npc:12369} guards the {quest:6027} at the far northern tip."] = "Les Nagas Ondulame tiennent la côte au nord de {area:2405}, jusqu'à la {area:598}. {npc:12369} garde {quest:6027} tout au bout de la pointe nord.",
 
-	-- Step 28: Maraudine totems
+	-- Step 27: Maraudine totems
 	["Maraudine totems"] = "Totems maraudine",
 	-- {area:2405} Ethel Rethor · {area:607} Valley of Spears · {quest:93225} Carved Centaur Totems
 	-- plural, as words: Maraudine Scouts = {npc:4654} Maraudine Scout
 	["Head south from {area:2405} into the {area:607}. The Maraudine Scouts, Wranglers, Maulers, Windchasers and Marauders (36-39) drop the {quest:93225}."] = "",
 
-	-- Step 29: Shadowprey Village
+	-- Step 28: Shadowprey Village
 	["Head on south-west to Shadowprey."] = "",
 
-	-- Step 30: Portals of the Legion
+	-- Step 29: Portals of the Legion
 	-- {area:602} Mannoroc Coven
 	["Head east to {area:602}. Use the Rod of Banishing by each demon portal to close six of them."] = "",
 
+	-- Step 30: The Valley of Bones
+	-- {area:2657} Valley of Bones
+	["The {area:2657}"] = "",
+	-- {area:2657} Valley of Bones · {item:15848} Crate of Ghost Magnets
+	-- plural, as words: Undead Ravagers = {npc:11561} Undead Ravager · Magrami Spectres = {npc:11560} Magrami Spectre
+	["Head south-east from the coven to the bone fields of the {area:2657}, where Undead Ravagers roam. At the far south-east, use the {item:15848} to draw the Magrami Spectres: they drop the ghost-o-plasm."] = "",
+
 	-- Step 31: Ghost Walker Post
 	-- {npc:5412} Gurda Wildmane · {area:597} Ghost Walker Post
-	["Head north from the coven to {npc:5412} at {area:597}."] = "",
+	["Head north to {npc:5412} at {area:597}."] = "",
 
-	-- Step 32: Hearth to Shadowprey
+	-- Step 33: Hearth to Shadowprey
 	["Hearth to Shadowprey"] = "Pierre de foyer vers Proie-de-l'Ombre",
 	-- {zone:1434} Stranglethorn Vale
 	["The next guide takes you back to {zone:1434}."] = "Le guide suivant vous ramène à {zone:1434}.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Kodo bones and ghosts"] = "Os de kodo et fantômes",
+	-- ["Pick up the kodo bones scattered across the graveyard, and use the {item:15848} among the bones: the ghosts it draws drop the ghost-o-plasm."] = "Ramassez les os de kodo éparpillés dans le cimetière et utilisez {item:15848} parmi les os : les fantômes qu'elle attire laissent tomber l'ectoplasme.",
 	-- ["Ride back west to Brackenwall with the head."] = "Retournez à l'ouest à Mur-de-Fougères avec la tête.",
 	-- ["Ride east back to the {area:497}."] = "Retournez à l'est jusqu'au {area:497}.",
 	-- ["Ride east from {area:378} along the road into the marsh. The burned-out {area:403} stands beside it just past the border; the shield, the badge and the hoofprints are in and beside the ruin."] = "Partez vers l'est depuis le {area:378} par la route qui entre dans le marais. {area:403}, incendiée, se dresse au bord de la route juste après la frontière ; le bouclier, l'insigne et les empreintes de sabots sont dans la ruine et à côté.",

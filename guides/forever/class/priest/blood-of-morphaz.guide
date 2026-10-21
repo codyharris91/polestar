@@ -35,6 +35,10 @@ why Experience and gold at 50 through Azshara and the Sunken Temple; Forever rem
 # Based on data, not play: the beta caps at level 30 until launch on
 # 4 November, so nothing here has been checked in game.
 
+# Preparation: Forever quest 8256 asks for one Ichor of Undeath after
+# 8255. Existing items can be kept; the stages are still handed in in order.
+# https://www.wowhead.com/forever/quest=8256/the-ichor-of-undeath
+
 step Cenarion Aid (Alliance)
   only Alliance
   zone Stormwind City
@@ -58,7 +62,7 @@ step Ogtinc
   accept 8255
 
 step Of Coursers We Know
-  tip Mosshoof Coursers graze all over Azshara; about one in three drops a Healthy Courser Gland.
+  tip Mosshoof Coursers graze all over Azshara; about one in three drops a Healthy Courser Gland. Keep any Ichor of Undeath you loot: Ogtinc's next stage asks for one.
   collect 20027 quest 8255.1                  -- Healthy Courser Gland
 
 step Ogtinc
@@ -66,7 +70,7 @@ step Ogtinc
   accept 8256
 
 step The Ichor of Undeath
-  tip Any undead can drop it. The Lingering Highborne in the Ruins of Eldarath, below Ogtinc's cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near Talrendis Point.
+  tip Already carrying an Ichor of Undeath? It counts as soon as you take this stage. Otherwise any undead can drop it. The Lingering Highborne in the Ruins of Eldarath, below Ogtinc's cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near Talrendis Point.
   collect 7972 quest 8256.1                   -- Ichor of Undeath
 
 step Ogtinc

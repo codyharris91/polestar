@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "Изучите: {skill:186}",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Любой учитель вашей фракции ({skill:186}) обучает навыку {skill:186}, ранг «Ученик» (уровень персонажа 5); стрелка ведет к ближайшему. Купите у торговца товарами или припасами: {item:2901} – и держите в сумке, без нее добывать руду нельзя.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "Добывайте по пути: {object:147516} (230, желтый), залежи истинного серебра (230, желтый), малая ториевая жила (245, желтый), богатая ториевая жила (275, оранжевый) – и обходите точки маршрута, пока {skill:186} не достигнет 300. Когда сумки заполнятся, переплавьте руду в горне: выплавка тоже повышает {skill:186}. Уровень зоны: 50-58.",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}, богатая ториевая жила",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Любой учитель вашей фракции ({skill:186}) обучает навыку {skill:186}, ранг «Ученик» (уровень персонажа 5); стрелка ведет к ближайшему. Купите у торговца товарами или припасами: {item:2901} – и держите в сумке, без нее добывать руду нельзя.",
 }

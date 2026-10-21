@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "学习{skill:186}",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "本阵营任何{skill:186}训练师都能传授初级{skill:186}（角色等级5）；箭头会指向最近的一位。从商品商人或杂货商处购买一把{item:2901}：放在背包里，没有它就无法采矿。",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "开采沿途所有{object:147516}（230，黄色）、真银矿石（230，黄色）、瑟银矿脉（245，黄色）、富瑟银矿（275，橙色），绕着路径点循环，直到{skill:186}达到300。背包满了就到熔炉熔炼矿石：熔炼也能提升{skill:186}。地区等级50-58。",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}、富瑟银矿",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "本阵营任何{skill:186}训练师都能传授初级{skill:186}（角色等级5）；箭头会指向最近的一位。从商品商人或杂货商处购买一把{item:2901}：放在背包里，没有它就无法采矿。",
 }

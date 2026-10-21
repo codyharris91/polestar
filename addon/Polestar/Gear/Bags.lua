@@ -2,12 +2,15 @@
 -- (QoL/Rewards.lua) on every item in the bags that Gear.IsUpgrade calls an
 -- upgrade, so the bags show at a glance what the tooltip's comparison line
 -- (Gear/Tooltip.lua) says on hover (gear.bagArrows, on by default; nothing
--- with gear advice off). The verdict is this character's, as on the tooltip.
+-- with gear advice off, or with gear.hideForPawn on and Pawn installed). An
+-- item that fits an empty slot and is worth nothing under the weights, but no
+-- loss, gets the arrow too (Gear.FillsEmptySlot), as the tooltip's "upgrade
+-- (empty slot)" says. The verdict is this character's.
 --
 --   Gear.Bags.IsUpgrade(link) -> bool   -- the verdict an arrow shows
 --   Gear.Bags.Redraw()                  -- repaint the shown bags now
 --
--- Two bag views:
+-- Three bag views:
 --   * The client's bags (Blizzard_UIPanels_Game Mainline ContainerFrame.lua,
 --     which Forever loads): each container frame's UpdateItems is post-hooked
 --     on the frame itself (ContainerFrameMixin's functions are copied onto
@@ -24,6 +27,16 @@
 --   * Baganator: a corner widget (top-left, first), the way Baganator shows
 --     Pawn's arrow; it hides and places the arrow itself. Registered as this
 --     file loads when Baganator is in, else when it loads.
+--   * EllesmereUI Bags (EllesmereUIBags), which replaces the client's bag
+--     frames, so there is nothing to hook: it runs the painters registered with
+--     EUI_Bags.RegisterItemOverlayIcon(name, fn(button, data)) on every slot it
+--     paints (grid and list, bags, reagent bag and bank). The arrow is a texture
+--     on the button's _textOverlay, bottom-left: top-left is where it shows
+--     the item's level (btn.ItemLevelText), which the arrow would cover, and
+--     bottom-right is its own Pawn arrow's. Registered as this file loads when
+--     it is in, else when EllesmereUIBags loads. New verdicts re-mark the
+--     shown slots from the link each last painted, so its window is not
+--     rebuilt (a full RefreshInventory) for them, in or out of combat.
 --
 -- New verdicts (GEAR_UPDATED: equipment, bags, level, spec, item data, gear
 -- settings) repaint the shown bags at most once every REDRAW seconds.
@@ -43,13 +56,17 @@ local LAYER = 3 -- OVERLAY sublevel: over IconOverlay2, under searchOverlay
 local REDRAW = 0.2 -- seconds: GEAR_UPDATED repaints at most this often
 local WIDGET = "polestar_upgrade" -- Baganator corner widget id
 
+-- Pawn draws its own arrows on bag items: gear.hideForPawn leaves the bags to
+-- it while Pawn is installed and enabled.
 function Bags.IsOn()
-	return Gear.IsEnabled() and ns.Get("gear.bagArrows") and true or false
+	if not (Gear.IsEnabled() and ns.Get("gear.bagArrows")) then return false end
+	if ns.Get("gear.hideForPawn") and ns.Compat.AddOnPresent("Pawn") then return false end
+	return true
 end
 
 function Bags.IsUpgrade(link)
 	if type(link) ~= "string" or not Bags.IsOn() then return false end
-	return Gear.IsUpgrade(link) and true or false
+	return (Gear.IsUpgrade(link) or Gear.FillsEmptySlot(link)) and true or false
 end
 
 local function media()
@@ -170,12 +187,80 @@ end
 if not registerBaganator() then ns.RegisterEvent("ADDON_LOADED", onAddonLoaded) end
 
 ---------------------------------------------------------------------------
+-- EllesmereUI Bags
+---------------------------------------------------------------------------
+
+local ELLESMERE = "Polestar" -- the painter's name in EUI_Bags.itemOverlayIcons
+local ellesmere = false
+local marks = setmetatable({}, { __mode = "k" }) -- item button -> arrow texture
+local painted = setmetatable({}, { __mode = "k" }) -- item button -> link it last painted (false: none)
+
+local function ellesmereAPI()
+	local B = _G.EUI_Bags
+	if type(B) == "table" and type(B.RegisterItemOverlayIcon) == "function" then return B end
+	return nil
+end
+
+-- One slot's arrow from its link. EllesmereUI Bags reruns the painters each
+-- time it fills a button, so the link last painted is the button's item.
+local function markEllesmere(button, link)
+	local t = marks[button]
+	if link and Bags.IsUpgrade(link) then
+		if not t then
+			local host = button._textOverlay or button
+			t = host:CreateTexture(nil, "OVERLAY", nil, LAYER)
+			t:SetSize(BADGE, BADGE)
+			t:SetPoint("BOTTOMLEFT", host, "BOTTOMLEFT", 0, 0)
+			t:SetTexture(media())
+			paint(t)
+			marks[button] = t
+		end
+		t:Show()
+	elseif t then
+		t:Hide()
+	end
+end
+
+-- data = { bag, slot, info, itemLink }, valid during the call only.
+local function paintEllesmere(button, data)
+	local link
+	if type(data) == "table" then
+		link = data.itemLink
+		if not link and data.bag and data.slot and data.slot > 0 then link = Gear.Client.BagLink(data.bag, data.slot) end
+	end
+	painted[button] = link or false
+	markEllesmere(button, link)
+end
+
+local function registerEllesmere()
+	if ellesmere then return true end
+	local B = ellesmereAPI()
+	if not B then return false end
+	ellesmere = true
+	B.RegisterItemOverlayIcon(ELLESMERE, paintEllesmere)
+	return true
+end
+
+local function onEllesmereLoaded(_, name)
+	if name == "EllesmereUIBags" and registerEllesmere() then
+		ns.UnregisterEvent("ADDON_LOADED", onEllesmereLoaded)
+	end
+end
+
+if not registerEllesmere() then ns.RegisterEvent("ADDON_LOADED", onEllesmereLoaded) end
+
+---------------------------------------------------------------------------
 -- Keeping the arrows fresh
 ---------------------------------------------------------------------------
 
 function Bags.Redraw()
 	for _, f in ipairs(containerFrames()) do
 		if hooked[f] and f:IsShown() then onUpdateItems(f) end
+	end
+	-- EllesmereUI Bags: re-mark the shown slots from the links they last
+	-- painted (bags and bank alike), without making it rebuild its window.
+	for button, link in pairs(painted) do
+		if button:IsVisible() then markEllesmere(button, link or nil) end
 	end
 	local API = baganator and baganatorAPI()
 	if API and API.RequestItemButtonsRefresh and (not API.IsCornerWidgetActive or API.IsCornerWidgetActive(WIDGET)) then
@@ -201,5 +286,6 @@ if ns.Theme and ns.Theme.OnChanged then
 	ns.Theme.OnChanged(function()
 		for _, t in pairs(arrows) do paint(t) end
 		for t in pairs(widgets) do paint(t) end
+		for _, t in pairs(marks) do paint(t) end
 	end)
 end

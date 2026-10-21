@@ -24,15 +24,15 @@ return {
 
 	-- Step 6: Renzik "The Shiv"
 	-- {npc:6946} Renzik "The Shiv" · {npc:332} Master Mathias Shaw · {quest:2300} SI:7 · {object:2100} Old Town · {area:2257} Deeprun Tram · {zone:1455} Ironforge · {area:442} Auberdine · {area:17203} Stormwind Harbor
-	["{npc:6946} stands beside {npc:332} at {quest:2300} in {object:2100}. Dwarves and Gnomes take the {area:2257} from {zone:1455}; Night Elves take the boat from {area:442} to {area:17203}."] = "{npc:6946} стоит рядом с NPC {npc:332} в {quest:2300} ({object:2100}). Дворфы и гномы едут на поезде ({area:2257}) из города {zone:1455}; ночные эльфы плывут на корабле из места {area:442} в {area:17203}.",
+	["{npc:6946} stands beside {npc:332} at {quest:2300} in {object:2100}. Dwarves and Gnomes take the {area:2257} from {zone:1455}; Night Elves take the boat from {area:442} to {area:17203}. Learn Lockpicking from a rogue trainer before leaving for Redridge."] = "",
 
 	-- Step 7: Lucius
 	-- {zone:1429} Elwynn Forest · {area:69} Lakeshire · {npc:6966} Lucius · {item:5060} Thieves' Tools
 	["Head east through {zone:1429} into Redridge, or fly to {area:69}. {npc:6966} waits on the west side of {area:69} and gives you {item:5060}."] = "",
 
 	-- Step 8: Alther's Mill
-	-- {quest:2282} Alther's Mill · {area:69} Lakeshire · {object:121264} Lucius's Lockbox
-	["{quest:2282} stands east of {area:69}, up off the road. Open {object:121264} there."] = "{quest:2282} — к востоку от места {area:69}, выше дороги. Откройте там: {object:121264}.",
+	-- {quest:2282} Alther's Mill · {area:69} Lakeshire · {object:121264} Lucius's Lockbox · {item:5060} Thieves' Tools · {npc:6966} Lucius
+	["{quest:2282} stands east of {area:69}, up off the road. Open {object:121264} there. Keep the {item:5060} supplied by {npc:6966} in your bags. Clear nearby spiders before practicing; lower-level rogues should bring help if the boxes are guarded. Use the practice locks until the quest lock is within your current skill, then recover the token. If useful practice remains, do it before returning to town; stop when the locks no longer improve your skill."] = "",
 
 	-- Step 9: Back to Lucius
 	-- {npc:6966} Lucius
@@ -40,5 +40,7 @@ return {
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["Ride east through {zone:1429} into Redridge, or fly to {area:69}. {npc:6966} waits on the west side of {area:69} and gives you {item:5060}."] = "Езжайте на восток через {zone:1429} в Красногорье или летите в {area:69}. {npc:6966} ждет на западной окраине места {area:69} и дает вам предмет: {item:5060}.",
+	-- ["{npc:6946} stands beside {npc:332} at {quest:2300} in {object:2100}. Dwarves and Gnomes take the {area:2257} from {zone:1455}; Night Elves take the boat from {area:442} to {area:17203}."] = "{npc:6946} стоит рядом с NPC {npc:332} в {quest:2300} ({object:2100}). Дворфы и гномы едут на поезде ({area:2257}) из города {zone:1455}; ночные эльфы плывут на корабле из места {area:442} в {area:17203}.",
 	-- ["{quest:2282} stands east of {area:69}, up off the road. Open {item:7869} there."] = "{quest:2282} — к востоку от места {area:69}, выше дороги. Откройте там: {item:7869}.",
+	-- ["{quest:2282} stands east of {area:69}, up off the road. Open {object:121264} there."] = "{quest:2282} — к востоку от места {area:69}, выше дороги. Откройте там: {object:121264}.",
 }

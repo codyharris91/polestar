@@ -106,16 +106,22 @@ local function indexOf(rec, x, y)
 		if math.abs(p.x - x) < 1e-6 and math.abs(p.y - y) < 1e-6 then return i end
 	end
 end
--- The path index the arrow aims at: point i, or i - 0.5 for the middle of
--- points i - 1 and i (Walk.lua's look-ahead), or nil.
-local function aimIndex(rec, x, y)
-	local i = indexOf(rec, x, y)
-	if i then return i end
+-- Where on the path the arrow aims (Nav/Follow.lua: a point up to 35 yd from
+-- the player along it, between points, a road's zigzag smoothed): the
+-- fractional point index (k - 1 + t on segment k - 1 -> k) of the nearest spot
+-- on the path, and the yards from it; nil without a path.
+local function alongOf(rec, x, y)
 	local pts = rec and rec.points or {}
+	local best, at = math.huge, nil
 	for k = 2, #pts do
 		local a, b = pts[k - 1], pts[k]
-		if math.abs((a.x + b.x) / 2 - x) < 1e-6 and math.abs((a.y + b.y) / 2 - y) < 1e-6 then return k - 0.5 end
+		local dx, dy = b.x - a.x, b.y - a.y
+		local l2 = dx * dx + dy * dy
+		local t = l2 > 0 and math.max(0, math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l2)) or 0
+		local d = sqrt((a.x + dx * t - x) ^ 2 + (a.y + dy * t - y) ^ 2)
+		if d < best then best, at = d, k - 1 + t end
 	end
+	return at, best
 end
 local function length(points)
 	local len = 0
@@ -233,7 +239,7 @@ test('a: Polestar\'s world frame is the engine\'s: known UnitPosition spots and 
 // path passes within the mouth's 10 yd).
 const FARGODEEP_MOUTH = [-9842.4, 135.3, 10];
 
-test('b, e, f: the arrow aims at the engine path\'s next point; the route lines and the journey carry the same path, split at the mine\'s mouth', { skip }, (t) => {
+test('b, e, f: the arrow aims along the engine path ahead of the player; the route lines and the journey carry the same path, split at the mine\'s mouth', { skip }, (t) => {
 	const out = run(t, `
 		local r = {}
 		place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
@@ -242,7 +248,8 @@ test('b, e, f: the arrow aims at the engine path\'s next point; the route lines 
 		local a = aim()
 		local pts = f.points
 		local _, tx, ty = N.GetTargetWorld()
-		r.aim = { state = a.state, index = indexOf(f, a.x, a.y), n = #pts, measured = a.measured, dist = a.dist, off = offPath(pts, a.x, a.y), toTarget = dist(a.x, a.y, tx, ty) }
+		local at, off = alongOf(f, a.x, a.y)
+		r.aim = { state = a.state, along = at, n = #pts, measured = a.measured, dist = a.dist, off = off, ahead = dist(a.x, a.y, GOLDSHIRE[1], GOLDSHIRE[2]), toTarget = dist(a.x, a.y, tx, ty) }
 		r.path = { length = length(pts), straight = dist(GOLDSHIRE[1], GOLDSHIRE[2], tx, ty), endGap = dist(pts[#pts].x, pts[#pts].y, tx, ty) }
 		r.left = { walk = N.walk.Left(0, tx, ty), along = length(pts) }
 		r.shown = { text = N.arrow.distText:GetText(), want = Polestar.FormatDistance(floor(a.dist + 0.5)), visible = PolestarNavArrow:IsShown() }
@@ -283,9 +290,10 @@ test('b, e, f: the arrow aims at the engine path\'s next point; the route lines 
 	// b
 	assert.equal(out.aim.state, 'travel');
 	assert.equal(out.aim.measured, true, 'the distance is along the path');
-	assert.equal(out.aim.index, 2, `the arrow aims at the path's second point (of ${out.aim.n}), not the target`);
+	assert.ok(out.aim.along > 1, `the arrow aims ahead along the path (at point ${out.aim.along.toFixed(2)} of ${out.aim.n}), not at the target`);
+	assert.ok(out.aim.ahead <= 35.5, `within 35 yd of the player (${out.aim.ahead.toFixed(1)} yd)`);
 	assert.ok(out.aim.toTarget > 50, `the aimed point is ${out.aim.toTarget.toFixed(0)} yd short of the target`);
-	assert.ok(out.aim.off < 1e-6, 'and on the path');
+	assert.ok(out.aim.off < 2, `and on the path, a road's zigzag smoothed (${out.aim.off.toFixed(2)} yd off)`);
 	assert.ok(out.path.endGap < 10, `the path ends ${out.path.endGap.toFixed(1)} yd from the target`);
 	// The walk is split at the mine's mouth: the first piece ends there.
 	assert.equal(out.first.step, 'cave');
@@ -370,37 +378,36 @@ test('b: where the straight line is blocked (Thelsamar to the Stonewrought Dam) 
 		local f = guide(1432, 48, 15, "Stonewrought Dam")
 		local a = aim()
 		local _, tx, ty = N.GetTargetWorld()
-		emit({ map = f.map, n = #f.points, length = length(f.points), straight = dist(sx, sy, tx, ty), index = aimIndex(f, a.x, a.y),
+		local at = alongOf(f, a.x, a.y)
+		emit({ map = f.map, n = #f.points, length = length(f.points), straight = dist(sx, sy, tx, ty), along = at,
 			toTarget = dist(a.x, a.y, tx, ty), endGap = dist(f.points[#f.points].x, f.points[#f.points].y, tx, ty), dist = a.dist,
 			second = dist(sx, sy, f.points[2].x, f.points[2].y), ahead = dist(sx, sy, a.x, a.y) })`);
 	assert.equal(out.map, 0);
 	assert.ok(out.length > out.straight * 1.2, `path ${out.length.toFixed(0)} yd against ${out.straight.toFixed(0)} yd straight`);
-	// The path's second point is the start cell's centre; within Walk.lua's POINT_REACH (5 yd) it counts as passed.
-	// From the next point the arrow looks up to 30 yd along the path (Walk.lua's AHEAD).
-	const next = out.second > 5 ? 2 : 3;
-	assert.ok(out.index >= next, `the arrow aims along the detour from its first corner on (point ${out.index} of ${out.n}; the second is ${out.second.toFixed(1)} yd away)`);
-	assert.ok(out.index === next || out.ahead <= 30, `no further than 30 yd ahead (${out.ahead.toFixed(1)} yd)`);
+	// The arrow aims along the detour, never straight at the target, and no further than 35 yd from the player.
+	assert.ok(out.along > 1, `the arrow aims along the detour (at point ${out.along.toFixed(2)} of ${out.n})`);
+	assert.ok(out.ahead <= 35.5, `no further than 35 yd away (${out.ahead.toFixed(1)} yd)`);
 	assert.ok(out.toTarget > 100);
 	assert.ok(out.endGap < 10);
 	// Measured along the path from where the player stands on it (within the passed first segment).
 	assert.ok(out.dist <= out.length + 0.5 && out.dist > out.length - out.second - 0.5, `the yards shown (${out.dist.toFixed(1)}) are the detour's (${out.length.toFixed(1)})`);
 });
 
-test('c: walking the path point by point advances the aim, never asks the engine again, and arrives', { skip }, (t) => {
+test('c: walking the path point by point moves the aim forward along it, never asks the engine again, and arrives', { skip }, (t) => {
 	const out = run(t, `
 		place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
 		local f = guide()
 		local pts = f.points
-		local seen, backwards, last, steps, states = {}, 0, 1, 0, {}
+		local seen, backwards, last, steps, states = 0, 0, 0, 0, {}
 		local function look()
 			local a = aim()
 			states[a.state] = (states[a.state] or 0) + 1
 			if a.x then
-				local i = indexOf(f, a.x, a.y)
-				if i then
-					if i < last then backwards = backwards + 1 end
-					last = i
-					seen[#seen + 1] = i
+				local at = alongOf(f, a.x, a.y)
+				if at then
+					if at < last - 1e-6 then backwards = backwards + 1 end
+					last = at
+					seen = seen + 1
 				end
 			end
 			return a
@@ -416,18 +423,9 @@ test('c: walking the path point by point advances the aim, never asks the engine
 				steps = steps + 1
 			end
 		end
-		local distinct = {}
-		for _, i in ipairs(seen) do if distinct[#distinct] ~= i then distinct[#distinct + 1] = i end end
-		-- The first step's spot: the path's second point (the start cell's centre)
-		-- may lie within Walk.lua's POINT_REACH (5 yd) of it, and count as passed.
-		local a1, b1 = pts[1], pts[2]
-		local n1 = math.max(1, math.ceil(dist(a1.x, a1.y, b1.x, b1.y) / 4))
-		local gap = dist(a1.x + (b1.x - a1.x) / n1, a1.y + (b1.y - a1.y) / n1, b1.x, b1.y)
-		emit({ n = #pts, distinct = distinct, gap = gap, backwards = backwards, finds = #finds, steps = steps, final = aim().state, states = states })`);
-	assert.equal(out.backwards, 0, 'the aimed point never goes back');
-	const from = out.gap <= 5 ? 3 : 2;
-	assert.deepEqual(out.distinct, Array.from({ length: out.n - from + 1 }, (_, i) => i + from),
-		`the aim went through every point after the first (the second passed on the first step when within 5 yd: ${out.gap.toFixed(1)} yd), in order, to the last (of ${out.n})`);
+		emit({ n = #pts, seen = seen, last = last, backwards = backwards, finds = #finds, steps = steps, final = aim().state, states = states })`);
+	assert.equal(out.backwards, 0, 'the aimed point never goes back along the path');
+	assert.ok(out.seen > 0 && out.last > out.n - 2, `it reached the path's last piece (point ${out.last.toFixed(2)} of ${out.n})`);
 	assert.equal(out.finds, 1, `${out.steps} steps along the path, no new search`);
 	assert.equal(out.final, 'arrived');
 });
@@ -486,7 +484,7 @@ test('g (row 6, C17): no search starts in combat, the old path is kept, and one 
 		place(1429, ox, oy)
 		stub.advance(5)
 		local s = aim()
-		r.fight = { finds = #finds, index = indexOf(f, s.x, s.y), state = s.state }
+		r.fight = { finds = #finds, along = alongOf(f, s.x, s.y), state = s.state }
 		-- A new target in combat: the straight arrow, no search either.
 		N.SetTarget(1429, 39.5, 80.0, "Lower mouth", "e")
 		stub.advance(2)
@@ -501,15 +499,16 @@ test('g (row 6, C17): no search starts in combat, the old path is kept, and one 
 		local n = 0
 		while not g.done and n < 100 do stub.advance(0.05); n = n + 1 end
 		s = aim()
-		r.follow = { combat = g.combat, from = dist(g.from[1], g.from[2], ox, oy), index = indexOf(g, s.x, s.y) }
+		local at, off = alongOf(g, s.x, s.y)
+		r.follow = { combat = g.combat, from = dist(g.from[1], g.from[2], ox, oy), along = at, off = off }
 		emit(r)`);
 	assert.equal(out.fight.finds, 1, 'nothing asked in combat');
-	assert.ok(out.fight.index >= 2, 'the old path is kept');
+	assert.ok(out.fight.along > 1, 'the old path is kept');
 	assert.deepEqual(out.newTarget, { finds: 1, straight: true });
 	assert.equal(out.after, 2, 'one search once combat ends');
 	assert.equal(out.follow.combat, false);
 	assert.ok(out.follow.from < 0.01);
-	assert.equal(out.follow.index, 2, 'the arrow follows it');
+	assert.ok(out.follow.along > 1 && out.follow.off < 2, 'the arrow follows it');
 });
 
 test('Z1: a guide goal at Andron Gant (Undercity, Rogues\' Quarter) is walked to his floor with his height, to the street above without it', { skip }, (t) => {

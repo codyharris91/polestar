@@ -7,10 +7,10 @@
 -- The comments are rewritten by sync.
 return {
 	-- Guide
-	-- {quest:5634} Desperate Prayer · {spell:1277331} Chastise
-	["{quest:5634} and {spell:1277331}"] = "{quest:5634}与{spell:1277331}",
-	-- {quest:5634} Desperate Prayer · {spell:1277331} Chastise
-	["The Human and Dwarf priest spells: {quest:5634} at 10, {spell:1277331} for Dwarves at 20."] = "人类和矮人牧师的法术：10级的{quest:5634}，矮人20级的{spell:1277331}。",
+	-- {quest:5634} Desperate Prayer · {quest:5641} Chastise
+	["{quest:5634} and {quest:5641}"] = "",
+	-- {quest:5634} Desperate Prayer · {quest:5641} Chastise
+	["The Human and Dwarf priest spells: {quest:5634} at 10, {quest:5641} for Dwarves at 20."] = "",
 
 	-- Step 1: Desperate Prayer
 	-- {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward · {npc:376} High Priestess Laurena · {zone:1453} Stormwind · {area:2257} Deeprun Tram
@@ -21,11 +21,14 @@ return {
 	["If Rohan did not take it: {npc:376} is in the Cathedral of Light. Take the {area:2257} from {object:171524}."] = "如果洛汉没有接收：{npc:376}在光明大教堂。从{object:171524}乘{area:2257}。",
 
 	-- Step 3: Chastise
-	-- {npc:11406} High Priest Rohan · {spell:1277331} Chastise · {npc:376} High Priestess Laurena · {zone:1453} Stormwind · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
-	["At 20, {npc:11406} teaches {spell:1277331}. {npc:376} in {zone:1453} and {npc:11401} in {zone:1457} send you to him with a quest of the same name."] = "20级时，{npc:11406}教授{spell:1277331}。{zone:1453}的{npc:376}和{zone:1457}的{npc:11401}会用同名任务让你去找他。",
+	-- {npc:11406} High Priest Rohan · {quest:5641} Chastise · {npc:376} High Priestess Laurena · {zone:1453} Stormwind · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
+	["At 20, {npc:11406} teaches {quest:5641}. {npc:376} in {zone:1453} and {npc:11401} in {zone:1457} send you to him with a quest of the same name."] = "",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["At 20, {npc:11406} teaches {quest:5641}. {npc:376} in {zone:1453} and {npc:11401} in {zone:1457} send you to him with a quest of the same name."] = "20级时，{npc:11406}教授{quest:5641}。{zone:1453}的{npc:376}和{zone:1457}的{npc:11401}会用同名任务让你去找他。",
+	-- ["At 20, {npc:11406} teaches {spell:1277331}. {npc:376} in {zone:1453} and {npc:11401} in {zone:1457} send you to him with a quest of the same name."] = "20级时，{npc:11406}教授{spell:1277331}。{zone:1453}的{npc:376}和{zone:1457}的{npc:11401}会用同名任务让你去找他。",
 	-- ["The Human and Dwarf priest spells: {quest:5634} at 10, {quest:5641} for Dwarves at 20."] = "人类和矮人牧师的法术：10级的{quest:5634}，矮人20级的{quest:5641}。",
+	-- ["The Human and Dwarf priest spells: {quest:5634} at 10, {spell:1277331} for Dwarves at 20."] = "人类和矮人牧师的法术：10级的{quest:5634}，矮人20级的{spell:1277331}。",
 	-- ["{quest:5634} and {quest:5641}"] = "{quest:5634}与{quest:5641}",
+	-- ["{quest:5634} and {spell:1277331}"] = "{quest:5634}与{spell:1277331}",
 }

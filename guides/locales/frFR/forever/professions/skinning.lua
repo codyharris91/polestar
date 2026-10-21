@@ -10,7 +10,7 @@ return {
 	-- {skill:393} Skinning
 	["Learn {skill:393}"] = "Apprendre {skill:393}",
 	-- {skill:393} Skinning · {item:7005} Skinning Knife
-	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "Tout maître en {skill:393} de votre faction enseigne {skill:393} (Apprenti) (niveau 5) ; la flèche indique le plus proche. Achetez un {item:7005} chez un marchand de fournitures d'artisanat ou de marchandises : gardez-le dans vos sacs, impossible de dépecer sans lui.",
+	["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} at any level, and so does the Junior Skinning Trainer in each starting zone; the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "",
 
 	-- Step 2: Beasts 1-9: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -218,4 +218,7 @@ return {
 	["{npc:9164}, Diemetradon"] = "{npc:9164}, Dimeurtrodon",
 	-- {npc:9164} Elder Diemetradon
 	["Pterrordax, {npc:9164}"] = "Pterreurdactyle, {npc:9164}",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:393} trainer of your faction teaches Apprentice {skill:393} (character level 5); the arrow picks the nearest. Buy a {item:7005} from a trade goods or general vendor: keep it in your bags, you cannot skin without it."] = "Tout maître en {skill:393} de votre faction enseigne {skill:393} (Apprenti) (niveau 5) ; la flèche indique le plus proche. Achetez un {item:7005} chez un marchand de fournitures d'artisanat ou de marchandises : gardez-le dans vos sacs, impossible de dépecer sans lui.",
 }

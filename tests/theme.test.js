@@ -548,11 +548,11 @@ test('skins: Polestar by default; Halo and Hearth bring their tokens, fonts, siz
 		Polestar.Set("ui.skin", "nonsense")
 		out.unknown = T.SkinKey()
 		Polestar.Set("ui.skin", "forever")
-		out.hiddenForever = T.SkinKey()
+		out.savedForever = T.SkinKey()
 		emit(out)`);
 	const r = (cs) => round(cs);
 	assert.equal(out.key, 'polestar');
-	assert.deepEqual(out.choices, ['polestar', 'halo', 'hearth', 'blizzard', 'classic']);
+	assert.deepEqual(out.choices, ['polestar', 'halo', 'hearth', 'forever', 'blizzard', 'classic']);
 	assert.equal(out.houseRow, 40);
 	assert.equal(out.houseHero, 26, 'the house ladder is unchanged');
 	const h = out.halo;
@@ -585,7 +585,7 @@ test('skins: Polestar by default; Halo and Hearth bring their tokens, fonts, siz
 	assert.equal(b.menuRow, 22);
 	assert.equal(b.font, 'Fonts\\FRIZQT__.TTF', "the game's font");
 	assert.equal(out.unknown, 'polestar', 'an unknown skin is the house style');
-	assert.equal(out.hiddenForever, 'polestar', 'a saved "forever" choice draws the default skin while it is hidden (#306)');
+	assert.equal(out.savedForever, 'forever', 'a saved "forever" choice draws the WoW Forever skin again (#306)');
 });
 
 test('skins: a window repaints from the house style to Halo (veil, no fill) to Hearth (gradient) and back, live', () => {
@@ -770,4 +770,88 @@ test('skins: Forever hover plates use ADD blend (#306c)', () => {
 	assert.equal(out.cardBlend, 'ADD', 'cardLit ADD');
 	assert.equal(out.navBlend,  'ADD', 'navHover ADD');
 	assert.equal(out.platBlend, 'ADD', 'plateLit ADD');
+});
+
+// #306 in game (Forever, after the border fix): the guide window's progress
+// bar showed no fill, its frame clipped by the window's foot, and the goals'
+// tick boxes sat on the window's border. The fill is a texture of its own,
+// cropped to the value; the frame sits 7 round the bar with its 2x slice
+// margins drawn at half; the check art keeps the control's proportion.
+test("skins: Forever's progress bar draws its own fill to the bar's value, the frame round it at half its 2x margins; the tick boxes fit their control (#306)", () => {
+	const [out] = run(`
+		local GF = Polestar.UI.GuideFrame
+		Polestar.Set("ui.skin", "forever")
+		uistub.openTabs({ { uistub.elwynn, 3 } }, 1)
+		local b = GF.parts.foot.Status
+		b:SetWidth(200)
+		local k = b.psSkin.kit
+		local function fill() return { shown = k.statusFill:IsShown(), w = k.statusFill:GetWidth(), u1 = k.statusFill.texCoord and k.statusFill.texCoord[2] } end
+		local out = { own = b:GetStatusBarTexture():GetAlpha() }
+		b:SetValue(0.5)
+		out.half = fill()
+		b:SetValue(0)
+		out.none = fill()
+		b:SetValue(1)
+		out.full = fill()
+		-- the frame host and its top-left corner piece
+		local o = k.statusFrame
+		local p = o:GetPoint(1)
+		out.frame = { select(4, o:GetPoint(1)), select(5, o:GetPoint(1)), select(4, o:GetPoint(2)), select(5, o:GetPoint(2)) }
+		local corner = k.statusArt[1]
+		out.cap = { select(4, corner:GetPoint(2)) - select(4, corner:GetPoint(1)) }
+		-- a tick box of the guide window (15) and one of Options (18)
+		local small = Polestar.Widgets.Checkbox(UIParent, function() end); small:SetSize(15, 15)
+		T.SKIN_PAINT.forever.checkbox(small)
+		local big = Polestar.Widgets.Checkbox(UIParent, function() end); big:SetSize(18, 18)
+		T.SKIN_PAINT.forever.checkbox(big)
+		out.tick = { small = small.psSkin.kit.check:GetWidth(), big = big.psSkin.kit.check:GetWidth() }
+		-- the border's frame under the window's content; the rows clear of it
+		local F = PolestarGuideFrame
+		out.edgeLevel = F.psSkin.kit.edge:GetFrameLevel() - F:GetFrameLevel()
+		do
+			local p, rel, rp = F.psSkin.kit.edge:GetPoint(1)
+			out.edgeTop = { p, rel == F.psStrip, rp }
+		end
+		out.pad = { T.Metric("guidePad", 14), T.Metric("guideLitInset", 4) }
+		local lit, row
+		for _, r in ipairs(GF.rows or {}) do
+			local t = r.psSkin and r.psSkin.kit and r.psSkin.kit.rowLit
+			if t and t:IsShown() then lit, row = select(4, t:GetPoint(1)), r end
+		end
+		out.lit = lit or false
+		-- the lit goal's tick box: its art's right edge, and the text's top, in the row
+		if row then
+			local cx = select(4, row.Check:GetPoint(1))
+			local art = row.Check.psSkin.kit.check:GetWidth()
+			out.tickRight = cx + (art - row.Check:GetWidth()) / 2
+			out.textTop = select(5, row.Text:GetPoint(1))
+			local p, _, rp, _, y = row.Check:GetPoint(1)
+			out.tickAnchor = { p, rp, y }
+		end
+		-- back to the house style: the bar's own fill again
+		Polestar.Set("ui.skin", "hearth")
+		out.hearth = { own = b:GetStatusBarTexture():GetAlpha(), fill = k.statusFill:IsShown(), pad = T.Metric("guidePad", 14), lit = T.Metric("guideLitInset", 4) }
+		emit(out)`, {
+		before: `C_Texture = { GetAtlasInfo = function(name)
+			local size = { ["Legacy-Progressbar-Frame"] = { 262, 52 }, ["Legacy-Progressbar-Fill"] = { 234, 24 }, ["Legacy-Progressbar-BG"] = { 234, 24 } }
+			local s = size[name] or { 30, 29 }
+			return { file = "atlas:" .. name, leftTexCoord = 0, rightTexCoord = 1, topTexCoord = 0, bottomTexCoord = 1, width = s[1], height = s[2] }
+		end }`,
+	});
+	assert.equal(out.own, 0, "the bar's own fill is unseen in Forever");
+	assert.deepEqual(out.half, { shown: true, w: 100, u1: 0.5 }, 'half the bar, the left half of the art');
+	assert.equal(out.none.shown, false, 'nothing at 0');
+	assert.deepEqual(out.full, { shown: true, w: 200, u1: 1 });
+	assert.deepEqual(out.frame, [-7, 6, 7, -7], '7 round the bar (the art is 14 2x pixels wider than the fill a side)');
+	assert.deepEqual(out.cap, [16.5], 'the 33-pixel 2x cap drawn 16.5 wide');
+	assert.equal(out.tick.big, 26, 'the Settings panel box as before');
+	assert.ok(Math.abs(out.tick.small - 15 * 26 / 18) < 1e-9, 'a 15 box: the art in the same proportion');
+	assert.equal(out.edgeLevel, 0, "the border's frame at the window's level: the content draws over its inner shade");
+	assert.deepEqual(out.edgeTop, ['TOPLEFT', true, 'BOTTOMLEFT'], "the border hangs from the tab strip's foot, so it follows the strip into and out of compact mode");
+	assert.deepEqual(out.pad, [18, 10], 'Forever pads its rows and the lit goal clear of the border');
+	assert.equal(out.lit, 10, 'the current goal lit 10 in');
+	assert.ok(out.tickRight <= -(10 + 10), `the tick box's art ends 10 or more inside the lit goal's outline (${out.tickRight})`);
+	assert.deepEqual(out.tickAnchor, ['RIGHT', 'RIGHT', 0], "the tick box on the row's middle");
+	assert.equal(out.textTop, -8, "the lit goal's lines start 8 below its top, not 4");
+	assert.deepEqual(out.hearth, { own: 1, fill: false, pad: 12, lit: 4 }, "Hearth: the bar's own fill back, its own sizes");
 });

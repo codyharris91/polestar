@@ -205,8 +205,14 @@ return {
 	["Each of Quel'ana's quests hands you a {item:15908}: use it on the beast she names, then bring the rod back to her in {area:16638}. Windsong Crawlers line the shore west of town; Vuldren Alphas and Ornery Galestriders roam the {area:16626} around the Windfield farm. Her sister {npc:254411} stands beside her."] = "Cada misión de Quel'ana te da una {item:15908}: úsala en la bestia que te indique y devuélvele la vara en {area:16638}. Los Windsong Crawlers ocupan la orilla al oeste del pueblo; Vuldren Alphas y Ornery Galestriders rondan {area:16626} alrededor de la granja Windfield. Su hermana {npc:254411} está a su lado.",
 	-- {npc:254588} Windsong Crawler · {item:15908} Taming Rod
 	["{npc:254588}: tame it with the {item:15908}"] = "{npc:254588}: domestícalo con la {item:15908}",
+	-- {npc:254588} Windsong Crawler
+	["Tame {npc:254588}"] = "",
 	-- {item:15908} Taming Rod
 	["Tame it with the {item:15908}"] = "Domestícalo con la {item:15908}",
+	-- {npc:251707} Ornery Galestrider
+	["Tame {npc:251707}"] = "",
+	-- {npc:250874} Vuldren Alpha
+	["Tame {npc:250874}"] = "",
 
 	-- Step 37: The Windstone Formations
 	-- plural, as words: Windstone Formations = {object:697118} Windstone Formation

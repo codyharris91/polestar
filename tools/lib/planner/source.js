@@ -39,7 +39,7 @@ class EditError extends Error {
 }
 
 // Verbs whose goals never use the zone (no place).
-const PLACELESS = ['hearth', 'fly', 'level'];
+const PLACELESS = ['hearth', 'fly', 'level', 'abandon', 'destroy'];
 const DEFAULT_INDENT = '  ';
 
 // --- text <-> lines

@@ -28,7 +28,10 @@
 --          40 m. Arrival: a 48-unit ring (stroke 3), then a check (stroke 5).
 --
 -- Work happens only while shown: OnUpdate samples the world at 20 Hz and
--- damps the heading every frame, allocating nothing. Hidden states (no
+-- turns the heading every frame, allocating nothing. The damping works on
+-- the target's bearing on the map, capped at MAX_TURN, and the player's
+-- facing is taken off every frame: a new aim point swings the arrow round
+-- smoothly, while turning the camera moves it at once. Hidden states (no
 -- target, taxi, instance) are re-checked by Nav's once-a-second ticker.
 
 local ADDON, ns = ...
@@ -41,6 +44,7 @@ local MEDIA = Nav.MEDIA
 
 local SAMPLE_INTERVAL = 0.05 -- seconds between world samples
 local DAMPING = 12           -- rotation stiffness (1/s); higher = snappier
+local MAX_TURN = 3.5         -- radians a second the bearing may swing (about 200°)
 local CLOSE_RANGE = 250      -- yards over which the colour shifts toward success
 local DIAL = 64
 
@@ -239,9 +243,16 @@ Nav.arrow = Arrow
 
 local mode            -- "travel" | "arrived" | "search" | "far" | "instruction" | "nopos" | nil
 local accum = 0       -- time since the last world sample
-local curAngle = 0    -- displayed rotation
-local goalAngle = 0   -- rotation the damping moves toward
+local curAngle = 0    -- displayed rotation (bearing less facing)
+local goalAngle = 0   -- bearing (or, without a facing, rotation) the damping moves toward
+local curBearing = 0  -- the damped bearing
 local hasAngle = false
+local byBearing = false -- goalAngle and curBearing are map bearings (the facing is known)
+
+local function facing()
+	local C = ns.Compat
+	return C and C.GetPlayerFacing and C.GetPlayerFacing() or nil
+end
 local lastYards, lastEta
 local lastDist, closeSpeed = nil, 0
 local pulse = 0
@@ -500,11 +511,15 @@ local function sample(elapsed)
 
 	setMode("travel")
 	if angle then
-		goalAngle = angle
-		if not hasAngle then
-			curAngle, hasAngle = angle, true
+		local f = facing()
+		local bearing = f and wrap(angle + f) or angle
+		if not hasAngle or byBearing ~= (f ~= nil) then
+			byBearing = f ~= nil
+			curBearing, hasAngle = bearing, true
+			curAngle = angle
 			setRotation(curAngle)
 		end
+		goalAngle = bearing
 	end
 
 	local yards = floor(dist + 0.5)
@@ -555,9 +570,17 @@ frame:SetScript("OnUpdate", function(_, elapsed)
 		if not sample(step) then return end
 	end
 	if mode == "travel" and hasAngle then
-		local diff = wrap(goalAngle - curAngle)
+		local diff = wrap(goalAngle - curBearing)
 		if abs(diff) > 1e-4 then
-			curAngle = wrap(curAngle + diff * (1 - exp(-elapsed * DAMPING)))
+			local step = diff * (1 - exp(-elapsed * DAMPING))
+			local cap = MAX_TURN * elapsed
+			if step > cap then step = cap elseif step < -cap then step = -cap end
+			curBearing = wrap(curBearing + step)
+		end
+		local f = byBearing and facing()
+		local shown = f and wrap(curBearing - f) or curBearing
+		if abs(wrap(shown - curAngle)) > 1e-4 then
+			curAngle = shown
 			setRotation(curAngle)
 		end
 	elseif (mode == "arrived" or mode == "search") and skinStyle() then

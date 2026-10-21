@@ -1150,6 +1150,56 @@ test('a hearth that landed stays done when the player walks out of the inn\'s to
 	assert.deepEqual(out, { before: [1, 'active', 2], landed: [1, 'done', 2], left: [1, 'done', 2] });
 });
 
+test('Hotline\'s report (#576): a hearth step while the Hearthstone waits says how long and walks the arrow to the inn; once it is ready both go', () => {
+	const [out] = run({
+		guides: `
+			Polestar.RegisterGuide({ id = "test/hearth-cd", pack = "test", title = "Hearth", minLevel = 1, maxLevel = 10, steps = {
+				{ goals = { { t = "hearth", location = "Goldshire" } } },
+				{ goals = { { t = "hearth", location = "Nowhere Inn" } } },
+				{ goals = { { t = "level", level = 99 } } },
+			} })
+		`,
+		before: 'w.setZone("Stormwind City", "Trade District")',
+		script: `
+			local w = stub.world
+			-- The Hearthstone (QoL/Hearth.lua) and the inns (Nav/Travel.lua), as the test sets them.
+			local hs = { have = true, remaining = 23 * 60 - 20 }
+			Polestar.QoL = Polestar.QoL or {}
+			Polestar.QoL.GetHearth = function() return hs end
+			Polestar.Nav = Polestar.Nav or {}
+			Polestar.Nav.FindInn = function(npc, name)
+				if name == "Goldshire" then return { map = 1429, x = 43.8, y = 65.8, f = "e", npc = 295 } end
+			end
+			local function changed() Polestar.Fire("QOL_HEARTH_CHANGED"); flush() end
+			local function state()
+				local g, wp = E.GetStepView(E.GetStepIndex()).goals[1], E.GetWaypoint()
+				return { line = g.hearthText or false, arrow = wp and { wp.map, wp.x, wp.y, wp.label } or false }
+			end
+			E.SetGuide("test/hearth-cd"); flush()
+			local r = { waiting = state() }
+			hs.remaining = 30; changed()
+			r.soon = state()
+			hs.remaining = 0; changed()
+			r.ready = state()
+			hs.have = false; changed()
+			r.none = state()
+			-- walking into the inn's town checks the step off, as hearthing does
+			hs.have, hs.remaining = true, 600; changed()
+			w.setZone("Elwynn Forest", "Goldshire"); flush()
+			r.walked = E.GetStepIndex()
+			-- an inn the data does not know: the time left, no arrow
+			r.unknown = state()
+			emit(r)
+		`,
+	});
+	assert.deepEqual(out.waiting, { line: 'Hearthstone ready in 23 min: walk to the inn, or wait for it', arrow: [1429, 43.8, 65.8, 'Walk to Goldshire'] });
+	assert.deepEqual(out.soon, { line: 'Hearthstone ready in under a minute: walk to the inn, or wait for it', arrow: [1429, 43.8, 65.8, 'Walk to Goldshire'] });
+	assert.deepEqual(out.ready, { line: false, arrow: false }, 'ready: the hearth step as before');
+	assert.deepEqual(out.none, { line: 'No Hearthstone in your bags: walk to the inn', arrow: [1429, 43.8, 65.8, 'Walk to Goldshire'] });
+	assert.equal(out.walked, 2, 'arriving in Goldshire on foot checks the hearth off');
+	assert.deepEqual(out.unknown, { line: 'Hearthstone ready in 10 min', arrow: false });
+});
+
 test('a flight that lands while the player looks ahead at another step still counts for its own step (#362)', () => {
 	const [out] = run({
 		guides: LANDED,

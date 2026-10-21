@@ -388,7 +388,9 @@ step Ratchet
   vendor nearest
 
 step Ishamuhale
-  tip Ishamuhale, a big Sunscale raptor, hunts the plains north of the road from Ratchet to the Crossroads.
+  tip Ishamuhale, a big Sunscale raptor, only comes to a fresh kill: loot a Fresh Zhevra Carcass from a zhevra, then use it at the Dead Tree north-west of Ratchet, north of the road to the Crossroads, and be ready when he arrives.
+  collect 10338                       -- Fresh Zhevra Carcass, from any zhevra; Zhevra Chargers graze around the tree
+  use 10338 quest 882.1 @59.95,30.21  -- At the Dead Tree: summons Ishamuhale
   collect 5101 quest 882.1
 
 step The Crossroads

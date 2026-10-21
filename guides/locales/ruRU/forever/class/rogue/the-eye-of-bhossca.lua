@@ -13,18 +13,23 @@ return {
 	-- Step 1: C's dead drop
 	["C's dead drop"] = "Тайник C",
 	-- {object:410369} Dead Drop · {area:204} Pyrewood Village · {area:236} Shadowfang Keep
-	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369} — сундук у места {area:204} на юге Серебряного бора, чуть южнее: {area:236}. Следующая записка C ждет там, когда вам исполнится 25 уровень.",
+	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. After the horn job and C's next letter, check it for the new job. The data lists a minimum of 25, but beta players report receiving the invitation at 30 after the horn job and a city visit; this is not a guaranteed mail level. If no new note is offered, continue leveling and check after C writes."] = "",
 
 	-- Step 2: The Scarlet Monastery
 	-- {area:796} Scarlet Monastery
 	["The {area:796}"] = "Локация: {area:796}",
-	-- {zone:1420} Tirisfal Glades
-	["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "Монастырь стоит на крайнем северо-востоке зоны {zone:1420}. Идите один; C советует добыть маскировку на территории монастыря перед входом.",
-	-- {area:796} Scarlet Monastery
-	["Find the Eye of Bhossca inside the {area:796}."] = "Найдите Глаз Бхосски внутри: {area:796}.",
+	-- {zone:1420} Tirisfal Glades · {npc:4293} Scarlet Scryer · {item:210963} Scryer's Key · {item:210968} Reliquary Key
+	["The monastery stands in the far north-east of {zone:1420}. Go in alone. Before entering, find the disguise in the chest by the outside stables. Recheck it after changing wings: stealth and suspicious actions can remove it. In the Graveyard, pickpocket a {npc:4293} for the {item:210963}; use it on the Personal Letterbox in the Library and read the message. It sends you back to sit at both benches between the statues in the graveyard. Watch for the mechanism's messages, take the {item:210968} from the stone coffer, then return to the Library for the locked reliquary. Avoid fighting through the instance."] = "",
+	["Solo route: Graveyard key, Library letter, Graveyard benches and coffer, then Library reliquary for the eye. Read the letter before the bench puzzle; check the disguise each time you change wings."] = "",
 
 	-- Step 3: Back to the dead drop
 	["Back to the dead drop"] = "Вернитесь к тайнику",
 	-- {object:410369} Dead Drop
-	["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "Положите глаз сюда: {object:410369}, у Погребальных Костров. Плата от C – второе задание о Глазе Бхосски у того же сундука.",
+	["Place the eye in the {object:410369} near Pyrewood. Check a capital mailbox for C's payment letter on your next planned city visit, then return here for the reward quest. The payment may not be available immediately; do not repeat the infiltration just because the reward has not appeared."] = "",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Find the Eye of Bhossca inside the {area:796}."] = "Найдите Глаз Бхосски внутри: {area:796}.",
+	-- ["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "Положите глаз сюда: {object:410369}, у Погребальных Костров. Плата от C – второе задание о Глазе Бхосски у того же сундука.",
+	-- ["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "Монастырь стоит на крайнем северо-востоке зоны {zone:1420}. Идите один; C советует добыть маскировку на территории монастыря перед входом.",
+	-- ["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369} — сундук у места {area:204} на юге Серебряного бора, чуть южнее: {area:236}. Следующая записка C ждет там, когда вам исполнится 25 уровень.",
 }

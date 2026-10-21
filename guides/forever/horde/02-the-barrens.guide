@@ -111,6 +111,27 @@ step Razormane camp
   kill 3265 quest 871.3
   collect 12708 quest 5041.1 @58.8,25.8
 
+# Turn in a carried alternative here before starting the shared ritual;
+# do not add a trip to a different trainer for an uncarried breadcrumb.
+
+step
+  only Tauren,Shaman
+  when onquest 1522
+  zone The Barrens
+  turnin 1522
+
+step
+  only Tauren,Shaman
+  when onquest 2983
+  zone The Barrens
+  turnin 2983
+
+step
+  only Tauren,Shaman
+  when onquest 2984
+  zone The Barrens
+  turnin 2984
+
 step Kranal Fiss
   only Tauren,Shaman
   tip Kranal Fiss stands on the ridge north of the Razormane camp.

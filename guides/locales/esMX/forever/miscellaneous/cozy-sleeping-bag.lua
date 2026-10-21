@@ -37,6 +37,9 @@ return {
 	-- Step 5: Stonetalon Mountains
 	-- {object:424005} Pocket Litter (no name in this language: may be words)
 	["The next hideout is a small camp in the hills of eastern Stonetalon. Leave the road where a path climbs into the hills and follow it to the camp; the {object:424005} lies on a crate beside its tent."] = "",
+	-- {area:1702} Honor's Stand
+	["The road west runs through {area:1702}, a Horde post; this way goes round it."] = "",
+	["North of Honor's Stand"] = "",
 	["Path into the hills"] = "",
 
 	-- Step 6: A hundred paces north

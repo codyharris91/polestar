@@ -1,3 +1,4 @@
+-- luacheck: read globals GetQuestID
 -- Quest rewards: the marks on the reward choices, and, when qol.rewardAutoPick
 -- is on (default off; Shift suppresses), taking the best one.
 --
@@ -106,16 +107,34 @@ local function choiceInfo(i, fromLog)
 	return link, count, itemID
 end
 
+-- Gear intentionally returns no comparison for consumables and inventory
+-- types it does not score (bags, shirts, tabards...). A known unscored type
+-- is a settled non-upgrade; missing facts about a scored type are not.
+local function unscored(G, probe, id)
+	local slots = G.SLOTS_OF
+	if not slots then return false end
+	local D = ns.ItemDB
+	local rec = id and D and D.Get and D.Get(id)
+	if rec and type(rec.inv) == "number" then return slots[rec.inv] == nil end
+	local C = G.Client
+	local loc = C and C.ItemInfo and ns.Compat.Readable(C.ItemInfo(probe))
+	if type(loc) ~= "string" then return false end
+	if loc == "" then return true end
+	local inv = G.EQUIP_LOC and G.EQUIP_LOC[loc]
+	return inv ~= nil and slots[inv] == nil
+end
+
 -- Read the shown choices (the quest giver's panel, or the quest log's when
--- fromLog). complete = every link and price known.
+-- fromLog). complete = every link, price and enabled gear verdict known;
+-- priced = every link and price known (the coin needs no gear verdict).
 function Rewards.ReadChoices(fromLog)
 	local n = numChoices(fromLog)
-	local list, complete = {}, true
+	local list, complete, priced = {}, true, true
 	local G = gear()
 	for i = 1, n do
 		local link, count, itemID = choiceInfo(i, fromLog)
 		local price = Client.SellPrice(link or itemID)
-		if not link or price == nil then complete = false end
+		if not link or price == nil then complete, priced = false, false end
 		local stack = (count and count > 0) and count or 1
 		local c = { index = i, link = link, itemID = itemID, count = count or 1, value = (price or 0) * stack }
 		-- Gear can judge an uncached choice from its ID (ItemDB stats).
@@ -123,10 +142,18 @@ function Rewards.ReadChoices(fromLog)
 		if G and probe then
 			local up, delta = G.IsUpgrade(probe)
 			c.upgrade, c.delta = up and true or false, delta
+			-- false,nil means both "not usable" and "not loaded yet" in
+			-- IsUpgrade. Only a settled comparison distinguishes the two.
+			local verdict = G.CompareToEquipped and G.CompareToEquipped(probe)
+			if (not verdict and not unscored(G, probe, itemID)) or (verdict and verdict.usable and delta == nil) then
+				complete = false
+			end
+		elseif G then
+			complete = false
 		end
 		list[i] = c
 	end
-	return list, complete
+	return list, complete, priced
 end
 
 ---------------------------------------------------------------------------
@@ -268,7 +295,7 @@ function Rewards.Mark()
 	local frame = rewardsFrame()
 	if not frame then return nil end
 	local fromLog = QuestInfoFrame and QuestInfoFrame.questLog and true or false
-	local choices, complete = Rewards.ReadChoices(fromLog)
+	local choices, complete, priced = Rewards.ReadChoices(fromLog)
 	if #choices == 0 then return nil end
 	-- The best waits for complete item data, or for auto-pick's settled answer.
 	local best, reason
@@ -283,7 +310,7 @@ function Rewards.Mark()
 	end
 	-- The coin: the highest vendor value, once every price is known.
 	local top = 0
-	if #choices >= 2 and complete then
+	if #choices >= 2 and priced then
 		for _, c in pairs(choices) do
 			if c.value > top then top = c.value end
 		end
@@ -321,8 +348,14 @@ local function schedule()
 end
 Rewards.ScheduleMarks = schedule
 
-local function evaluate(gen, tries)
+local function questID()
+	local q = GetQuestID and ns.Compat.Readable(GetQuestID())
+	return type(q) == "number" and q > 0 and q or nil
+end
+
+local function evaluate(gen, tries, quest)
 	if gen ~= generation then return end
+	if quest and questID() ~= quest then return end
 	local choices, complete = Rewards.ReadChoices(false)
 	if #choices < 2 then
 		Rewards.Mark()
@@ -331,16 +364,19 @@ local function evaluate(gen, tries)
 	if not complete and tries < RETRIES and C_Timer and C_Timer.After then
 		-- Meanwhile: the upgrades known so far, without a best.
 		if tries == 0 then Rewards.Mark() end
-		C_Timer.After(RETRY_DELAY, function() evaluate(gen, tries + 1) end)
+		C_Timer.After(RETRY_DELAY, function() evaluate(gen, tries + 1, quest) end)
 		return
 	end
+	-- A retry deadline is not evidence that the missing choice is worse.
+	-- Leave an incomplete ranking to the player instead of committing it.
+	if not complete then Rewards.Mark(); return end
 	local order, reason = Rewards.Rank(choices)
 	local best = order[1]
 	Rewards.best, Rewards.reason, Rewards.order = best, reason, order
 	local why = reason == "upgrade" and L["upgrade"] or L["best vendor value"]
-	if QoL.On("rewardAutoPick") and not QoL.Shift() then
-		local money = GetQuestMoneyToGet and GetQuestMoneyToGet() or 0
-		if (not money or money == 0) and GetQuestReward then
+	if gen == generation and quest and questID() == quest and QoL.On("rewardAutoPick") and not QoL.Shift() then
+		local money = GetQuestMoneyToGet and ns.Compat.Readable(GetQuestMoneyToGet())
+		if money == 0 and GetQuestReward then
 			GetQuestReward(best)
 			ns.Print(format(L["Took %s (%s)."], choices[best].link or ("#" .. best), why))
 			return
@@ -360,12 +396,12 @@ end
 function Rewards.OnQuestComplete()
 	reset()
 	if not (QoL.On("rewardHighlight") or QoL.On("rewardAutoPick")) then return end
-	local gen = generation
+	local gen, quest = generation, questID()
 	-- The panel lays its buttons out in the same event; mark them after it.
 	if C_Timer and C_Timer.After then
-		C_Timer.After(0, function() evaluate(gen, 0) end)
+		C_Timer.After(0, function() evaluate(gen, 0, quest) end)
 	else
-		evaluate(gen, 0)
+		evaluate(gen, 0, quest)
 	end
 end
 
@@ -391,7 +427,10 @@ ns.RegisterEvent("QUEST_FINISHED", reset)
 ns.RegisterEvent("GET_ITEM_INFO_RECEIVED", function() if shown() then schedule() end end)
 ns.On("GEAR_UPDATED", function() if shown() then schedule() end end)
 ns.On("SETTING_CHANGED", function(path)
-	if path == "qol.rewardHighlight" or path == "qol" or path == "" then schedule() end
+	if path == "qol.rewardAutoPick" or path == "qol.rewardHighlight" or path == "qol" or path == "" then
+		reset()
+		schedule()
+	end
 end)
 if ns.Theme and ns.Theme.OnChanged then
 	ns.Theme.OnChanged(function()

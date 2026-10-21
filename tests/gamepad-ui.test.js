@@ -77,7 +77,7 @@ test('with the keyboard and mouse Polestar registers its slash commands, menu en
 		{ slash: r.slash, way: r.way, recorderSlash: r.recorderSlash, recorderCommand: r.recorderCommand, openMap: r.openMap, minimapButton: r.minimapButton },
 		{ slash: true, way: true, recorderSlash: true, recorderCommand: 'function', openMap: true, minimapButton: false },
 	);
-	assert.equal(r.menus, 2, 'the world map and minimap tracking menus');
+	assert.equal(r.menus, 6, 'nearby and service filters on the world map and minimap, and two quest menus');
 	assert.ok(r.special > 0, 'its windows close with Escape');
 });
 
@@ -123,6 +123,8 @@ const ALLOWED = {
 	'Polestar/Dungeons/Dungeons.lua': [1, 'through Compat.OpenWorldMap'],
 	'Polestar/Nav/Journey.lua': [6, "the map's canvas click handler and /way, neither with the gamepad interface; wayTaken only reads"],
 	'Polestar/Nav/Nearby.lua': [3, 'the tracking menus, not with the gamepad interface'],
+	'Polestar/Maps/Services.lua': [3, 'the service tracking menus, not with the gamepad interface'],
+	'Polestar/UI/QuestLinks.lua': [3, 'the quest menus, not with the gamepad interface'],
 	'Polestar/QoL/QoL.lua': [2, "dialogs closed for the player (QoL.ClosePopup), never with the gamepad interface (its focus owns them)"],
 	'Polestar/QoL/Toggles.lua': [3, 'the error-message setting, which does nothing with the gamepad interface'],
 	'Polestar/UI/Options.lua': [2, "closing the game's Settings panel, never with the gamepad interface or in combat"],

@@ -7,6 +7,9 @@
 	<Script file="MinimapButton.lua"/>
 	<Script file="Dungeons.lua"/>
 	<Script file="TravelPins.lua"/>
+	<Script file="ServiceData.lua"/>
+	<Script file="ServiceClusters.lua"/>
+	<Script file="Services.lua"/>
 	<Script file="FlightPaths.lua"/>
 	<Script file="RouteStrokes.lua"/>
 	<Script file="RouteSparkle.lua"/>

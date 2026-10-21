@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "Aprende {skill:186}",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Cualquier instructor de {skill:186} de tu facción enseña {skill:186} de aprendiz (nivel de personaje 5); la flecha elige el más cercano. Compra un {item:2901} a un proveedor de mercancías o general: guárdalo en las bolsas, no puedes extraer sin ella.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "Extrae cada nodo de {object:147516} (230, amarillo), veraplata (230, amarillo), filón pequeño de torio (245, amarillo), filón de torio enriquecido (275, naranja) que encuentres y recorre los puntos de ruta hasta {skill:186} 300. Funde el mineral en una forja cuando se te llenen las bolsas: fundir también sube {skill:186}. Nivel de zona 50-58.",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}, filón de torio enriquecido",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Cualquier instructor de {skill:186} de tu facción enseña {skill:186} de aprendiz (nivel de personaje 5); la flecha elige el más cercano. Compra un {item:2901} a un proveedor de mercancías o general: guárdalo en las bolsas, no puedes extraer sin ella.",
 }

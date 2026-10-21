@@ -13,6 +13,6 @@ return {
 	["Durotar Supply and Logistics camp"] = "Lager von Versorgung und Logistik Durotar",
 
 	-- Step 2: Pack Kodo
-	["The reins need level 60 and Journeyman Riding to ride (Forever client); you can buy them earlier."] = "Die Zügel erfordern zum Reiten Stufe 60 und Reiten (Geselle) (Forever-Client); kaufen kannst du sie schon früher.",
+	["The reins need level 60 and Journeyman Riding to ride (Forever client); you can buy them earlier."] = "Die Zügel erfordern zum Reiten Stufe 60 und Geübtes Reiten (Forever-Client); kaufen kannst du sie schon früher.",
 	["6,000 Merchant's Favor"] = "6,000 Merchant's Favor",
 }

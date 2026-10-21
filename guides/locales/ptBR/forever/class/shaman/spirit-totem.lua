@@ -46,11 +46,14 @@ return {
 	["Spider eye and bear claw"] = "Olho de aranha e garra de urso",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "Nas {zone:1422}, as Tocaieiras Rasterruças soltam o {item:20610} e os Ursos Pretos Doentes a {item:20611} (cerca de uma morte em cinco, cada).",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple
 	["The {area:1417}"] = "{area:1417}",
 	-- {area:1417} Sunken Temple · {area:1477} Temple of Atal'Hakkar · {area:74} Pool of Tears · {npc:5716} Zul'Lor · {item:20606} Amber Voodoo Feather
 	["The {area:1417} ({area:1477}) lies under the {area:74}; the arrow points at its entrance. Gasher or {npc:5716} drop the {item:20606}, Hukku or Mijan the Blue, Zolo or Loro the Green: all six are elite trolls inside. Bring a group."] = "O {area:1417} ({area:1477}) fica sob o {area:74}; a seta aponta para a entrada. Talho ou {npc:5716} soltam a {item:20606}, Hukkah ou Mirran a azul, Zolo ou Lorro a verde: os seis são trolls elite lá dentro. Leve um grupo.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "Nas {zone:1422}, as Tocaieiras Rasterruças soltam o {item:20610} e os Ursos Pretos Doentes a {item:20611} (cerca de uma morte em cinco, cada).",
 }

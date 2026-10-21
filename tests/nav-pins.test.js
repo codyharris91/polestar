@@ -37,6 +37,23 @@ function run(script) {
 	return runAddon({ stubs: ['stub_nav.lua'], addons: [NAV], login: true, script: PRELUDE + script }).emitted;
 }
 
+test('zone-only layers hide on continent and world maps, return in narrower views, and keep minimap icons', () => {
+	const [out] = run(`
+		local kinds={ [9000]=3, [9002]=2, [9003]=1, [9004]=5 }
+		for _,map in ipairs({9002,9003,9004,9005}) do nav.maps[map]=nav.maps[9000] end
+		C_Map.GetMapInfo=function(map) return kinds[map] and {mapType=kinds[map]} end
+		Pins.SetLayer("services", {at(0,0)}, {minMapType=3})
+		Pins.SetLayer("guide", {at(0,50)})
+		local counts={}
+		for _,map in ipairs({9000,9002,9003,9004,9005,9000}) do
+			nav.showWorldMap(map)
+			counts[#counts+1]=#nav.pins()
+		end
+		emit({world=counts,minimap=frames("services")})
+	`);
+	assert.deepEqual(out, { world: [2, 1, 1, 2, 1, 2], minimap: 1 });
+});
+
 test('a 500-pin layer costs nothing per frame while the player stands still', () => {
 	const [out] = run(`
 		local pins = {}
@@ -575,6 +592,26 @@ test('with the gamepad, the map cursor near a pin shows its tooltip and A clicks
 	assert.equal(out.far, 'Here');
 	assert.equal(out.out, false, 'past 12 units: the tooltip goes');
 	assert.equal(out.cursorGone, false, 'and with the cursor');
+});
+
+test('a popup owns gamepad A until it closes and the button is released', () => {
+	const [out] = run(`
+		local open,clicks=false,0
+		Polestar.Widgets={MenuShown=function() return open end}
+		Pins.SetLayer("services",{at(0,0,{tooltip="Services",onClick=function() clicks=clicks+1; open=true end})})
+		nav.showWorldMap(9000)
+		WorldMapFrame.Child.x,WorldMapFrame.Child.y=100,-100
+		SoftCursor.x,SoftCursor.y=600,400; SoftCursor:Show()
+		local function press(down) stub.keysDown.PAD1=down; stub.runMapFrame(WorldMapFrame,0.06) end
+		press(false); press(true)
+		press(false); press(true); press(false) -- category menu handles these presses
+		open=false
+		press(true) -- popup selection closes while A is still down
+		local afterPopup=clicks
+		press(false); press(true)
+		emit({afterPopup=afterPopup,newPress=clicks})
+	`);
+	assert.deepEqual(out,{afterPopup:1,newPress:2});
 });
 
 test('world map pins never call the combat-restricted SetPassThroughButtons in combat', () => {

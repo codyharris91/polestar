@@ -46,7 +46,7 @@ return {
 	["Spider eye and bear claw"] = "蜘蛛眼和熊爪",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "在{zone:1422}，{npc:1822}掉落{item:20610}，{npc:1815}掉落{item:20611}（各自大约五次击杀掉落一次）。",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "在{zone:1422}，{npc:1822}掉落{item:20610}，{npc:1815}掉落{item:20611}（各自大约五次击杀掉落一次）。食腐鸟可能掉落其中任一种，路上得到的也要留着。",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple

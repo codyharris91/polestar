@@ -24,23 +24,32 @@ why The Ruby-Adorned Blade, C's payment for a solo job inside the Scarlet Monast
 # the Scarlet Monastery entrance from data/forever/dungeons.json (Tirisfal
 # Glades 82.6,33.8, live frame). The data has no item for the eye and no
 # position for it or the disguise.
-# Based on data, not play: the beta caps at level 30 until launch on
-# 4 November, so this level 35 quest has not been checked in game.
+# Based on data and beta reports, not an in-game test of this guide.
+
+# Mechanics: Forever comments by Gaunerh on wowhead.com/forever/quest=78676
+# and Thorshadow on /forever/quest=78699 (checked 2026-10-20), compared
+# with ForG's Forever rogue-quests walkthrough. Item 210955's Forever
+# tooltip confirms suspicious activity breaks the disguise. Letter timing
+# differs from the datamined minimum; no exact mail level is asserted.
+
+# Follow-up, 2026-10-21: Gaunerh (78676) and Kimeera (78699) report
+# the invitation at 30 after the horn job and a city visit. This is
+# player evidence, not a guaranteed mail level or a level-gate change.
 
 step C's dead drop
-  tip The Dead Drop is a chest near Pyrewood Village in southern Silverpine, just south of Shadowfang Keep. C's next note waits there once you are 25.
+  tip The Dead Drop is a chest near Pyrewood Village in southern Silverpine, just south of Shadowfang Keep. After the horn job and C's next letter, check it for the new job. The data lists a minimum of 25, but beta players report receiving the invitation at 30 after the horn job and a city visit; this is not a guaranteed mail level. If no new note is offered, continue leveling and check after C writes.
   level 25
   accept 78676 object 410369                  -- Dead Drop
 
 step The Scarlet Monastery
   zone Tirisfal Glades
-  tip The monastery stands in the far north-east of Tirisfal Glades. Go in alone; C advises a disguise from the monastery's grounds before you enter.
+  tip The monastery stands in the far north-east of Tirisfal Glades. Go in alone. Before entering, find the disguise in the chest by the outside stables. Recheck it after changing wings: stealth and suspicious actions can remove it. In the Graveyard, pickpocket a Scarlet Scryer for the Scryer's Key; use it on the Personal Letterbox in the Library and read the message. It sends you back to sit at both benches between the statues in the graveyard. Watch for the mechanism's messages, take the Reliquary Key from the stone coffer, then return to the Library for the locked reliquary. Avoid fighting through the instance.
   goto 82.6,33.8 live "Scarlet Monastery"
-  note Find the Eye of Bhossca inside the Scarlet Monastery.
+  note Solo route: Graveyard key, Library letter, Graveyard benches and coffer, then Library reliquary for the eye. Read the letter before the bench puzzle; check the disguise each time you change wings.
 
 step Back to the dead drop
   zone Silverpine Forest
-  tip Place the eye in the Dead Drop near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest.
+  tip Place the eye in the Dead Drop near Pyrewood. Check a capital mailbox for C's payment letter on your next planned city visit, then return here for the reward quest. The payment may not be available immediately; do not repeat the infiltration just because the reward has not appeared.
   turnin 78676 object 410369                  -- Dead Drop
   accept 78699 object 410369
   turnin 78699 object 410369 reward 277246    -- Ruby-Adorned Blade

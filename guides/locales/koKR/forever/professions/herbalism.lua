@@ -10,7 +10,7 @@ return {
 	-- {skill:182} Herbalism
 	["Learn {skill:182}"] = "{skill:182} 배우기",
 	-- {skill:182} Herbalism
-	["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} (character level 5); the arrow picks the nearest."] = "진영의 {skill:182} 상급자 누구에게서나 초급 {skill:182}을(를) 배울 수 있습니다(캐릭터 레벨 5). 화살표가 가장 가까운 상급자를 가리킵니다.",
+	["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} at any level, and so does the Junior Herbalism Trainer in each starting zone; the arrow picks the nearest."] = "",
 
 	-- Step 2: Silverleaf & Earthroot: Elwynn Forest (1-50)
 	-- {item:2447} Peacebloom · {item:765} Silverleaf · {item:2449} Earthroot · {skill:182} Herbalism
@@ -95,4 +95,7 @@ return {
 	-- Step 27: Mountain Silversage & Plaguebloom: Felwood (285-300)
 	-- {item:8836} Arthas' Tears · {item:8838} Sungrass · {item:8846} Gromsblood · {item:13464} Golden Sansam · {item:13463} Dreamfoil · {item:13465} Mountain Silversage · {item:13466} Plaguebloom · {skill:182} Herbalism
 	["Pick every {item:8836} (220, green), {item:8838} (230, green), {item:8846} (250, yellow), {item:13464} (260, yellow), {item:13463} (270, orange), {item:13465} (280, orange), {item:13466} (285, orange) you pass and circle the waypoints until {skill:182} 300. Zone level 48-55."] = "지나가는 {item:8836}(220, 초록색), {item:8838}(230, 초록색), {item:8846}(250, 노란색), {item:13464}(260, 노란색), {item:13463}(270, 주황색), {item:13465}(280, 주황색), {item:13466}(285, 주황색)을(를) 모두 채집하고, {skill:182} 300까지 경유지를 도세요. 지역 레벨 48-55.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:182} trainer of your faction teaches Apprentice {skill:182} (character level 5); the arrow picks the nearest."] = "진영의 {skill:182} 상급자 누구에게서나 초급 {skill:182}을(를) 배울 수 있습니다(캐릭터 레벨 5). 화살표가 가장 가까운 상급자를 가리킵니다.",
 }

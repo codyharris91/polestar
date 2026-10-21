@@ -31,6 +31,10 @@ why Experience and gold at 50, ending in the Sunken Temple; Forever removed the 
 # dungeon of the 50s; bring a group.
 # Beta capped at 30: not played; it follows the data above.
 
+# Collection: Forever quest 8412 requires eight eyes and eight claws; its
+# own text names carrion birds as sources of either, alongside bears/spiders.
+# https://www.wowhead.com/forever/quest=8412/spirit-totem
+
 step Sagorne Creststrider
   only Orc,Troll
   zone Orgrimmar
@@ -59,7 +63,7 @@ step Bath'rah the Windwatcher
 
 step Spider eye and bear claw
   zone Western Plaguelands
-  tip In the Western Plaguelands, the Venom Mist Lurkers drop the Bloodshot Spider Eye and the Diseased Black Bears the Thick Black Claw (about one kill in five each).
+  tip In the Western Plaguelands, the Venom Mist Lurkers drop the Bloodshot Spider Eye and the Diseased Black Bears the Thick Black Claw (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way.
   collect 20610 quest 8412.1                  -- Bloodshot Spider Eye
   collect 20611 quest 8412.2                  -- Thick Black Claw
 

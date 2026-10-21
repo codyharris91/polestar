@@ -13,18 +13,24 @@ return {
 	-- Step 1: C's dead drop
 	["C's dead drop"] = "C的秘密投递点",
 	-- {object:410369} Dead Drop · {area:204} Pyrewood Village · {area:236} Shadowfang Keep
-	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369}是银松森林南部{area:204}附近的一个箱子，就在{area:236}南边。你到25级后，C的下一张字条会在那里等你。",
+	["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. After the horn job and C's next letter, check it for the new job. The data lists a minimum of 25, but beta players report receiving the invitation at 30 after the horn job and a city visit; this is not a guaranteed mail level. If no new note is offered, continue leveling and check after C writes."] = "{object:410369}是银松森林南部{area:204}附近的箱子，就在{area:236}南边。完成号角委托并收到C的下一封信后，再来查看新委托。资料标注最低25级，但有测试服玩家完成号角委托后，在30级回主城时才收到邀请；这并非保证触发的来信等级。没有新字条时先继续升级，收到来信后再查看。",
 
 	-- Step 2: The Scarlet Monastery
 	-- {area:796} Scarlet Monastery
 	["The {area:796}"] = "{area:796}",
-	-- {zone:1420} Tirisfal Glades
-	["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "修道院位于{zone:1420}的最东北端。独自进去；C建议你进去前先从修道院的庭院弄一身伪装。",
-	-- {area:796} Scarlet Monastery
-	["Find the Eye of Bhossca inside the {area:796}."] = "在{area:796}里找到那只眼睛。",
+	-- {zone:1420} Tirisfal Glades · {npc:4293} Scarlet Scryer · {item:210963} Scryer's Key · {item:210968} Reliquary Key
+	["The monastery stands in the far north-east of {zone:1420}. Go in alone. Before entering, find the disguise in the chest by the outside stables. Recheck it after changing wings: stealth and suspicious actions can remove it. In the Graveyard, pickpocket a {npc:4293} for the {item:210963}; use it on the Personal Letterbox in the Library and read the message. It sends you back to sit at both benches between the statues in the graveyard. Watch for the mechanism's messages, take the {item:210968} from the stone coffer, then return to the Library for the locked reliquary. Avoid fighting through the instance."] = "修道院位于{zone:1420}最东北端，必须独自进入。进去前，先从院外马厩旁的箱子取得伪装服装。切换区域后重新检查伪装；潜行和可疑举动可能令伪装消失。在墓地从{npc:4293}身上偷取{item:210963}，用它打开图书馆里的私人信箱并阅读信件。按信中提示回墓地，在雕像之间的两处长椅分别坐下，留意机关提示。从石棺取得{item:210968}后，再回图书馆打开上锁的遗物匣。以潜入为主，避免一路硬打。",
+	["Solo route: Graveyard key, Library letter, Graveyard benches and coffer, then Library reliquary for the eye. Read the letter before the bench puzzle; check the disguise each time you change wings."] = "单人路线：墓地偷钥匙→图书馆取信→墓地长椅机关与石棺→图书馆遗物匣取眼睛。先读信再做长椅机关，每次切换区域后检查伪装。",
 
 	-- Step 3: Back to the dead drop
 	["Back to the dead drop"] = "回到秘密投递点",
 	-- {object:410369} Dead Drop
-	["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "把眼睛放进焚木村附近的{object:410369}。C的报酬是同一个箱子的第二个眼睛任务。",
+	["Place the eye in the {object:410369} near Pyrewood. Check a capital mailbox for C's payment letter on your next planned city visit, then return here for the reward quest. The payment may not be available immediately; do not repeat the infiltration just because the reward has not appeared."] = "把眼睛放进焚木村附近的{object:410369}。下次计划中回主城时，检查邮箱里C的报酬来信，再回这里领取奖励任务。报酬可能不会立刻出现，不要因为暂时没有奖励就重新潜入。",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Find the Eye of Bhossca inside the {area:796}."] = "在{area:796}里找到那只眼睛。",
+	-- ["Place the eye in the {object:410369} near Pyrewood. C's payment is the second Eye of Bhossca quest at the same chest."] = "把眼睛放进焚木村附近的{object:410369}。C的报酬是同一个箱子的第二个眼睛任务。",
+	-- ["The monastery stands in the far north-east of {zone:1420}. Go in alone; C advises a disguise from the monastery's grounds before you enter."] = "修道院位于{zone:1420}的最东北端。独自进去；C建议你进去前先从修道院的庭院弄一身伪装。",
+	-- ["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. After the horn job and C's next letter, check it for the new job. The data lists a minimum of 25; reaching that level alone does not guarantee the letter or quest is available. If no new note is offered, continue leveling and check after C writes."] = "{object:410369}是银松森林南部{area:204}附近的箱子，就在{area:236}南边。完成号角委托并收到C的下一封信后，再来查看新委托。资料标注最低25级，但达到该等级并不保证信件或任务已经触发。没有新字条时先继续升级，收到来信后再查看。",
+	-- ["The {object:410369} is a chest near {area:204} in southern Silverpine, just south of {area:236}. C's next note waits there once you are 25."] = "{object:410369}是银松森林南部{area:204}附近的一个箱子，就在{area:236}南边。你到25级后，C的下一张字条会在那里等你。",
 }

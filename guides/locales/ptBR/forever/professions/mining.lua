@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "Aprenda {skill:186}",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Qualquer instrutor de {skill:186} da sua facção ensina {skill:186} Aprendiz (nível de personagem 5); a seta escolhe o mais próximo. Compre uma {item:2901} de um mercador de mercadorias ou de artigos gerais: mantenha-a nas bolsas, sem ela você não pode minerar.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "Minere cada jazida de {object:147516} (230, amarelo), Veraprata (230, amarelo), Tório Escasso (245, amarelo), Tório Abundante (275, laranja) pelo caminho e percorra os pontos de rota até {skill:186} 300. Funda o minério numa forja quando as bolsas encherem: fundir também eleva {skill:186}. Zona de nível 50-58.",
 	-- {object:147516} Dark Iron (no name in this language: may be words)
 	["{object:147516}, Rich Thorium"] = "{object:147516}, Tório Abundante",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Qualquer instrutor de {skill:186} da sua facção ensina {skill:186} Aprendiz (nível de personagem 5); a seta escolhe o mais próximo. Compre uma {item:2901} de um mercador de mercadorias ou de artigos gerais: mantenha-a nas bolsas, sem ela você não pode minerar.",
 }

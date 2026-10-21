@@ -187,8 +187,12 @@ return {
 	["{npc:4949}: {quest:93739}, a tour of the Horde's leaders"] = "{npc:4949}: {quest:93739}, 호드 지도자 순방",
 	-- {npc:3230} Nazgrel
 	["Speak with {npc:3230}, in Grommash Hold"] = "{npc:3230}에게 말을 거세요, 그롬마쉬 요새 안",
+	-- {npc:3230} Nazgrel
+	["Talk to {npc:3230}"] = "",
 	-- {npc:10540} Vol'jin
 	["Speak with {npc:10540}, in Grommash Hold"] = "{npc:10540}에게 말을 거세요, 그롬마쉬 요새 안",
+	-- {npc:10540} Vol'jin
+	["Talk to {npc:10540}"] = "",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["Moonrage Bloodhowlers"] = "달의분노일족 혈투사",

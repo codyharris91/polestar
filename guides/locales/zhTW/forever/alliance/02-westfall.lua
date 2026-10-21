@@ -7,13 +7,12 @@
 -- The comments are rewritten by sync.
 return {
 	-- Step 1: The Jansen Stead
-	-- {zone:1436} Westfall
-	["Follow the road from Elwynn into {zone:1436}: the Furlbrows sit by their burned farm, the first one on the road. Collect the oats from the Sacks of Oats in the fields as you go."] = "沿道路從艾爾文森林進入{zone:1436}：法布隆夫妻坐在被燒毀的農場旁，就是道路邊第一座農場。沿途從田裡的燕麥袋中收集燕麥。",
+	-- {zone:1436} Westfall · {object:2724} Sack of Oats
+	["Follow the road from Elwynn into {zone:1436}: the Furlbrows sit by their burned farm, the first one on the road. Pick up oats from any {object:2724} you pass on the loop: the rest are gathered in the fields here on the way back."] = "",
 	-- {npc:237} Farmer Furlbrow · {npc:963} Deputy Rainer
 	["{npc:237}; Humans took it from {npc:963} in Elwynn"] = "{npc:237}；人類在艾爾文從{npc:963}那裡拿走了它",
 	-- {item:1972} Westfall Deed
 	["Only if you looted a {item:1972} in Elwynn: right-click it"] = "只有在艾爾文森林拾取了{item:1972}時：右鍵點擊它",
-	["Sacks of Oats"] = "一袋燕麥",
 
 	-- Step 2: Saldean's Farm
 	-- {npc:233} Farmer Saldean · {npc:235} Salma Saldean · {npc:253395} Ozwin Ironsprocket
@@ -61,6 +60,7 @@ return {
 	["Gnoll Paws"] = "豺狼人的爪子",
 
 	-- Step 8: The Jansen Stead
+	["Sacks of Oats in the fields around the farm"] = "",
 	["Fill the vial at the well"] = "在井邊裝滿小瓶",
 
 	-- Step 11: Jangolode Mine
@@ -136,6 +136,7 @@ return {
 	-- ["Fly or ride to {zone:1453}. Trainers: {object:2100} (Warriors, Rogues), the Cathedral (Paladins, Priests), the {object:2101} (Mages, Warlocks), the Park (Druids). {npc:11026} works in the {object:28027}, {npc:279} in the {object:2096}."] = "飛往或騎往{zone:1453}。訓練師：{object:2100}（戰士、盜賊）、大教堂（聖騎士、牧師）、{object:2101}（法師、術士）、公園（德魯伊）。{npc:11026}在{object:28027}工作，{npc:279}在{object:2096}。",
 	-- ["Fly or ride to {zone:1453}. {npc:376} is in the Cathedral of Light."] = "飛往或騎往{zone:1453}。{npc:376}在光明大教堂內。",
 	-- ["Fly or ride to {zone:1453}. {npc:5480} trains warriors in {object:2100}; {npc:6089} and {npc:6090} stand together by the {object:2152} there. {npc:6090} fights you for his mug."] = "飛往或騎往{zone:1453}。{npc:5480}在{object:2100}訓練戰士；{npc:6089}和{npc:6090}一起站在那裡的{object:2152}旁。{npc:6090}會為了他的杯子和你決鬥。",
+	-- ["Follow the road from Elwynn into {zone:1436}: the Furlbrows sit by their burned farm, the first one on the road. Collect the oats from the Sacks of Oats in the fields as you go."] = "沿道路從艾爾文森林進入{zone:1436}：法布隆夫妻坐在被燒毀的農場旁，就是道路邊第一座農場。沿途從田裡的燕麥袋中收集燕麥。",
 	-- ["Follow the road north. {npc:233} stands outside, {npc:235} in the house, {npc:253395} in the barn to the west."] = "沿道路向北走。{npc:233}站在屋外，{npc:235}在屋內，{npc:253395}在西邊的穀倉裡。",
 	-- ["Further north along the road. The Furlbrows sit by their burned farm. Collect the oats from the Sacks of Oats in the fields as you go and fill the vial at the stead's well."] = "沿道路繼續向北。法布隆夫婦坐在被燒毀的農場旁。沿途從田裡的一袋燕麥收集燕麥，並在農場的井裝滿小瓶。",
 	-- ["Further north along the road. The Furlbrows sit by their burned farm. Collect the oats from the Sacks of Oats in the fields as you go."] = "沿道路繼續向北。法布隆夫婦坐在被燒毀的農場旁。沿途從田裡的一袋燕麥收集燕麥。",
@@ -143,6 +144,7 @@ return {
 	-- ["Only if he takes the isosprings alone"] = "只有在他只收等軸彈簧時",
 	-- ["Ride to {zone:1453}. It has no shaman trainer: take the {area:2257} from the {object:28027} to {zone:1455}, train with {npc:258098}, then ride the tram back for the boat."] = "騎往{zone:1453}。那裡沒有薩滿訓練師：從{object:28027}搭乘{area:2257}前往{zone:1455}，向{npc:258098}學習，然後搭地鐵回來搭船。",
 	-- ["Riverpaw Gnolls and Scouts roam the hills between the coast and the {area:916}."] = "河爪豺狼人和河爪斥候在海岸與{area:916}之間的丘陵遊蕩。",
+	-- ["Sacks of Oats"] = "一袋燕麥",
 	-- ["West of Molsen Farm, toward the coast. Riverpaw Miners work the quarry."] = "在摩爾森農場西邊，靠近海岸。河爪礦工在採石場工作。",
 	-- ["Young Goretusks and Fleshrippers roam the fields around the farm: start on livers and the stew's meat on the way back."] = "幼年血牙野豬和碎屍鳥在農場周圍的田野遊蕩：回程時順便收集肝臟和燉肉用的肉。",
 	-- ["{npc:234} and {npc:821} stand at the top of the stone tower. {npc:491} is in the tower, {npc:878} and {npc:253092} on the south side of the hill, next to the inn and {npc:523} the gryphon master."] = "{npc:234}和{npc:821}站在石塔頂端。{npc:491}在塔內，{npc:878}和{npc:253092}在山丘南側，旅店和獅鷲管理員{npc:523}旁邊。",

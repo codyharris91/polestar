@@ -319,7 +319,7 @@ test('a hidden window does no work on step messages and shows the current step w
 	assert.ok(out.rows > 0);
 });
 
-test('left-click on a goal of the step aims the arrow at it; right-click and the box tick any goal done and back', () => {
+test('left-click on a goal of the step aims the arrow at it; right-click (a menu on a quest line) and the box tick any goal done and back', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)
 		local collect = rowFor("Tough Wolf Meat")
@@ -328,6 +328,7 @@ test('left-click on a goal of the step aims the arrow at it; right-click and the
 		local target = Polestar.Nav.GetTarget()
 		local marked = collect.Mark:IsShown()
 		stub.RunScript(rowFor("Kobold Vermin"), "OnClick", "RightButton")
+		for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() and r.Text:GetText() == "Tick it done" then r:Click() end end
 		local tickedKill = { lastCall("ToggleGoal"), rowFor("Kobold Vermin").Check:IsShown() }
 		for g = 1, 3 do uistub.goal(4, g).status = "done" end
 		uistub.setStep(4)
@@ -344,6 +345,66 @@ test('left-click on a goal of the step aims the arrow at it; right-click and the
 	assert.deepEqual(out.toggled, ['ToggleGoal', 4, 4]);
 	assert.equal(out.checked, true);
 	assert.equal(out.after, false, 'the box follows the engine, which flipped it back');
+});
+
+// Skip this quest (Engine.SkipQuest): a quest's line, right-clicked, offers
+// its tick and the quest's skip. The card moves on, so a banner offers the
+// undo; a skipped quest's line reads so, its accept shows Undo, and a
+// right-click brings it back. A line with no quest ticks.
+test('right-click on a quest line: Tick it done or Skip this quest; the banner, Undo or a right-click bring it back', () => {
+	const [out] = run(`
+		uistub.setGuide(uistub.elwynn, 3)
+		for g = 1, 3 do uistub.goal(4, g).status = "done" end
+		uistub.goal(4, 2).status = "active"
+		uistub.setStep(4)
+		local B = GF.parts.banner
+		local function menu()
+			local out = {}
+			for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() then out[#out + 1] = r.Text:GetText() end end
+			return out
+		end
+		local function pick(text) for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() and r.Text:GetText() == text then r:Click() end end end
+		local echo = rowFor("Investigate Echo Ridge")
+		stub.RunScript(echo, "OnEnter")
+		local tip = GameTooltip.lines
+		stub.RunScript(echo, "OnClick", "RightButton")
+		local items = menu()
+		pick("Skip this quest")
+		local skipped = { call = lastCall("SkipQuest"), banner = B:IsShown() and B.Text:GetText() or false, undo = B.Jump.Label:GetText() }
+		B.Jump:Click()
+		local undone = { call = lastCall("SkipQuest"), banner = B:IsShown() }
+		-- Skipped again, with the rest of the step done: the card shows every line.
+		Polestar.Engine.SkipQuest(15, true)
+		GF.DismissBanner()
+		uistub.goal(4, 4).status = "done"; Polestar.Fire("STEP_UPDATED", 4)
+		echo = rowFor("Investigate Echo Ridge")
+		local line = { undo = echo.Skip:IsShown() and echo.Skip.Label:GetText() or false }
+		stub.RunScript(echo, "OnEnter")
+		line.tip = GameTooltip.lines
+		echo.Skip:Click()
+		line.call = lastCall("SkipQuest")
+		Polestar.Engine.SkipQuest(15, true)
+		GF.DismissBanner()
+		stub.RunScript(rowFor("Investigate Echo Ridge"), "OnClick", "RightButton")
+		local back = { call = lastCall("SkipQuest"), menu = PolestarMenu:IsShown() }
+		-- Skipped again: every line shows; Brother Neals has no quest.
+		Polestar.Engine.SkipQuest(15, true)
+		GF.DismissBanner()
+		stub.RunScript(rowFor("Brother Neals"), "OnClick", "RightButton")
+		emit({ tip = tip, items = items, skipped = skipped, undone = undone, line = line, back = back, neals = { lastCall("ToggleGoal"), PolestarMenu:IsShown() } })`);
+	assert.ok(out.tip.includes('Right-click to tick it done or skip this quest'), out.tip.join(' | '));
+	assert.deepEqual(out.items, ['Tick it done', 'Skip this quest']);
+	assert.deepEqual(out.skipped, {
+		call: ['SkipQuest', 15, true],
+		banner: 'Skipped Investigate Echo Ridge  ·  and the quests that follow from it',
+		undo: 'Undo',
+	});
+	assert.deepEqual(out.undone, { call: ['SkipQuest', 15, false], banner: false });
+	assert.equal(out.line.undo, 'Undo', 'the skipped accept shows Undo');
+	assert.ok(out.line.tip.includes('Right-click to bring this quest back'));
+	assert.deepEqual(out.line.call, ['SkipQuest', 15, false]);
+	assert.deepEqual(out.back, { call: ['SkipQuest', 15, false], menu: false }, 'a right-click brings a skipped quest back, no menu');
+	assert.deepEqual(out.neals, [['ToggleGoal', 4, 4], false], 'a line with no quest ticks on right-click, as before');
 });
 
 test('hovering a goal explains it: detail, quest, NPC, location and what clicks do', () => {
@@ -1324,6 +1385,31 @@ test('a quest started by a dropped item reads as one line, the quest; the Go to 
 	assert.equal(out.header, 'Field of Giants');
 	assert.equal(out.headerMark, true, 'the arrow on the Go to marks the header');
 	assert.deepEqual(out.held, ['Runed Scroll: in your bags, right-click it  \u00b7  Keep it: Kadrak']);
+});
+
+// `when group` (Engine.GroupQuestion): the banner asks at the group quest the
+// live step waits on; Skip it is the default (the accent link, the gamepad's
+// first focus), Do it with a group the other answer; it cannot be dismissed.
+test('a group quest banner asks Skip it or Do it with a group, and cannot be dismissed', () => {
+	const ask = `
+		uistub.groupQuestion = { quest = 6284, title = "Arachnophobia" }
+		uistub.openTabs(TABS, 1)
+		local B = GF.parts.banner
+		local shown = { B:IsShown(), B.Text:GetText(), B.Jump.Label:GetText(), B.Later:IsShown() and B.Later.Label:GetText(), B.Close:IsShown(), B.Jump.psDefault == true }
+		GF.DismissBanner()
+		local kept = B:IsShown()`;
+	const [skip] = run(`${ask}
+		B.Jump:Click()
+		emit({ shown = shown, kept = kept, call = lastCall("AnswerGroup"), after = B:IsShown(), flag = B.Jump.psDefault or false })`);
+	assert.deepEqual(skip.shown, [true, 'Group quest: Arachnophobia\nIt needs a group. Skip it and the guide keeps to the solo route.', 'Skip it', 'Do it with a group', false, true]);
+	assert.equal(skip.kept, true, 'dismissing does not answer');
+	assert.deepEqual(skip.call, ['AnswerGroup', 6284, 'skip']);
+	assert.equal(skip.after, false);
+	assert.equal(skip.flag, false, 'no default mark once answered');
+	const [group] = run(`${ask}
+		B.Later:Click()
+		emit({ call = lastCall("AnswerGroup"), after = B:IsShown() })`);
+	assert.deepEqual(group, { call: ['AnswerGroup', 6284, 'do'], after: false });
 });
 
 test('TRAIN_DUE shows a training banner after the out-levelled offer; Show points the arrow, Later dismisses', () => {

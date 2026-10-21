@@ -491,7 +491,10 @@ test('every Maps setting is registered with a label and help: map features on th
 	assert.deepEqual(out.pages.Map.sort(), [
 		'maps.coords', 'maps.dockPins', 'maps.dungeonPins', 'maps.innPins', 'maps.minimapButton', 'maps.minimapCoords', 'maps.reveal',
 		'maps.taxiPins', 'maps.travelMinimap', 'maps.zoneLevels',
-	]);
+		'maps.servicePins', 'maps.serviceMinimap',
+		...['repair', 'mailbox', 'class', 'weapon', 'auctioneer', 'banker',
+			'battlemaster', 'spirithealer', 'stablemaster', 'trainer', 'vendor'].map((key) => `maps.serviceFilters.${key}`),
+	].sort());
 	assert.deepEqual(out.pages['Quality of Life'].sort(), [
 		'maps.flightTimer', 'maps.instanceDisplay', 'maps.instances', 'maps.perDay', 'maps.perHour',
 	]);

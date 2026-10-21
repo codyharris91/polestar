@@ -68,7 +68,7 @@ test('pages: by order, a page with nothing to set left out, Recorder and About l
 	// here; Gear registered no control: all left out of the list. Community guides
 	// (a custom page) and Integrations (which says when it has nothing) are
 	// always there.
-	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Integrations', 'Community guides', 'Gamepad', 'Recorder', 'About']);
+	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Integrations', 'Community guides', 'Gamepad', 'Guiding Stars', 'Recorder', 'About']);
 	assert.equal(out.title, 'Guide');
 	assert.deepEqual(out.tabs, ['Window', 'Arrow & routes', 'Automation']);
 	assert.deepEqual(out.pages.find((p) => p.name === 'Quests'), { name: 'Quests', key: 'quests', builtin: false, tabs: ['Map'] });
@@ -199,7 +199,7 @@ test('page keys stay English on a translated client: /polestar options quests, g
 		'options qualityoflife': 'qualityoflife: Komfort > Travel',
 		'options about': 'about: Über > ',
 		packs: 'guidepacks: Community-Guides > ',
-		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'integrations', 'guidepacks', 'gamepad', 'recorder', 'about'],
+		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'integrations', 'guidepacks', 'gamepad', 'thanks', 'recorder', 'about'],
 	});
 });
 
@@ -793,4 +793,24 @@ test('Discovery, Dungeons: a toggle per Classic dungeon for leveling guides, all
 	assert.equal(out.found, 1, 'search finds the dungeon by the name it shows');
 	assert.deepEqual(out.reset, { rfc: false, chosen: false, saved: {} }, 'Reset page turns the choices off too');
 	assert.equal(out.account, false, 'the choice is per character, never an account setting');
+});
+
+// Guide, Automation: the answer for every group quest (`when group`), shown
+// once a guide for the character has one; and the offer of a Class guide
+// when it opens (QoL/ClassQuests.lua), always there.
+test('Guide, Automation: an answer for all group quests while a guide has one; the class-quest offer', () => {
+	const [none] = run(`
+		UI.ShowOptions("guide")
+		O.Select("guide", "Automation")
+		local c = O.Controls("guide", "Automation")
+		emit({ group = c["behavior.groupQuests"] ~= nil, offer = c["behavior.offerClassQuests"] ~= nil })`);
+	assert.deepEqual(none, { group: false, offer: true }, 'no group-quest answer while no guide has a group quest');
+	const [out] = run(`
+		uistub.groupQuests = { { quest = 7, title = "Kobold Camp Cleanup" } }
+		UI.ShowOptions("guide")
+		O.Select("guide", "Automation")
+		local c = O.Controls("guide", "Automation")
+		local dd = c["behavior.groupQuests"]
+		emit({ shown = dd ~= nil, label = dd and dd.Button.Label:GetText() or false, value = Polestar.Get("behavior.groupQuests") })`);
+	assert.deepEqual(out, { shown: true, label: 'Ask me at each', value: 'ask' });
 });

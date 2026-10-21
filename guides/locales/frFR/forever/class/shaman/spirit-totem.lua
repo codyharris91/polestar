@@ -46,7 +46,7 @@ return {
 	["Spider eye and bear claw"] = "Œil d'araignée et griffe d'ours",
 	-- {zone:1422} Western Plaguelands · {item:20610} Bloodshot Spider Eye · {item:20611} Thick Black Claw
 	-- plural, as words: Venom Mist Lurkers = {npc:1822} Venom Mist Lurker · Diseased Black Bears = {npc:1815} Diseased Black Bear
-	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "Dans les {zone:1422}, les Rôdeuses venimeuses des brumes laissent tomber l'{item:20610} et les Ours noirs malades la {item:20611} (environ une fois sur cinq chacun).",
+	["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each). Carrion birds can drop either, so keep what they give you on the way."] = "",
 
 	-- Step 7: The Sunken Temple
 	-- {area:1417} Sunken Temple
@@ -55,5 +55,6 @@ return {
 	["The {area:1417} ({area:1477}) lies under the {area:74}; the arrow points at its entrance. Gasher or {npc:5716} drop the {item:20606}, Hukku or Mijan the Blue, Zolo or Loro the Green: all six are elite trolls inside. Bring a group."] = "Le {area:1417} ({area:1477}) se trouve sous le {area:74} ; la flèche indique son entrée. Balafreur ou {npc:5716} laissent tomber la {item:20606}, Hukku ou Mijan la bleue, Zolo ou Loro la verte : tous les six sont des trolls élites à l'intérieur. Venez en groupe.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["In the {zone:1422}, the Venom Mist Lurkers drop the {item:20610} and the Diseased Black Bears the {item:20611} (about one kill in five each)."] = "Dans les {zone:1422}, les Rôdeuses venimeuses des brumes laissent tomber l'{item:20610} et les Ours noirs malades la {item:20611} (environ une fois sur cinq chacun).",
 	-- ["One each of {item:7069}, Fire, Earth and Water. The Exiles of {zone:1417} drop them, one element each, about one kill in ten: Thundering (air), Burning (fire), Rumbling (earth) and Cresting (water). Or buy them at the auction house."] = "Un exemplaire de chacun : {item:7069}, Feu élémentaire, Terre élémentaire et Eau élémentaire. Les Exilés des {zone:1417} les laissent tomber, un élément chacun, environ une fois sur dix : Exilés foudroyants (air), ardents (feu), grondants (terre) et grimpeurs (eau). Ou achetez-les à l'hôtel des ventes.",
 }

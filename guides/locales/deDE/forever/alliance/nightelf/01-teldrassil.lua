@@ -97,6 +97,7 @@ return {
 	-- {area:186} Dolanaar · {area:260} Starbreeze Village
 	-- plural, as words: Strigid Owls = {npc:1995} Strigid Owl · Webwood Lurkers = {npc:1998} Webwood Lurker
 	["Nightsabers, Strigid Owls and Webwood Lurkers roam all around {area:186} and along the road east. The moonwell is at the west edge of {area:260}."] = "Nachtsäbler, Strigideulen und Waldweberlauerer streifen rund um {area:186} und entlang der Straße nach Osten umher. Der Mondbrunnen liegt am Westrand von {area:260}.",
+	["Nightsabers"] = "Nachtsäbler",
 	-- {item:5619} Jade Phial
 	["Use the {item:5619} at the moonwell"] = "Benutze die {item:5619} am Mondbrunnen",
 	-- {npc:2150} Zenn Foulhoof
@@ -111,6 +112,8 @@ return {
 	["/sit by {npc:265811}'s campfire until you get {spell:1229451}"] = "/sit an {npc:265811}s Lagerfeuer, bis du {spell:1229451} erhältst",
 	-- {npc:6286} Zarrin
 	["Speak with {npc:6286}, south of the inn"] = "Sprich mit {npc:6286}, südlich des Gasthauses",
+	-- {npc:6286} Zarrin
+	["Talk to {npc:6286}"] = "",
 
 	-- Step 17: East to Starbreeze Village
 	-- {area:260} Starbreeze Village
@@ -118,7 +121,6 @@ return {
 	-- {area:186} Dolanaar · {npc:2150} Zenn Foulhoof · {object:126158} Tallonkai's Dresser
 	-- plural, as words: Fel Cones = {object:1673} Fel Cone · Webwood Lurkers = {npc:1998} Webwood Lurker
 	["Fel Cones lie under the trees all around {area:186} and {npc:2150}. Nightsabers and Webwood Lurkers keep roaming the road east. {object:126158} is in the house on the hill at the east end of the village."] = "Teufelszapfen liegen unter den Bäumen rund um {area:186} und {npc:2150}. Nachtsäbler und Waldweberlauerer streifen weiter entlang der Straße nach Osten. {object:126158} ist im Haus auf dem Hügel am Ostende des Dorfs.",
-	["Nightsabers"] = "Nachtsäbler",
 	-- plural, as words: Webwood Lurkers = {npc:1998} Webwood Lurker
 	["Webwood Lurkers"] = "Waldweberlauerer",
 
@@ -179,9 +181,11 @@ return {
 	["Hearth to {area:186}"] = "Ruhestein nach {area:186}",
 
 	-- Step 29: Ferocitas the Dream Eater
-	-- {area:260} Starbreeze Village · {item:8049} Gnarlpine Necklace
+	-- {npc:7234} Ferocitas the Dream Eater · {area:260} Starbreeze Village · {item:8049} Gnarlpine Necklace
 	-- plural, as words: Gnarlpine Mystics = {npc:7235} Gnarlpine Mystic
-	["Gnarlpine Mystics and Ferocitas camp north-east of {area:260}. Ferocitas drops the {item:8049}: open it for the jewel."] = "Mystiker der Knarzklauen und Ferocitas der Traumfresser lagern nordöstlich von {area:260}. Ferocitas lässt den {item:8049} fallen: Öffne ihn für das Juwel.",
+	["Gnarlpine Mystics and {npc:7234} camp north-east of {area:260}. {npc:7234} drops the {item:8049}: open it for the jewel."] = "",
+	-- {item:8049} Gnarlpine Necklace · {npc:7234} Ferocitas the Dream Eater
+	["{item:8049}, from {npc:7234}"] = "",
 	-- {npc:3567} Tallonkai Swiftroot · {area:186} Dolanaar
 	["{npc:3567}, back in {area:186}"] = "{npc:3567}, zurück in {area:186}",
 
@@ -328,6 +332,7 @@ return {
 	-- ["Each of {npc:3601}'s quests hands you a {item:15908}: use it on the beast he names, then bring the rod back to him in {area:186}. Webwood Lurkers creep around the village, Nightsaber Stalkers and Strigid Screechers roam the woods south of it."] = "Jede Quest von {npc:3601} gibt dir eine {item:15908}: Benutze sie an dem Wildtier, das er nennt, und bring den Stab dann zu ihm nach {area:186} zurück. Waldweberlauerer schleichen um das Dorf, Pirschende Nachtsäbler und Strigidkreischer streifen durch die Wälder südlich davon.",
 	-- ["Follow the road south-west out of {area:188} to {area:186}."] = "Folge der Straße nach Südwesten aus {area:188} hinaus nach {area:186}.",
 	-- ["From {area:17203}, ride through the city gates into {zone:1429} and follow the road west to {zone:1436}."] = "Reite vom {area:17203} durch die Stadttore in den {zone:1429} und folge der Straße nach Westen nach {zone:1436}.",
+	-- ["Gnarlpine Mystics and Ferocitas camp north-east of {area:260}. Ferocitas drops the {item:8049}: open it for the jewel."] = "Mystiker der Knarzklauen und Ferocitas der Traumfresser lagern nordöstlich von {area:260}. Ferocitas lässt den {item:8049} fallen: Öffne ihn für das Juwel.",
 	-- ["Learn the {area:442} flight path on the hill south of the inn, then cast {spell:18960}. {npc:11802} is in {area:2361}; the {quest:5929} sits in the woods to the north-west. Learn the {area:493} flight path in {area:2361} and fly to {area:702} (by way of {area:442})."] = "Hol dir die Flugroute von {area:442} auf dem Hügel südlich des Gasthauses, dann wirke {spell:18960}. {npc:11802} ist in {area:2361}; {quest:5929} sitzt im Wald im Nordwesten. Hol dir die Flugroute von {area:493} in {area:2361} und flieg nach {area:702} (über {area:442}).",
 	-- ["Nightsabers, Strigid Owls and Webwood Lurkers live along the road east. The moonwell is at the west edge of {area:260}."] = "Nachtsäbler, Strigideulen und Waldweberlauerer leben entlang der Straße nach Osten. Der Mondbrunnen liegt am Westrand von {area:260}.",
 	-- ["Take the portal down to {area:702}. {npc:10118} stands on the dock, {npc:3838} by the hippogryphs."] = "Nimm das Portal hinab nach {area:702}. {npc:10118} steht am Steg, {npc:3838} bei den Hippogryphen.",

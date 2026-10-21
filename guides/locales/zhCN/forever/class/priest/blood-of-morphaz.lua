@@ -28,14 +28,14 @@ return {
 	["{npc:8405} lives atop the cliffs north-east of the {area:1221}. Alliance: fly to {area:3137}; Horde: fly to {area:1237}."] = "{npc:8405}住在{area:1221}东北的悬崖顶上。联盟：飞往{area:3137}；部落：飞往{area:1237}。",
 
 	-- Step 4: Of Coursers We Know
-	-- {zone:1447} Azshara · {item:20027} Healthy Courser Gland
+	-- {zone:1447} Azshara · {item:20027} Healthy Courser Gland · {item:7972} Ichor of Undeath · {npc:8405} Ogtinc
 	-- plural, as words: Mosshoof Coursers = {npc:8761} Mosshoof Courser
-	["Mosshoof Coursers graze all over {zone:1447}; about one in three drops a {item:20027}."] = "{npc:8761}在{zone:1447}各处吃草；大约三只中有一只掉落{item:20027}。",
+	["Mosshoof Coursers graze all over {zone:1447}; about one in three drops a {item:20027}. Keep any {item:7972} you loot: {npc:8405}'s next stage asks for one."] = "{npc:8761}在{zone:1447}各处吃草；大约三只中有一只掉落{item:20027}。拾取到的{item:7972}要留着：{npc:8405}的下一阶段需要一份。",
 
 	-- Step 6: The Ichor of Undeath
-	-- {npc:7864} Lingering Highborne · {area:1221} Ruins of Eldarath · {npc:8405} Ogtinc · {area:3137} Talrendis Point
+	-- {item:7972} Ichor of Undeath · {npc:7864} Lingering Highborne · {area:1221} Ruins of Eldarath · {npc:8405} Ogtinc · {area:3137} Talrendis Point
 	-- plural, as words: Highborne Apparitions = {npc:6116} Highborne Apparition
-	["Any undead can drop it. The {npc:7864} in the {area:1221}, below {npc:8405}'s cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near {area:3137}."] = "任何亡灵都可能掉落。{npc:8405}的悬崖下方、{area:1221}中的{npc:7864}最近；{npc:6116}和上层精灵鬼巫出没于{area:3137}附近的废墟。",
+	["Already carrying an {item:7972}? It counts as soon as you take this stage. Otherwise any undead can drop it. The {npc:7864} in the {area:1221}, below {npc:8405}'s cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near {area:3137}."] = "已经带着{item:7972}？接取这一阶段后它马上计入。否则任何亡灵都可能掉落。{npc:8405}的悬崖下方、{area:1221}中的{npc:7864}最近；{npc:6116}和上层精灵鬼巫出没于{area:3137}附近的废墟。",
 
 	-- Step 8: Morphaz in the Sunken Temple
 	-- {area:1417} Sunken Temple

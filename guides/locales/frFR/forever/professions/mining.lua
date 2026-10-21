@@ -10,7 +10,7 @@ return {
 	-- {skill:186} Mining
 	["Learn {skill:186}"] = "Apprendre {skill:186}",
 	-- {skill:186} Mining · {item:2901} Mining Pick
-	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Tout maître de {skill:186} de votre faction enseigne {skill:186} niveau Apprenti (personnage niveau 5) ; la flèche indique le plus proche. Achetez {item:2901} chez un marchand de fournitures d'artisanat ou un marchand général : gardez-la dans vos sacs, impossible de miner sans elle.",
+	["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} at any level, and so does the Junior Mining Trainer in each starting zone; the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "",
 
 	-- Step 2: Copper: Elwynn Forest (1-50)
 	-- {zone:1429} Elwynn Forest
@@ -174,4 +174,7 @@ return {
 	["Mine every {object:147516} (230, yellow), Truesilver (230, yellow), Small Thorium (245, yellow), Rich Thorium (275, orange) node you pass and circle the waypoints until {skill:186} 300. Smelt the ore at a forge when your bags fill: smelting also raises {skill:186}. Zone level 50-58."] = "Minez tous les gisements sur votre passage : {object:147516} (230, jaune), Vrai-argent (230, jaune), Petit thorium (245, jaune), Riche thorium (275, orange). Faites le tour des points de passage jusqu'à {skill:186} 300. Fondez le minerai à une forge quand vos sacs sont pleins : la fonte augmente aussi {skill:186}. Niveau de zone 50-58.",
 	-- {object:147516} Dark Iron
 	["{object:147516}, Rich Thorium"] = "{object:147516}, Riche thorium",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Any {skill:186} trainer of your faction teaches Apprentice {skill:186} (character level 5); the arrow picks the nearest. Buy a {item:2901} from a trade goods or general vendor: keep it in your bags, you cannot mine without it."] = "Tout maître de {skill:186} de votre faction enseigne {skill:186} niveau Apprenti (personnage niveau 5) ; la flèche indique le plus proche. Achetez {item:2901} chez un marchand de fournitures d'artisanat ou un marchand général : gardez-la dans vos sacs, impossible de miner sans elle.",
 }

@@ -126,6 +126,8 @@ return {
 	["Head east to the {area:380} and fly to {zone:1454}. Take the zeppelin from the towers outside {zone:1454} to {zone:1420}; the {area:1497} lies below the {area:153}. The bat handler is in the {object:36078}."] = "",
 	-- {npc:10181} Lady Sylvanas Windrunner · {object:36126} Royal Quarter · {quest:93739} Exploring the Horde
 	["Speak with {npc:10181}, in the {object:36126}: {quest:93739}"] = "與{object:36126}的{npc:10181}交談：{quest:93739}",
+	-- {npc:10181} Lady Sylvanas Windrunner
+	["Talk to {npc:10181}"] = "",
 
 	-- Step 24: Aelthalyste
 	-- {npc:4606} Aelthalyste · {object:36070} War Quarter

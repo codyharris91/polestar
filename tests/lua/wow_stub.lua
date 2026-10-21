@@ -206,6 +206,7 @@ function Methods.SetMovable(self, v) self.movable = v and true or false end
 function Methods.IsMovable(self) return self.movable == true end
 function Methods.SetResizable(self, v) self.resizable = v and true or false end
 function Methods.IsResizable(self) return self.resizable == true end
+function Methods.SetResizeBounds(self, minW, minH, maxW, maxH) self.resizeBounds = { minW, minH, maxW, maxH } end
 function Methods.StartMoving(self) self.moving = true end
 function Methods.StartSizing(self) self.sizing = true end
 function Methods.StopMovingOrSizing(self) self.moving, self.sizing = false, false end

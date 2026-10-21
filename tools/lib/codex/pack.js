@@ -38,9 +38,11 @@
 //              q quest quest,choice        g gift npc,spell (an NPC hands it out)   c craft spell,skillLine,skill
 //              r rep faction,standing,npc  p pvp rank,npc               n container item,chance
 //              w world minLevel,maxLevel
-//   npc      level;levelMax;faction;flags(r e b);instance;roles;loot;<spawns>...
+//   npc      level;levelMax;faction;flags(r e b);instance;roles;loot;<spawns>...[;t<subName>]
 //            spawns = map,f,x,y,x,y...   (one group per map); loot = item,item,...
-//   object   treasure(1|empty);loot;<spawns>...
+//   object   treasure(1|empty);loot;<spawns>...[;m<faction>]
+//            t/m tails contain no commas, so older spawn readers skip them.
+//            m marks a mailbox; faction is A/H/AH, or empty when unknown/hostile.
 //   quest    level;minLevel;faction;races;classes;zone;startNpc;startObject;startItem;
 //            endNpc;endObject;pre;rewards;choices;preAny;<objective>...[;<rep>][;<xp>]
 //            objective = <k|i|o|e><id>,<count>,<text>[;p<map>,<x>,<y>,<f>]
@@ -228,11 +230,11 @@ function encodeSpawns(spawns) {
 function encodeNpc(rec) {
 	const flags = `${rec.rare ? 'r' : ''}${rec.elite ? 'e' : ''}${rec.boss ? 'b' : ''}`;
 	const head = [num(rec.level), num(rec.levelMax), rec.faction || '', flags, esc(rec.instance), (rec.roles || []).map(esc).join(','), list(rec.loot)];
-	return [...head, ...encodeSpawns(rec.spawns)].join(';');
+	return [...head, ...encodeSpawns(rec.spawns), ...(rec.subName ? ['t' + esc(rec.subName)] : [])].join(';');
 }
 
 function encodeObject(rec) {
-	return [rec.treasure ? '1' : '', list(rec.loot), ...encodeSpawns(rec.spawns)].join(';');
+	return [rec.treasure ? '1' : '', list(rec.loot), ...encodeSpawns(rec.spawns), ...(rec.mailbox ? ['m' + (rec.faction || '')] : [])].join(';');
 }
 
 function encodeQuest(rec) {

@@ -611,6 +611,7 @@ test('mergeCodex builds npcs, rares, instances, quests, spells and frames', () =
 		{ map: 1429, x: 69.6, y: 79.4, f: null },
 	]);
 	assert.deepEqual(n[4730].spawns, [
+		{ map: 1438, x: 25.2, y: 50.1, f: 'e' },
 		{ map: 1438, x: 25.3, y: 50.2, f: 'e' },
 		{ map: 1438, x: 70, y: 70, f: 'e' },
 	]);
@@ -707,6 +708,56 @@ test('mergeCodex: a guard recorded on a city map and on the zone that holds it i
 	// A capital the zone's frame overlaps without holding wins all the same:
 	// the Undercity is recorded with Silverpine Forest, which does not hold it.
 	assert.deepEqual(codex.npcs[4787].spawns.map((s) => s.map), [1458, 1438]);
+});
+
+test('Codex services retain exact spawns, trainer titles and mailbox factions through the pack', () => {
+	const inputs = syntheticInputs();
+	const points = Array.from({ length: 28 }, (_, i) => [10 + i, 50]);
+	inputs.forever.npcs[4730].spawns[1438] = { f: 'e', pts: points.slice(0, 24), more: points.slice(24) };
+	inputs.forever.npcs[198].subName = 'Mage Trainer';
+	inputs.forever.npcs[77777] = { id: 77777, name: 'Town Crier', subName: 'Herald', level: 30, faction: 'A', spawns: { 1438: { f: 'e', pts: [[40, 40]] } } };
+	inputs.forever.objects[99999] = { id: 99999, name: 'Mailbox', roles: ['mailbox'], faction: 'H',
+		spawns: { 1438: { f: 'e', pts: [[25.2, 50.1], [25.3, 50.2]], more: [[70, 70]] } } };
+	const codex = mergeCodex(inputs);
+	assert.equal(codex.npcs[4730].spawns.length, 28, 'service points are not capped or averaged');
+	assert.equal(codex.npcs[198].subName, 'Mage Trainer');
+	assert.ok(codex.npcs[198].roles.includes('class:MAGE'));
+	assert.ok(codex.npcs[77777], 'the NPC without services is in the Codex');
+	assert.equal(codex.npcs[77777].subName, undefined, 'titles ride only on service NPCs');
+	assert.equal(codex.objects[99999].spawns.length, 3, 'unreferenced mailboxes retain every physical point');
+	const pack = writeCodexPack(codex);
+	try {
+		const [out] = run(`local C=Polestar.Codex; C.Load(); emit({npc=C.Npc(198),box=C.Object(99999),points=#C.Npc(4730).spawns})`, { pack });
+		assert.equal(out.npc.subName, 'Mage Trainer');
+		assert.equal(out.points, 28);
+		assert.equal(out.box.mailbox, true);
+		assert.equal(out.box.faction, 'H');
+		assert.equal(out.box.spawns.length, 3);
+	} finally { pack.cleanup(); }
+});
+
+test('Codex optional service tails escape punctuation and work without any spawns', () => {
+	const codex = sampleCodex();
+	codex.npcs[88888] = { id: 88888, name: 'Trainer', subName: 'Mage, Trainer; 100%~', faction: 'A', roles: ['trainer'], spawns: [], loot: [] };
+	codex.objects[88888] = { id: 88888, name: 'Mailbox', mailbox: true, faction: null, spawns: [], loot: [] };
+	const pack = writeCodexPack(codex);
+	try {
+		const [out] = run(`local C=Polestar.Codex; C.Load(); emit({npc=C.Npc(88888),box=C.Object(88888)})`, { pack });
+		assert.equal(out.npc.subName, 'Mage, Trainer; 100%~');
+		assert.equal(Object.keys(out.npc.spawns).length, 0);
+		assert.equal(out.box.mailbox, true);
+		assert.equal(out.box.faction, undefined);
+		assert.equal(Object.keys(out.box.spawns).length, 0);
+	} finally { pack.cleanup(); }
+});
+
+test('Codex services keep precise fallback positions when the reference data has no spawns', () => {
+	const inputs = syntheticInputs();
+	delete inputs.atlasloot;
+	inputs.forever.npcs[4730].spawns = {};
+	inputs.wowhead = { npc: { 4730: { spawns: { 1438: [[25.2,50.1],[25.3,50.2]] }, drops: [] } }, object: {}, item: {}, spell: {} };
+	const npc = mergeCodex(inputs).npcs[4730];
+	assert.deepEqual(npc.spawns, [{ map:1438, x:25.2, y:50.1, f:null }, { map:1438, x:25.3, y:50.2, f:null }]);
 });
 
 test('mergeCodex: an NPC casting a spell that creates the item hands it out (gift)', () => {

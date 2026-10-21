@@ -72,6 +72,8 @@ return {
 	-- Step 13: Imp Delivery
 	-- {npc:14437} Gorzeeki Wildeyes · {item:18688} Imp in a Jar · {area:2057} Scholomance
 	["Back to {npc:14437} with the stardust. He gives you the {item:18688} for the {area:2057}."] = "帶著星塵返回{npc:14437}。他會給你{item:18688}，用於{area:2057}。",
+	-- {quest:7625} Xorothian Stardust · {npc:14522} Ur'dan
+	["{quest:7625}, from {npc:14522}"] = "",
 
 	-- Step 14: The Scholomance
 	-- {area:2057} Scholomance

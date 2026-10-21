@@ -43,6 +43,7 @@ local UI, Theme, W = ns.UI, ns.Theme, ns.Widgets
 local L = ns.L
 local floor, max, min, type, ipairs, pairs = math.floor, math.max, math.min, type, ipairs, pairs
 local ZoneArt = UI.ZoneArt
+local readable = ns.Compat.Readable
 
 local SH = W.SHELL
 local WIN_W = 1120 + SH.rail -- the section rail, then the three panes
@@ -80,6 +81,7 @@ local win, details
 local factCache = {} -- guide id -> { quests, zones } (guideFacts)
 local folderPool, rowPool, cardPool, segButtons = {}, {}, {}, {}
 local query = ""
+local questContext -- { id, query, steps = { [guideId] = matching steps } }
 local category = "All"
 local view = "home" -- "home" | "current" | "recent" | "browse"
 local newTabMode = false
@@ -208,7 +210,32 @@ local function haystack(g)
 	return table.concat(parts, " "):lower()
 end
 
+-- Match IDs, not translated titles: two quests can share a name.
+local function questSteps(g)
+	local cached = questContext.steps[g.id]
+	if cached then return cached end
+	local G, C = ns.Guides, ns.Compat
+	local full = G.Get(g.id)
+	local player = C.GetPlayerInfo()
+	local found = {}
+	questContext.steps[g.id] = found
+	if not full or (G.GuideMatches and not G.GuideMatches(g, player)) then return found end
+	local function applies(only) return not G.Matches or G.Matches(only, player) end
+	for i, step in ipairs(full.steps or {}) do
+		if applies(step.only) then
+			for _, goal in ipairs(step.goals or {}) do
+				if goal.quest == questContext.id and applies(goal.only) then
+					found[#found + 1] = { index = i, step = step }
+					break
+				end
+			end
+		end
+	end
+	return found
+end
+
 local function matches(g, q)
+	if questContext and q == questContext.query:lower() then return #questSteps(g) > 0 end
 	if q == "" then return true end
 	local hay = haystack(g)
 	for word in q:gmatch("%S+") do
@@ -1201,8 +1228,21 @@ local function renderDetails(byId, tabs, active)
 	local child = d.Scroll.Child
 	child:SetWidth(inner)
 	local cy = 0
-	if type(g.pitch) == "string" and g.pitch ~= "" then
-		d.Pitch:SetText(g.pitch)
+	-- Put the quest's matching steps first; the guide's pitch follows them.
+	local pitch = g.pitch
+	if questContext then
+		local text = {}
+		for _, hit in ipairs(questSteps(g)) do
+			text[#text + 1] = string.format(L["Step %d of %d: %s"], hit.index, g.stepCount or 0, hit.step.title or questContext.query)
+			if type(hit.step.note) == "string" and hit.step.note ~= "" then text[#text + 1] = hit.step.note end
+		end
+		if #text > 0 then
+			if type(pitch) == "string" and pitch ~= "" then text[#text + 1] = pitch end
+			pitch = table.concat(text, "\n\n")
+		end
+	end
+	if type(pitch) == "string" and pitch ~= "" then
+		d.Pitch:SetText(pitch)
 		d.Pitch:ClearAllPoints()
 		d.Pitch:SetPoint("TOPLEFT", child, "TOPLEFT", 0, -cy)
 		d.Pitch:Show()
@@ -1405,6 +1445,7 @@ local function sectionLayout(s)
 	win.Close:ClearAllPoints()
 	win.Close:SetPoint("TOPRIGHT", on and win.Header or details.Art, "TOPRIGHT", -12, -12)
 	if not on then win.Close:SetFrameLevel(details.Scrim:GetFrameLevel() + 2) end
+	if win.PlaceThanks then win.PlaceThanks() end
 	W.SetSearchPlaceholder(win.Search, (s and s.searchPlaceholder) or (s and s.search and L["Search"]) or HUB_SEARCH)
 	win.Search:SetShown(not s or s.search ~= nil)
 end
@@ -1724,6 +1765,7 @@ P.Step = step
 
 local function onSearch(text)
 	text = text or ""
+	if questContext and text ~= questContext.query then questContext = nil end
 	if text == query then return end
 	-- A section with its own search takes the box while it is shown; in any
 	-- other section typing goes back to the guides.
@@ -1754,6 +1796,7 @@ local function build()
 	})
 	P.frame = win
 	UI.Report.SidebarLink(win)
+	UI.Thanks.HeaderLink(win)
 	P.search = win.Search
 	P.scroll = win.Scroll
 	local main = win.Main
@@ -1817,7 +1860,7 @@ local function build()
 			initial = function(rows)
 				local first
 				for i, w in ipairs(rows) do
-					if ns.Gamepad.Within(w, win.Main) and w.psKey == nil then
+					if ns.Gamepad.Within(w, win.Main) and w.psKey == nil and w ~= win.ThanksLink then
 						if w.psGuide and w.psGuide.id == P.Selected() then return i end
 						first = first or i
 					end
@@ -1878,6 +1921,27 @@ function P.SetQuery(text)
 	onSearch(text or "")
 end
 
+-- A quest menu searches installed guides, including those without a Codex.
+function P.ShowQuest(id)
+	id = readable(id)
+	if type(id) ~= "number" or id <= 0 or id >= math.huge or id % 1 ~= 0 then return false end
+	UI.ShowPicker()
+	P.ShowSection("Guides")
+	P.SetCategory("All")
+	-- The filter is account-wide: only lift one that hides this character's
+	-- faction, and back to "auto" so an alt of the other faction is not left
+	-- filtered to this one.
+	local filter = factionFilter()
+	if filter ~= "All" and filter ~= UI.PlayerFaction() then ns.Set("ui.pickerFaction", "auto") end
+	local name = UI.QuestTitle(id) or (ns.Names and ns.Names.Quest(id))
+	questContext = { id = id, query = name or tostring(id), steps = {} }
+	P.SetQuery(questContext.query)
+	P.Render()
+	if #visibleIds == 0 then P.Select(nil) else selectFirstResult() end
+	win.Search:SetFocus()
+	return true
+end
+
 ns.On("GUIDE_CHANGED", function(id)
 	remember(id)
 	P.Render()
@@ -1887,6 +1951,7 @@ ns.On("SETTING_CHANGED", function(path)
 end)
 local function guidesChanged()
 	factCache = {}
+	if questContext then questContext.steps = {} end
 	P.Render()
 end
 ns.On("GUIDES_REGISTERED", guidesChanged)

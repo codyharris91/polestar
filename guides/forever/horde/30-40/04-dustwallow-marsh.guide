@@ -21,7 +21,8 @@ next forever/horde/40-50/01-stranglethorn-vale
 # Graveyard -> the Gizelton caravan -> Ghost Walker Post -> Kormek's Hut ->
 # the Kodo Graveyard -> Kormek's Hut -> Thunder Axe Fortress -> Ethel Rethor
 # and the Slitherblade coast -> the Valley of Spears -> Shadowprey ->
-# Mannoroc Coven -> Ghost Walker Post -> hearth to Shadowprey.
+# Mannoroc Coven -> the Valley of Bones -> Ghost Walker Post -> Hornizz at
+# the Kodo Graveyard -> hearth to Shadowprey.
 #
 # Deviations from the export:
 # - The Shady Rest pick-ups (Suspicious Hoofprints 1268, The Black Shield
@@ -37,6 +38,11 @@ next forever/horde/40-50/01-stranglethorn-vale
 # - Desolace: Kormek's Hut is visited twice (Bone Collector needs the quest
 #   before the bones can be picked up); the Thunder Axe box and Ethel Rethor
 #   follow on the second visit.
+# - Ghost-o-plasm Round Up (6134): the Magrami Spectres the Crate of Ghost
+#   Magnets draws are in the Valley of Bones in the far south-east, not the
+#   Kodo Graveyard, so the ghosts wait for the Mannoroc Coven trip, the
+#   nearest the route comes, and Hornizz is handed the plasm on the ride
+#   north before the hearth.
 # - Theramore Spies (1201), Soothing Spices (1218) and the Loose Dirt pair
 #   (1238, 1239) come from forever/horde/07-ashenvale, where they were level 35
 #   quests at 30. The Lost Report (1238) is read at Brackenwall before the
@@ -207,13 +213,9 @@ step Kormek's Hut
   tip Head north up the road to the hut by the road north of the graveyard.
   accept 5501                         -- Bibbly F'utzbuckle
 
-step Kodo bones and ghosts
-  tip Pick up the kodo bones scattered across the graveyard, and use the Crate of Ghost Magnets among the bones: the ghosts it draws drop the ghost-o-plasm.
+step Kodo bones
+  tip Pick up the kodo bones scattered across the graveyard.
   collect 13703 quest 5501
-  complete 6134
-
-step Hornizz Brimbuzzle
-  turnin 6134
 
 step Kormek's Hut
   turnin 5501                         -- Bibbly F'utzbuckle
@@ -253,9 +255,17 @@ step Portals of the Legion
   goto 52.0,78.0 "Mannoroc Coven"
   complete 5581
 
+step The Valley of Bones
+  tip Head south-east from the coven to the bone fields of the Valley of Bones, where Undead Ravagers roam. At the far south-east, use the Crate of Ghost Magnets to draw the Magrami Spectres: they drop the ghost-o-plasm.
+  collect 15849 quest 6134            -- Ghost-o-plasm
+
 step Ghost Walker Post
-  tip Head north from the coven to Gurda Wildmane at Ghost Walker Post.
+  tip Head north to Gurda Wildmane at Ghost Walker Post.
   turnin 93225                        -- Gurda Wildmane
+
+step Hornizz Brimbuzzle
+  tip Hornizz waits at the goblin camp on the west side of the Kodo Graveyard.
+  turnin 6134
 
 step Hearth to Shadowprey
   hearth "Shadowprey Village"

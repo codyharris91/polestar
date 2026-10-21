@@ -54,6 +54,8 @@ const MODS = {
 	// `direct`: handed in straight from the NPC's window, with no accept.
 	turnin: [...COMMON, ...COORDS, 'npc', 'object', 'reward', 'choose', 'xp', 'money', 'direct'],
 	complete: [...COMMON, ...COORDS],
+	abandon: ['text', 'optional', 'only'],
+	destroy: ['text', 'optional', 'only'],
 	kill: [...COMMON, ...COORDS, 'npc', 'quest', 'count'],
 	collect: [...COMMON, ...COORDS, 'npc', 'quest', 'count', 'nearest'],
 	goto: [...COMMON, 'map', 'r', 'frame'],
@@ -64,6 +66,8 @@ const MODS = {
 	hearth: [...COMMON],
 	getfp: [...COMMON, ...COORDS, 'npc'],
 	fly: [...COMMON],
+	// `enter "<Place>"`: be in that zone or area (the zone or subzone text); coordinates only point the arrow.
+	enter: [...COMMON, ...COORDS],
 	train: [...COMMON, ...COORDS, 'npc'],
 	buy: [...COMMON, ...COORDS, 'npc', 'count', 'nearest'],
 	vendor: [...COMMON, ...COORDS, 'npc'],
@@ -74,6 +78,8 @@ const MODS = {
 	note: ['optional', 'only', ...COORDS],
 	skill: [...COMMON, ...COORDS],
 	learn: [...COMMON, ...COORDS, 'npc', 'item', 'nearest'],
+	// `cast <spellId> ["Name"]`: the player casts that spell while the goal is open.
+	cast: [...COMMON, ...COORDS],
 	craft: [...COMMON, ...COORDS, 'count', 'until'],
 	rep: [...COMMON, ...COORDS],
 	explore: [...COMMON, 'map', 'r', 'frame'],
@@ -332,6 +338,7 @@ function parseGuide(text, file, diag) {
 				}
 				const w = parseWhen(line.slice(toks[3].start, lex.end));
 				if (w.error) err(ln, `\`skipto\`: ${w.error}`, w.hint);
+				else if (w.value.k === 'group') err(ln, '`skipto` cannot wait for an answer: `group` asks the player at a step', 'put `when group <quest>` on the steps of that quest instead');
 				else (step.skipto ||= []).push({ to: toks[1].text, when: { ...w.value, line: ln }, line: ln });
 			} else if (kw === 'image') {
 				parseImage(step, toks, ln, err);
@@ -588,7 +595,8 @@ function parsePositional(verb, goal, toks, line, lex, ln, err, spans) {
 	switch (verb) {
 		case 'accept':
 		case 'turnin':
-		case 'complete': {
+		case 'complete':
+		case 'abandon': {
 			if (!t) return err(ln, `\`${verb}\` needs a quest id`), -1;
 			goal.quest = parseId(t, 'quest', ln, err);
 			if (goal.quest === null) return -1;
@@ -610,6 +618,7 @@ function parsePositional(verb, goal, toks, line, lex, ln, err, spans) {
 		}
 		case 'collect':
 		case 'use':
+		case 'destroy':
 		case 'buy': {
 			if (!t) return err(ln, `\`${verb}\` needs an item id`), -1;
 			goal.item = parseId(t, 'item', ln, err);
@@ -682,7 +691,8 @@ function parsePositional(verb, goal, toks, line, lex, ln, err, spans) {
 		case 'sethome':
 		case 'hearth':
 		case 'getfp':
-		case 'fly': {
+		case 'fly':
+		case 'enter': {
 			if (!t) return err(ln, `\`${verb}\` needs a "Location"${verb === 'sethome' ? ' or `nearest`' : ''}`), -1;
 			if (verb === 'sethome' && !t.quoted && t.text.toLowerCase() === 'nearest') {
 				goal.nearest = true;
@@ -745,7 +755,8 @@ function parsePositional(verb, goal, toks, line, lex, ln, err, spans) {
 			return i + 1;
 		}
 		case 'learn':
-		case 'craft': {
+		case 'craft':
+		case 'cast': {
 			if (!t) return err(ln, `\`${verb}\` needs a spell id`), -1;
 			goal.spell = parseId(t, 'spell', ln, err);
 			if (goal.spell === null) return -1;

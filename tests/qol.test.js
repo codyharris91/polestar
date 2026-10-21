@@ -1680,6 +1680,7 @@ test('rewards: a green arrow on every upgrade, the best framed, on the icon; the
 
 		Polestar.Gear = {
 			IsEnabled = function() return true end,
+			CompareToEquipped = function() return { usable = true } end,
 			IsUpgrade = function(link)
 				if link:find("item:13") then return true, 8 end
 				if link:find("item:11") then return true, 3 end
@@ -1736,7 +1737,7 @@ test('rewards: a mark is made with no parent, then set on its reward button, so 
 		q.items[11] = { name = "Cloak", price = 120 }
 		q.items[12] = { name = "Potion", price = 50 }
 		q.choices = { { id = 11 }, { id = 12, count = 5 } }
-		Polestar.Gear = { IsEnabled = function() return true end, IsUpgrade = function(link) return link:find("item:11") ~= nil, 4 end }
+		Polestar.Gear = { IsEnabled = function() return true end, CompareToEquipped = function() return { usable = true } end, IsUpgrade = function(link) return link:find("item:11") ~= nil, 4 end }
 		q.questComplete()
 		stub.runTimers()
 		local on = 0
@@ -1771,6 +1772,89 @@ test('rewards: auto-pick takes the best when on; Shift, quest cost and a disable
 	assert.deepEqual(out[0], [2], 'disabled Gear: vendor value decides');
 	assert.equal(out[1], 0);
 	assert.equal(out[2], 0);
+});
+
+test('rewards: auto-pick leaves the choice to the player when a price is still unknown after every retry', () => {
+	const [unknown, arrived] = run(`
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Ring" }             -- its price never arrives
+		q.choices = { { id = 11 }, { id = 12 } }
+		set("rewardAutoPick", true)
+		q.questComplete(); stub.advance(5)
+		emit({ picks = #calls("GetQuestReward"), best = QoL.Rewards.best or false })
+		q.items[12].price = 400                     -- known on the next turn-in
+		q.questComplete(); stub.advance(5)
+		emit(calls("GetQuestReward"))
+	`);
+	assert.deepEqual(unknown, { picks: 0, best: false }, 'a retry deadline is no evidence the unpriced ring is worth less');
+	assert.deepEqual(arrived, [2], 'with every price known, the most valuable is taken');
+});
+
+test('rewards: an unsettled gear verdict keeps the coin on the most valuable reward and picks nothing', () => {
+	const [out, picks] = run(`${MARKS}
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Potion", price = 50 }
+		q.choices = { { id = 11 }, { id = 12 } }
+		-- Gear is on but has no comparison yet for either choice.
+		Polestar.Gear = { IsEnabled = function() return true end, CompareToEquipped = function() return nil end, IsUpgrade = function() return false, nil end }
+		q.questComplete(); stub.advance(5)          -- every retry spent
+		emit(marks())
+		emit(#calls("GetQuestReward"))
+	`);
+	assert.deepEqual(out, [
+		{ badge: false, coin: true, best: false, onIcon: true },
+		{ badge: false, coin: false, best: false },
+	], 'every link and price is known: the coin needs no gear verdict; the frame does');
+	assert.equal(picks, 0);
+});
+
+test('rewards: auto-pick never takes a reward while a link is missing, with or without retry timers', () => {
+	const [noLink, noTimers] = run(`
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Ring", price = 400, uncached = true }   -- no link, no price yet
+		q.choices = { { id = 11 }, { id = 12 } }
+		set("rewardAutoPick", true)
+		q.questComplete(); stub.advance(5)
+		emit(#calls("GetQuestReward"))
+		q.calls = {}
+		local timer = C_Timer
+		C_Timer = nil                               -- no retries: evaluated once, in the event
+		q.questComplete()
+		C_Timer = timer
+		emit(#calls("GetQuestReward"))
+	`);
+	assert.equal(noLink, 0);
+	assert.equal(noTimers, 0, 'incomplete data with no retry left is not a choice');
+});
+
+test('rewards: a deferred auto-pick does not take a reward for a different quest', () => {
+	const [out] = run(`
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Ring", price = 400 }
+		q.choices = { { id = 11 }, { id = 12 } }
+		set("rewardAutoPick", true)
+		q.questID = 7
+		q.questComplete()
+		q.questID = 8                               -- another quest's panel, with no QUEST_FINISHED between
+		stub.runTimers()
+		emit(#calls("GetQuestReward"))
+	`);
+	assert.equal(out, 0);
+});
+
+test('rewards: turning auto-pick off and on again while a pick is pending cancels that pick', () => {
+	const [out] = run(`
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Ring", price = 400 }
+		q.choices = { { id = 11 }, { id = 12 } }
+		set("rewardAutoPick", true)
+		q.questComplete()                           -- the pick waits for the panel's layout
+		Polestar.Set("qol.rewardAutoPick", false)
+		Polestar.Set("qol.rewardAutoPick", true)
+		stub.runTimers()
+		emit(#calls("GetQuestReward"))
+	`);
+	assert.equal(out, 0, 'the consent given when the panel opened was withdrawn');
 });
 
 const WEAR = `
@@ -2010,7 +2094,7 @@ test('rewards: a reward that never goes on (its bind confirmation cancelled) hol
 test('rewards: with the real Gear module, a two-hander stays on against a one-hander that wins only with a bag shield, rings end as the best two', () => {
 	const out = runAddon({
 		stubs: ['stub_qol.lua'],
-		addons: [{ name: 'Polestar', files: ['Core/Init.lua', 'Core/Compat.lua', 'Theme/Theme.xml', 'Gear/ItemDB.lua', 'Gear/Weights.lua', 'Gear/SpecData.lua', 'Gear/Gear.lua', 'QoL/QoL.xml'] }],
+		addons: [{ name: 'Polestar', files: ['Core/Init.lua', 'Core/Compat.lua', 'Theme/Theme.xml', 'Gear/ItemDB.lua', 'Gear/Weights.lua', 'Gear/SpecData.lua', 'Gear/PawnStats.lua', 'Gear/Pawn.lua', 'Gear/Gear.lua', 'QoL/QoL.xml'] }],
 		before: `
 			local q = stub.qol
 			q.level = 30
@@ -2086,7 +2170,7 @@ test('rewards: waits for uncached item data before ranking; an upgrade is marked
 		q.items[11] = { name = "Cloak", price = 120 }
 		q.items[12] = { name = "Ring", price = 400, uncached = true }
 		q.choices = { { id = 11 }, { id = 12 } }
-		Polestar.Gear = { IsEnabled = function() return true end, IsUpgrade = function(link) return link:find("item:12") ~= nil, 4 end }
+		Polestar.Gear = { IsEnabled = function() return true end, CompareToEquipped = function() return { usable = true } end, IsUpgrade = function(link) return link:find("item:12") ~= nil, 4 end }
 		q.questComplete()
 		stub.runTimers()
 		emit(QoL.Rewards.best or "pending")

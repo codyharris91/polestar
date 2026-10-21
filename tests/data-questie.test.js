@@ -88,7 +88,7 @@ const METAS = {
 		['friendlyToFaction', 'string'], ['npcFlags', 'number'], ['questStarts', 'table', 'idarray'], ['rank', 'number'],
 		['minLevelHealth', 'number', null, 0],
 	],
-	Object: [['name', 'string'], ['spawns', 'table', 'spawnlist'], ['questStarts', 'table', 'idarray'], ['questEnds', 'table', 'idarray']],
+	Object: [['name', 'string'], ['spawns', 'table', 'spawnlist'], ['questStarts', 'table', 'idarray'], ['questEnds', 'table', 'idarray'], ['factionID', 'number']],
 	Item: [['name', 'string'], ['npcDrops', 'table', 'idarray'], ['objectDrops', 'table', 'idarray'], ['vendors', 'table', 'idarray']],
 };
 const META_FILE = { Quest: 'questMeta.lua', Npc: 'npcMeta.lua', Object: 'objectMeta.lua', Item: 'itemMeta.lua' };
@@ -208,6 +208,7 @@ function writeQuestie(dir, store = {}) {
 	);
 	w('support/Forever/Zones/areaIdToUiMapId.lua', 'local ZoneDB = QuestieLoader:ImportModule("ZoneDB")\nZoneDB.private.areaIdToUiMapIdOverride = [[return { [0] = 0 }]]\nZoneDB.private.areaIdToUiMapId = [[return {\n  [12] = 1429, [87] = 1429, [1519] = 1453, [16593] = 2521,\n}]]\n');
 	w('support/Forever/Zones/uiMapIdToAreaId.lua', 'local ZoneDB = QuestieLoader:ImportModule("ZoneDB")\nZoneDB.private.uiMapIdToAreaId = [[return {\n  [1429] = 12, [1453] = 1519, [2521] = 16593,\n}]]\n');
+	w('support/Forever/FactionTemplates/factionTemplateClassic.lua', 'local Q = QuestieLoader:ImportModule("QuestieDB")\nQ.factionTemplate = { [12] = 4, [29] = 2, [35] = 0, [99] = 6 }\n');
 	w(
 		'src/support/eraToForever.lua',
 		'-- DBC bounds: 1.15.9.1 -> 1.60.1.2. Assumes unchanged world positions.\nlocal transforms = {\n  [1519] = { 0.77, 19.68, 0.77, 24.43 }, -- Stormwind City\n}\nlocal uiMapToArea = {\n  [1453] = 1519, -- Stormwind City\n}\n',
@@ -287,9 +288,11 @@ describe('QuestieDB decoder', () => {
 		assert.equal(qz.npcs.get(251362).minLevelHealth, 0);
 		assert.deepEqual(qz.npcs.get(2).spawns, { 12: [[42.1, 65.9]], 1519: [[60, 60]] });
 		assert.equal(qz.objects.get(500).name, 'Fixture Altar');
+		assert.equal(qz.objects.get(500).factionID, 0, 'absent object faction templates retain the numeric default');
 		assert.deepEqual(qz.items.get(50).npcDrops, [3, 4]);
 		// Support data.
 		assert.deepEqual(qz.xp.get(92460), { level: 1, xp: 40 });
+		assert.deepEqual([...qz.factionTemplates], [[12, 4], [29, 2], [35, 0], [99, 6]]);
 		assert.equal(qz.areaToUiMap.get(16593), 2521);
 		assert.equal(qz.uiMapToArea.get(2521), 16593);
 		assert.deepEqual([...qz.eraToForever.uiMapToArea], [[1453, 1519]]);
@@ -319,6 +322,54 @@ describe('QuestieDB decoder', () => {
 });
 
 describe('QuestieDB merge', () => {
+	test('mailboxes keep their role and known friendly side through pfQuest and recording overlays', async () => {
+		const mailbox = (factionID) => ({ name: 'Mailbox', factionID, spawns: { 12: [[30, 40]] } });
+		const { read } = await build({ recordingsDir: path.join(FIX, 'recordings') }, {
+			objects: {
+				500: mailbox(29), 600: mailbox(12), 801: mailbox(35), 802: mailbox(99),
+				803: mailbox(999), 804: { name: 'Mailbox', spawns: { 12: [[31, 41]] } },
+				805: { name: 'mailbox', factionID: 35, spawns: { 12: [[32, 42]] } },
+			},
+		});
+		const objects = read('objects');
+		assert.deepEqual(objects[500].roles, ['mailbox']);
+		assert.equal(objects[500].faction, 'H');
+		assert.equal(objects[500].name, 'Fixture Altar', 'observed name may change without losing mailbox identity');
+		assert.deepEqual(objects[500].spawns, { 1429: { f: 'l', pts: [[31.5, 41.25]] } });
+		assert.deepEqual(Object.keys(objects[500]).slice(0, 5), ['id', 'name', 'roles', 'faction', 'spawns']);
+		assert.deepEqual(objects[600].roles, ['herb', 'mailbox'], 'pfQuest gathering roles survive');
+		assert.equal(objects[600].faction, 'A');
+		assert.deepEqual(objects[801].roles, ['mailbox']);
+		assert.equal(objects[801].faction, 'AH', 'known template with no enemy player side');
+		assert.equal(objects[804].faction, 'AH', 'zero faction ID follows Questie mailbox semantics: available to both sides');
+		for (const id of [802, 803]) {
+			assert.deepEqual(objects[id].roles, ['mailbox']);
+			assert.equal(objects[id].faction, null, `hostile-both or unknown template stays unknown: ${id}`);
+		}
+		assert.equal(objects[805].roles, undefined, 'classification uses the exact raw English object name');
+		assert.equal(objects[805].faction, undefined, 'unrelated objects gain no faction field');
+	});
+
+	test('services retain close spawn positions, spirit guides, and only fill missing service NPC factions', async () => {
+		const points = [[30, 40], [30.1, 40.1]];
+		const npc = (npcFlags, friendlyToFaction) => ({ name: 'Fixture Service', minLevel: 10, spawns: { 12: points }, npcFlags, friendlyToFaction });
+		const { read } = await build({ cap: 1 }, {
+			npcs: { 2: npc(4, 'H'), 3: npc(4, 'H'), 4: npc(0, 'A'), 812: npc(32 + 64, 'AH') },
+			objects: { 813: { name: 'Mailbox', factionID: 35, spawns: { 12: points } }, 814: { name: 'Fixture Stone', spawns: { 12: points } } },
+		});
+		const npcs = read('npcs');
+		assert.equal(npcs[2].faction, 'AH', 'existing pfQuest service side wins');
+		assert.equal(npcs[3].faction, 'H', 'new service flag fills an unknown pfQuest side');
+		assert.equal(npcs[4].faction, null, 'nonservice wildlife keeps its existing faction semantics');
+		assert.deepEqual(npcs[812].roles, ['spirithealer'], 'spirit healer and guide bits share one role');
+		for (const entity of [npcs[3], npcs[812], read('objects')[813]]) {
+			const spawn = entity.spawns[1429];
+			assert.equal(spawn.pts.length, 1);
+			assert.deepEqual([...spawn.pts, ...(spawn.more || [])].sort((a, b) => a[0] - b[0]), points, 'cap keeps the other close service point in more');
+		}
+		assert.equal(read('objects')[814].spawns[1429].more, undefined, 'ordinary objects retain spatial reduction');
+	});
+
 	test('Forever-only quests, npcs and items are added', async () => {
 		const { read } = await build();
 		const q = read('quests');

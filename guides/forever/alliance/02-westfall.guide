@@ -26,6 +26,11 @@ next forever/alliance/03-darkshore
 #   on the way south, before Sentinel Hill. None of them needs the hill
 #   first. The Jansen Stead well sample (92742.1, Alba's quest from the
 #   hill) is filled on the return to the Jansen Stead after the north loop.
+# - Poor Old Blanchy's oats (151, #621): gathered on the return to the Jansen
+#   Stead, placed in its fields (56.8,19.1: 19 of the zone's 119 known Sacks
+#   of Oats lie within 150 yd, 32 within 250). On the first step, unplaced, the
+#   arrow searched every sack in the zone, down to Moonbrook, before
+#   Saldean's; players found the far ones empty.
 # - The simulator took Sentinel Hill's quests (102, 12, 153, 92742, 92744,
 #   92745) only on its second pass at 14.8 and then walked the north a
 #   second time; here they are taken on arrival and the north is one loop,
@@ -121,14 +126,13 @@ next forever/alliance/03-darkshore
 
 step The Jansen Stead
   zone Westfall
-  tip Follow the road from Elwynn into Westfall: the Furlbrows sit by their burned farm, the first one on the road. Collect the oats from the Sacks of Oats in the fields as you go.
+  tip Follow the road from Elwynn into Westfall: the Furlbrows sit by their burned farm, the first one on the road. Pick up oats from any Sack of Oats you pass on the loop: the rest are gathered in the fields here on the way back.
   accept 109 npc 237                          -- Farmer Furlbrow; Humans took it from Deputy Rainer in Elwynn
   accept 36                                   -- Verna Furlbrow
   accept 151
   accept 64                                   -- Farmer Furlbrow
   accept 184 optional                         -- Only if you looted a Westfall Deed in Elwynn: right-click it
   turnin 184 optional
-  collect 1528 quest 151                      -- Sacks of Oats
 
 step Saldean's Farm
   tip South along the road, past the fork. Farmer Saldean stands outside, Salma in the house, Ozwin Ironsprocket in the barn to the west. Young Goretusks and Fleshrippers roam the fields around the farm: start on livers and the stew's meat on the way.
@@ -186,6 +190,7 @@ step The gnoll hills
   collect 725 quest 102 @44.7,14.6            -- Gnoll Paws
 
 step The Jansen Stead
+  collect 1528 quest 151 @56.8,19.1           -- Sacks of Oats in the fields around the farm
   collect 254546 quest 92742.1 @56.6,18.6 only Dwarf,Gnome,NightElf,Skyborne -- Fill the vial at the well
   turnin 64                                   -- Farmer Furlbrow
   turnin 151                                  -- Verna Furlbrow

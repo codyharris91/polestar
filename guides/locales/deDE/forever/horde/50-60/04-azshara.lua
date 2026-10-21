@@ -34,7 +34,7 @@ return {
 	-- {npc:5901} Islen Waterseer · {area:392} Ratchet
 	["{npc:5901} camps on the shore just north of {area:392}."] = "{npc:5901} lagert am Ufer gleich nördlich von {area:392}.",
 	-- {area:2479} Emerald Sanctuary · {zone:1448} Felwood
-	["Cleansed Water goes to the {area:2479} in {zone:1448}: keep it for later."] = "Gesäubertes Wasser wird zum Teufelswald gebracht führt zum {area:2479} im {zone:1448}: Behalte sie für später.",
+	["Cleansed Water goes to the {area:2479} in {zone:1448}: keep it for later."] = "Das gereinigte Wasser geht zum {area:2479} im {zone:1448}: Behalte es für später.",
 
 	-- Step 7: Fly to Orgrimmar
 	-- {area:1637} Orgrimmar

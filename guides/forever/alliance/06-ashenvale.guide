@@ -33,7 +33,8 @@ next forever/alliance/07-thousand-needles
 #   taken on the first visit to Delgren; Wolves, Elune's Tear and the east
 #   quests run in one loop between the two hearths.
 # - Wetlands: Digging Through the Ooze (470) and Young Crocolisk Skins (484)
-#   are done in the east where their mobs live (the export did them before
+#   are done in the east where their mobs live, the oozes at Ironbeard's
+#   Tomb as the quest says (the export did them before
 #   leaving Menethil) and turned in after the hearth. Apprentice's Duties
 #   (471) is accepted then and finished on the north coast in the next
 #   guide's Wetlands return, beside the Third Fleet's wreck (the export did
@@ -66,6 +67,10 @@ next forever/alliance/07-thousand-needles
 #   is taken in Auberdine before the boat and handed to Tarrel Rockweaver
 #   before In Search of the Excavation Team (305). A player carrying it gets
 #   no 305 from him until it is handed in (#524).
+# - The grind to 28 for Pilot Longbeard's The Brassbolts Brothers (1179, from
+#   level 28) is done at the Dragonmaw camp on the walk east from Menethil to
+#   Dun Algaz, after the Menethil hand-ins (about 7,200 XP) count towards it,
+#   not before the hearth (#617).
 #
 # Class quests: on arrival in Auberdine, Night Elf Druids finish Trial of the
 # Sea Lion and Aquatic Form (272, 5061: Moonglade, then Darnassus) and Night
@@ -387,8 +392,8 @@ step Thelgen Rock
   collect 280319 quest 98282              -- Unruptured Stalker Gland
 
 step Black Oozes
-  tip Black Oozes creep through the marsh north of the Green Belt road, west of Einar's camp. Any ooze may hold Sida's bag.
-  collect 3349 quest 470                  -- Sida's Bag
+  tip Black, Crimson and Monstrous Oozes fill Ironbeard's Tomb, just west of the road to Dun Modr and north of Einar's camp. Any ooze there may hold Sida's bag.
+  collect 3349 quest 470 @44.6,25.6       -- Sida's Bag
 
 step The Green Belt
   tip Einar Stonegrip camps by the road; Rethiel the Greenwarden stands farther east, by the river.
@@ -424,11 +429,6 @@ step Dun Modr
 step Rethiel the Greenwarden
   turnin 275
 
-step Dragonmaw camp
-  tip The Dragonmaw camp lies south of the road, just west of the Green Belt: Raiders, Swamprunners and Bonewarders. Pilot Longbeard's quest in Dun Morogh needs level 28.
-  goto 45.7,44.8 "Dragonmaw camp"
-  level 28 -- grind on Dragonmaw Raiders and Swamprunners at the Dragonmaw camp, Wetlands
-
 step Hearth to Menethil
   hearth "Deepwater Tavern"
   turnin 306                              -- Tarrel Rockweaver
@@ -438,6 +438,11 @@ step Hearth to Menethil
   turnin 470                              -- Sida
   turnin 98282                            -- Caitlin Grassman
   vendor nearest
+
+step Dragonmaw camp
+  tip The Dragonmaw camp lies south of the road, just west of the Green Belt: Raiders, Swamprunners and Bonewarders. Pilot Longbeard's quest in Dun Morogh needs level 28.
+  goto 45.7,44.8 "Dragonmaw camp"
+  level 28 -- grind on Dragonmaw Raiders and Swamprunners at the Dragonmaw camp, Wetlands
 
 # ---------------------------------------------------------------- Ironforge
 

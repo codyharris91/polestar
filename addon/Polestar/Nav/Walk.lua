@@ -82,13 +82,16 @@
 --
 --   Walk.Aim(pc, px, py, gc, gx, gy, handmade, gz, stop) -> c, wx, wy, left | nil
 --     where to point for walking from the player to (gc, gx, gy; gz: its
---     height, else the target's when it is the target's point): a point up
---     to AHEAD (30) yards along the path whose way there keeps every path
---     point within PAD (10) yards of the line to it (a road's wiggles, not
---     its corners), on the next point's floor and never past path point
---     `stop` (a piece of a split walk: the last point before its
---     chokepoint); and the yards left along the path (never to the aim
---     point); nil = straight at the goal. Allocation-free once the path is in.
+--     height, else the target's when it is the target's point): Nav/Follow.lua's
+--     aim along the path (the furthest point within 35 yd of the player and
+--     45 yd along it, sliding between points, stopped at a corner, another
+--     floor and path point `stop`, a piece of a split walk's last point
+--     before its chokepoint); and the yards left along the path from the
+--     player's place on it plus their way to it; nil = straight at the goal.
+--     Allocation-free once the path is in.
+--   Walk.Progress(c, x, y) -> along, off | nil: at the last Aim for that goal,
+--     the yards along the path from its start to the player's place on it,
+--     and the yards between the player and that place
 --   Walk.Left(c, x, y) -> yards left along the path to that goal at the last Aim | nil
 --   Walk.Passed(c, x, y, seg) -> the player is past segment `seg` of that goal's path
 --   Walk.Stops(pc, px, py) -> stops, total: the chokepoints along the path
@@ -141,13 +144,6 @@ ns.RegisterDefaults("nav", { navRouting = true, routeStyle = "balanced" })
 local PACK = "Polestar_Nav"
 local STRAY = 25            -- yards off the path: ask again
 local ASK_EVERY = 2         -- seconds between asks for the same goal
-local POINT_REACH = 20     -- yards: a path point is passed (the body)
-local POINT_REACH_TIGHT = 5 -- yards: reach near a boundary, floor change, or the goal
-local NEAR_CHOKE = 25       -- yards from a boundary or goal: use POINT_REACH_TIGHT
-local LOOKAHEAD = 12        -- path segments looked at ahead of the current one
-local AHEAD = 45            -- yards along the path the arrow looks ahead of the player
-local PAD = 12              -- yards: path points this close to the line from the player to the aim lie on the way
-local FLOOR_STEP = 6        -- yards above or below the next point: another floor, never aimed past
 local GOAL_MOVED = 1        -- yards: the goal is another one
 local FAIL_RETRY, FAIL_MOVED = 15, 25 -- a failed search is asked again this late, this far away
 local Z_OFF = 30            -- yards: a path ending this far above or below the goal's height missed its floor
@@ -216,7 +212,8 @@ local hubs                   -- the other faction's towns the path enters (Find'
 local left = {}              -- left[i] = yards from point i to the end of the path
 local lastLeft               -- yards left along the path at the last Aim
 local count = 0              -- points in the path (0: none yet)
-local idx = 1                -- the point aimed at
+local idx = 1                -- the end point of the segment the player is on (Nav/Follow.lua)
+local fstate = {}           -- the follower's state (Nav/Follow.lua's Follow.Step)
 local wanted = false         -- a search is owed (deferred in combat)
 local askedAt = -huge
 local failed = false
@@ -249,6 +246,7 @@ function Walk.Clear()
 	local had, c, x, y = gc ~= nil, gc, gx, gy
 	cancel()
 	gc, gx, gy, gzFor, gz, count, idx, wanted, failed, hubs = nil, nil, nil, nil, nil, 0, 1, false, false, nil
+	Nav.follow.Reset(fstate)
 	if had then
 		restore(c, x, y)
 		changed()
@@ -276,6 +274,7 @@ local function took(points)
 		end
 	end
 	idx = 1
+	Nav.follow.Reset(fstate)
 end
 
 -- The player's height, when the client gives it on this continent (picks the
@@ -510,70 +509,6 @@ local function ask(P, pc, px, py, flat)
 	if token == mine then job = handle end
 end
 
--- Where the arrow points from (px, py), toIdx yards from the next point idx:
--- the furthest point j (from idx, never past `stop`, the last point it may
--- reach) within AHEAD yards along the path, every point before it, from idx,
--- within PAD yards of the line from the player to it (and not behind the
--- player or beyond j along it) and none more than FLOOR_STEP above or below
--- point idx. A road's wiggles stay inside that corridor; a real corner (a
--- point more than PAD off the line) still turns the arrow, gradually as it
--- comes within AHEAD. Past idx it aims at the middle of j - 1 and j, so the
--- side-to-side zigzag of a road's points cancels out. Allocation-free.
-local function ahead(px, py, toIdx, stop)
-	local limit = count
-	if stop and stop < limit then limit = stop end
-	local budget = toIdx + left[idx] - AHEAD -- left[k] at least this: within AHEAD along the path
-	local zRef = ptsZ[idx]
-	local j = idx
-	for k = idx + 1, limit do
-		if left[k] < budget then break end
-		local zk = ptsZ[k]
-		if zRef and zk and abs(zk - zRef) > FLOOR_STEP then break end
-		local lx, ly = ptsX[k] - px, ptsY[k] - py
-		local len = sqrt(lx * lx + ly * ly)
-		if len == 0 then break end
-		local on = true
-		for m = idx, k - 1 do
-			local mx, my = ptsX[m] - px, ptsY[m] - py
-			local along, across = (mx * lx + my * ly) / len, (mx * ly - my * lx) / len
-			if along < -PAD or along > len or abs(across) > PAD then
-				on = false
-				break
-			end
-		end
-		if not on then break end
-		j = k
-	end
-	if j == idx then return ptsX[j], ptsY[j] end
-	return (ptsX[j - 1] + ptsX[j]) * 0.5, (ptsY[j - 1] + ptsY[j]) * 0.5
-end
-
--- Distance from (px, py) to segment a -> b of the path.
-local function segment(px, py, a, b)
-	local ax, ay = ptsX[a], ptsY[a]
-	local dx, dy = ptsX[b] - ax, ptsY[b] - ay
-	local len2 = dx * dx + dy * dy
-	local t = 0
-	if len2 > 0 then
-		t = ((px - ax) * dx + (py - ay) * dy) / len2
-		if t < 0 then t = 0 elseif t > 1 then t = 1 end
-	end
-	local ex, ey = ax + dx * t - px, ay + dy * t - py
-	return sqrt(ex * ex + ey * ey)
-end
-
--- The reach used to mark point i as passed: tight near a boundary (stop), a floor
--- change, or the goal so the body never skips a turn at a doorway or chokepoint.
-local function pointReach(i, stop)
-	if stop and stop <= count and left[i] - left[stop] < NEAR_CHOKE then return POINT_REACH_TIGHT end
-	if left[i] < NEAR_CHOKE then return POINT_REACH_TIGHT end
-	if i > 1 then
-		local za, zb = ptsZ[i - 1], ptsZ[i]
-		if za and zb and abs(zb - za) > FLOOR_STEP then return POINT_REACH_TIGHT end
-	end
-	return POINT_REACH
-end
-
 function Walk.Aim(pc, px, py, goalC, goalX, goalY, handmade, goalZ, stop)
 	local P = engine()
 	if P and P.SurfacesAt and pc then track(P, pc, px, py) end
@@ -586,6 +521,7 @@ function Walk.Aim(pc, px, py, goalC, goalX, goalY, handmade, goalZ, stop)
 		local had = count > 0
 		cancel()
 		gc, gx, gy, count, idx, failed, hubs = goalC, goalX, goalY, 0, 1, false, nil
+		Nav.follow.Reset(fstate)
 		gzFor, gz = tz, tz or nil
 		askedAt = -huge
 		if had then changed() end
@@ -603,57 +539,19 @@ function Walk.Aim(pc, px, py, goalC, goalX, goalY, handmade, goalZ, stop)
 	end
 	if count == 0 then return nil end
 
-	-- The nearest segment from just behind the aimed point to a little ahead.
-	local first = idx > 1 and idx - 1 or 1
-	local last = idx + LOOKAHEAD
-	if last > count then last = count end
-	local off, best = huge, idx
-	if count == 1 then
-		local dx, dy = ptsX[1] - px, ptsY[1] - py
-		off = sqrt(dx * dx + dy * dy)
-	else
-		for a = first, last - 1 do
-			local d = segment(px, py, a, a + 1)
-			if d < off then off, best = d, a + 1 end
-		end
-	end
-	if best > idx then idx = best end
-	while idx <= count do
-		if stop and idx > stop then break end
-		local dx, dy = ptsX[idx] - px, ptsY[idx] - py
-		-- Use the large body only when the player has passed this point along the path;
-		-- ahead of the player: tight reach only (don't swallow corners or floor changes).
-		local reach
-		if idx > 1 then
-			local ax, ay = ptsX[idx] - ptsX[idx - 1], ptsY[idx] - ptsY[idx - 1]
-			if ax * ax + ay * ay > 0 and (-dx) * ax + (-dy) * ay < 0 then
-				reach = POINT_REACH_TIGHT  -- player not yet at this point: 5 yd only
-			else
-				reach = pointReach(idx, stop)  -- player past/at it: large body with guards
-			end
-		else
-			reach = pointReach(idx, stop)
-		end
-		if dx * dx + dy * dy > reach * reach then break end
-		idx = idx + 1
-	end
-	if idx > count then
+	local ax, ay = Nav.follow.Step(ptsX, ptsY, ptsZ, left, count, fstate, px, py, stop)
+	idx = fstate.idx
+	if not ax then
 		lastLeft = nil
 		return nil
 	end
-	local dx, dy = ptsX[idx] - px, ptsY[idx] - py
-	local toIdx = sqrt(dx * dx + dy * dy)
-	lastLeft = toIdx + left[idx]
-	local ax, ay = ahead(px, py, toIdx, stop)
-	-- Re-ask: strayed from the path, or aim >90° off the path's forward direction
-	-- (a stale path with early points behind the player causes this).
-	local shouldAsk = off > STRAY
-	if not shouldAsk and count >= 2 then
-		local fi = idx > 1 and idx - 1 or 1
-		local fwdX, fwdY = ptsX[fi + 1] - ptsX[fi], ptsY[fi + 1] - ptsY[fi]
-		if fwdX * (ax - px) + fwdY * (ay - py) < 0 then shouldAsk = true end
-	end
-	if shouldAsk and token == nil and not wanted and GetTime() - askedAt >= ASK_EVERY then ask(P, pc, px, py) end
+	-- Yards left: straight to the end of the segment the player is on, then along the path.
+	local ix, iy = ptsX[idx] or ptsX[count], ptsY[idx] or ptsY[count]
+	local dx, dy = ix - px, iy - py
+	lastLeft = sqrt(dx * dx + dy * dy) + left[idx <= count and idx or count]
+	-- Re-ask only when the player has strayed from the path: walking beside it,
+	-- or coming at it from the side, is the follower's to handle.
+	if fstate.off > STRAY and token == nil and not wanted and GetTime() - askedAt >= ASK_EVERY then ask(P, pc, px, py) end
 	return pc, ax, ay, lastLeft
 end
 
@@ -665,6 +563,13 @@ end
 function Walk.Left(c, x, y)
 	if not isGoal(c, x, y) then return nil end
 	return lastLeft
+end
+
+-- At the last Aim for (c, x, y): yards along the path from its start to the
+-- player's place on it, and yards between the player and that place; or nil.
+function Walk.Progress(c, x, y)
+	if not isGoal(c, x, y) or fstate.off == nil then return nil end
+	return fstate.along, fstate.off
 end
 
 -- Has the player gone past segment `seg` of the path to (c, x, y)?

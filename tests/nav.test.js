@@ -130,24 +130,29 @@ test('sheet frames: rounding, wraparound and texture coordinates match the gener
 	});
 });
 
-test('turning is damped: the arrow eases toward the new bearing the short way round', () => {
+test('turning is damped: a new bearing eases in the short way round, at most MAX_TURN a second; turning the camera moves the arrow at once', () => {
 	const [out] = run(`
 		target(100, 0)
 		stub.advance(1)
 		local before = A.GetAngle()
 		local frames = { A.GetFrame() }
-		nav.facing = math.pi / 2           -- turn to face west: target now to the right
+		nav.place(100, 100)                 -- the player steps west of it: the target is now to the right
 		local early, later
 		for i = 1, 44 do
 			stub.advance(0.05)
 			if i == 2 then early = A.GetAngle() elseif i == 4 then later = A.GetAngle() end
 			if A.GetFrame() ~= frames[#frames] then frames[#frames + 1] = A.GetFrame() end
 		end
-		emit({ before = before, early = early, later = later, settled = A.GetAngle(), frames = frames })`);
+		local settled = A.GetAngle()
+		nav.facing = -math.pi / 2           -- turn to face east: the target is straight ahead
+		stub.advance(0.05)
+		emit({ before = before, early = early, later = later, settled = settled, faced = A.GetAngle(), frames = frames })`);
 	near(out.before, 0, 1e-6, 'before');
 	assert.ok(out.early < 0 && out.early > -PI / 2, `early ${out.early} is partway, clockwise`);
+	assert.ok(out.early >= -3.5 * 0.1 - 1e-6, `no faster than MAX_TURN (3.5 rad/s): ${out.early} after 0.1 s`);
 	assert.ok(out.later < out.early && out.later > -PI / 2, `later ${out.later} keeps closing in`);
 	near(out.settled, -PI / 2, 1e-3, 'settled');
+	near(out.faced, 0, 1e-3, 'turning the camera: straight ahead within one frame');
 	// The 3D frames wrap 0 -> 99 -> ... -> 75: clockwise, never through the back half.
 	assert.equal(out.frames[0], 0);
 	assert.equal(out.frames[out.frames.length - 1], 75);

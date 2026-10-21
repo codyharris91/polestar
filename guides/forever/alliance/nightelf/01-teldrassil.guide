@@ -66,8 +66,11 @@ next forever/alliance/02-westfall
 #   (issue #555).
 # - Added: The Enchanted Glade (937), Darkness in the Glade (98392) and The
 #   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
-#   moonwell: every harpy lives around it. The chain's last steps go to
-#   Fandral in Darnassus and are not taken (see "Left out").
+#   moonwell: every harpy lives around it. Teldrassil (940, 440 XP), which
+#   the Oracle Tree Bark offers once 98398 is handed to it, is taken there
+#   and handed to Fandral in Darnassus with Crown of the Earth (935): no
+#   extra walk (Pynte, #647). Fandral's follow-up goes to Darkshore and is
+#   not taken (see "Left out").
 # - Crown of the Earth (935, 1100 XP) is taken from Corithras after the
 #   Amethyst Phial (7383) and handed to Fandral in the Cenarion Enclave on
 #   the way through Darnassus; his Drained Vessel (98046) goes to Lariia and
@@ -104,9 +107,9 @@ next forever/alliance/02-westfall
 # would send you back into Teldrassil from Darnassus.
 # Measured and left out (sim compare, each against the guide without it):
 # Bounty: Gnarlpine Furbolg (490, Sentinel Shayla, in the new export), 0.08 h
-# later to 60; Teldrassil (940, from the Oracle Tree Bark to Fandral), 0.01 h
-# later, and with Fandral's Grove of the Ancients (952, to Onu in Darkshore)
-# 0.18 h later.
+# later to 60; Fandral's Grove of the Ancients (952, to Onu in Darkshore),
+# with Teldrassil (940), 0.18 h later. (940 alone measured 0.01 h later when
+# the data gave it the Classic 220 XP; it pays 440 on Forever.)
 # Eyes of the Sentinels (98067, Sentinel Dalia Sunblade in the Temple of the
 # Moon) places owls at the city gate, the Craftsmen's Terrace inn, the bank
 # and Cenarion Hold: a full lap of Darnassus for 660 XP, so it is not taken;
@@ -373,6 +376,7 @@ step Hearth to Dolanaar
 step Ferocitas the Dream Eater
   tip Gnarlpine Mystics and Ferocitas camp north-east of Starbreeze Village. Ferocitas drops the Gnarlpine Necklace: open it for the jewel.
   kill 7235 quest 2459.1
+  collect 8049                                -- Gnarlpine Necklace, from Ferocitas
   collect 8050 quest 2459.2 @69.4,53.4
   turnin 2459                                 -- Tallonkai Swiftroot, back in Dolanaar
 
@@ -408,6 +412,7 @@ step Sentinel Arynia again
   turnin 98392
   accept 98398
   turnin 98398                                -- Oracle Tree Bark, just west of the moonwell
+  accept 940 object 673378                    -- the same Oracle Tree Bark: Fandral in Darnassus takes it
 
 step Ursal the Mauler
   tip Walk south along the west side of the island. Ursal prowls the far south, below the Pools of Arlithrien.
@@ -466,6 +471,7 @@ step Darnassus
   tip Follow the road west into Darnassus. Mydrannul stands on the Craftsmen's Terrace just inside the city. Arch Druid Fandral Staghelm is in the Cenarion Enclave at the north end of the city, Rellian Greenspyre just south of it; Lariia and Tyrande Whisperwind are in the Temple of the Moon at the south end. Sister Aquinne is in the west of the city, on the way to the pink portal down to Rut'theran.
   accept 6344                                 -- Mydrannul
   turnin 935                                  -- Arch Druid Fandral Staghelm, in the Cenarion Enclave
+  turnin 940
   accept 98046
   turnin 6103 only Hunter                     -- Jocaste, in the Cenarion Enclave: Beast Training
   turnin 5925 only Druid                      -- Mathrengyl Bearwalker, in the Cenarion Enclave

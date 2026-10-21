@@ -21,6 +21,7 @@
 --   w.learnSkill(171, "Alchemy", 1, 75); w.skillUp(171, 50)    -- SKILL_LINES_CHANGED + CHAT_MSG_SKILL
 --   w.learnSpell(2330)                     -- spellbook spell (LEARNED_SPELL_IN_SKILL_LINE, SPELLS_CHANGED)
 --   w.learnRecipe(2330)                    -- profession recipe (NEW_RECIPE_LEARNED)
+--   w.cast(818)                            -- the player casts a spell (UNIT_SPELLCAST_SUCCEEDED)
 --   w.setRep(72, "Stormwind", 5, 1500, 3000, 9000)  -- standing, value, barMin, barMax (UPDATE_FACTION)
 --   w.addArea(1429, 40, 30, 60, 50, 87)    -- explorable rect (percent) -> areaID; w.explore(87)
 --   w.addAchievement(9001, "Legacy: ...", { { "Kill 10", 10 }, ... }); w.criteria(9001, 1, 4)
@@ -112,6 +113,13 @@ end
 
 function world.addItem(id, n)
 	world.items[id] = (world.items[id] or 0) + (n or 1)
+	fire("BAG_UPDATE", 0)
+	fire("BAG_UPDATE_DELAYED")
+end
+
+-- Destroys the whole stack, as the client's delete does.
+function world.removeItem(id)
+	world.items[id] = nil
 	fire("BAG_UPDATE", 0)
 	fire("BAG_UPDATE_DELAYED")
 end
@@ -289,6 +297,11 @@ function world.learnSpell(id)
 	world.spells[id] = true
 	fire("LEARNED_SPELL_IN_SKILL_LINE", id, 1, false)
 	fire("SPELLS_CHANGED")
+end
+
+-- The player casts spell id: UNIT_SPELLCAST_SUCCEEDED(unit, castGUID, spellID), as the client fires it.
+function world.cast(id)
+	fire("UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3-0-0-0-" .. id .. "-0", id)
 end
 
 function world.learnRecipe(id)

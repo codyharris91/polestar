@@ -263,6 +263,8 @@ end
 
 local function decodeNpc(group, id, s)
 	local t, n = split(s, ";")
+	local title
+	if n >= 8 and sub(t[n], 1, 1) == "t" then title, n = unesc(sub(t[n], 2)), n - 1 end
 	local flags = t[4] or ""
 	local roles = {}
 	if t[6] and t[6] ~= "" then
@@ -278,6 +280,7 @@ local function decodeNpc(group, id, s)
 		boss = find(flags, "b", 1, true) ~= nil,
 		instance = unesc(t[5]),
 		roles = roles,
+		subName = title,
 		loot = numbers(t[7]),
 		spawns = decodeSpawns(t, 8, n),
 	}
@@ -285,7 +288,14 @@ end
 
 local function decodeObject(group, id, s)
 	local t, n = split(s, ";")
-	return { id = id, name = nameOf(group, id), treasure = t[1] == "1", loot = numbers(t[2]), spawns = decodeSpawns(t, 3, n) }
+	local mailbox, faction
+	if n >= 3 and (t[n] == "m" or t[n] == "mA" or t[n] == "mH" or t[n] == "mAH") then
+		mailbox, faction = true, sub(t[n], 2)
+		if faction == "" then faction = nil end
+		n = n - 1
+	end
+	return { id = id, name = nameOf(group, id), treasure = t[1] == "1", mailbox = mailbox,
+		faction = faction, loot = numbers(t[2]), spawns = decodeSpawns(t, 3, n) }
 end
 
 local function decodeQuest(group, id, s)

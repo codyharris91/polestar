@@ -139,6 +139,17 @@ function run(script, { engine = true, many = false } = {}) {
 	}).emitted;
 }
 
+// The arrow aims along the path (Nav/Follow.lua): at a point up to 35 yd away
+// on the way to the next corner, not at the corner itself. aim()'s point
+// (out[2], out[3]) lies in the direction from (px, py) to (tx, ty), within 1 degree.
+function heads(out, [px, py], [tx, ty], msg) {
+	const a = Math.atan2(out[3] - py, out[2] - px);
+	const b = Math.atan2(ty - py, tx - px);
+	let d = Math.abs(a - b) * 180 / Math.PI;
+	if (d > 180) d = 360 - d;
+	assert.ok(d <= 1, `${msg}: the aim (${out[2]}, ${out[3]}) is ${d.toFixed(1)} degrees off (${tx}, ${ty})`);
+}
+
 test('the arrow follows the path\'s points, with the yards left along it', () => {
 	const [out] = run(`
 		local r = {}
@@ -159,9 +170,12 @@ test('the arrow follows the path\'s points, with the yards left along it', () =>
 		emit(r)`);
 	assert.deepEqual(out.before, ['travel', 600, 0, -600], 'straight until the path is in');
 	assert.deepEqual(out.ask, [1, 0, 0, 0, 0, -600], 'one search on the player\'s continent, player to target');
-	assert.deepEqual(out.first, ['travel', 683, 100, -100], 'the first corner, and the whole path\'s length');
-	assert.deepEqual(out.corner, ['travel', 541, 100, -500], 'a passed point gives way to the next');
-	assert.deepEqual(out.along, ['travel', 341, 100, -500]);
+	assert.equal(out.first[1], 683, 'the whole path\'s length');
+	heads(out.first, [0, 0], [100, -100], 'toward the first corner');
+	assert.equal(out.corner[1], 541);
+	heads(out.corner, [100, -100], [100, -500], 'a passed point gives way to the next');
+	assert.equal(out.along[1], 341);
+	heads(out.along, [100, -300], [100, -500], 'along the second leg');
 	assert.equal(out.arrived, 'arrived', 'arrival is the target\'s radius, as before');
 	assert.equal(out.calls, 1, 'walking along the path asks nothing more');
 });
@@ -206,15 +220,15 @@ test('a wiggly road (points 3 yd either side of the line every 4 yd) keeps the a
 	for (const [k, s] of out.samples.entries()) {
 		const p = { x: 0, y: -k };
 		worst = Math.max(worst, offStraight(s));
-		// Walk.Left as before the look-ahead: to the next point (the first one
-		// ahead more than 5 yd away), then along the path from it.
+		// Walk.Left: straight to the end of the segment the player is on, then
+		// along the path from it. On a zigzag the segment the player projects
+		// onto may be either neighbour of a point, so within one point's spacing.
 		let i = pts.findIndex((q) => q.y < p.y);
-		while (d(pts[i], p) <= 5) i++;
 		let want = d(pts[i], p);
 		for (let j = i; j < pts.length - 1; j++) want += d(pts[j], pts[j + 1]);
 		assert.equal(s.state, 'travel');
-		assert.ok(Math.abs(s.left - want) < 1e-6, `Walk.Left at y ${p.y}: ${s.left} against ${want}`);
-		assert.ok(Math.abs(s.dist - want) < 1e-6, 'the yards shown are Walk.Left');
+		assert.ok(Math.abs(s.left - want) <= 6, `Walk.Left at y ${p.y}: ${s.left} against ${want}`);
+		assert.ok(Math.abs(s.dist - s.left) < 1e-6, 'the yards shown are Walk.Left');
 	}
 	assert.ok(worst <= 3, `the arrow stays within 3 degrees of straight (worst ${worst.toFixed(1)})`);
 });
@@ -235,6 +249,41 @@ test('a real 90 degree corner still turns the arrow: gradually from within 30 yd
 	assert.ok(out.near.dy < -5, 'still ahead along the road, not across the corner');
 	const at = offStraight(out.at);
 	assert.ok(at > 70, `at the corner: along the new road (${at.toFixed(1)})`);
+});
+
+// Coming at the path from the side (loney's walk in the Wetlands, 0.2.6): the
+// path was searched from 25 yd east of the road and runs west to it, then
+// south down it. The player cuts the corner at 45 degrees and walks down the
+// road 6 yd to its side, never within 5 yd of the joining points. The arrow
+// never points back behind the player (north), and stays within 60 degrees
+// of the road once they are beside it.
+test('approaching the path at 45 degrees and walking beside the road: the arrow never points back at a node behind', () => {
+	const [out] = run(`${LOOK}
+		local pts = {}
+		for x = 25, 1, -6 do pts[#pts + 1] = { x, 0 } end
+		for i = 1, 60 do pts[#pts + 1] = { 0, -6 * i } end
+		nav.place(25, 0)
+		target(0, -360)
+		N.Sample()
+		answerZ(pts)
+		local r = {}
+		local x, y = 25, 0
+		while x > -6 do
+			x, y = x - 0.5, y - 0.5
+			r[#r + 1] = { x = x, y = y, s = look(x, y, 0, -360) }
+		end
+		for _ = 1, 100 do
+			y = y - 2
+			r[#r + 1] = { x = x, y = y, s = look(x, y, 0, -360), beside = true }
+		end
+		emit(r)`);
+	let worst = 0;
+	for (const { x, y, s, beside } of out) {
+		assert.equal(s.state, 'travel');
+		assert.ok(s.dy < 0, `at (${x}, ${y}) the arrow points back north (aim offset ${s.dx.toFixed(1)}, ${s.dy.toFixed(1)})`);
+		if (beside) worst = Math.max(worst, offStraight(s));
+	}
+	assert.ok(worst <= 60, `beside the road the arrow stays within 60 degrees of it (worst ${worst.toFixed(1)})`);
 });
 
 test('the look-ahead never aims onto another floor (path heights) or past a split walk\'s chokepoint', () => {
@@ -299,11 +348,13 @@ test('straying more than 25 yards from the path asks again, at most every 2 seco
 		r.after = aim()
 		emit(r)`);
 	assert.equal(out.near, 1, '20 yards off is on the path');
-	assert.deepEqual(out.strayAt, ['travel', 417, 0, -300], 'the old path until a new one arrives');
+	assert.equal(out.strayAt[0], 'travel');
+	assert.ok(out.strayAt[2] === 0 && out.strayAt[3] < -200, `the old path, ahead, until a new one arrives (aim ${out.strayAt[2]}, ${out.strayAt[3]})`);
 	assert.equal(out.tooSoon, 1, 'not again within 2 seconds of the last search');
 	assert.equal(out.later, 2, 'asked again from where the player is');
 	assert.deepEqual(out.from, [60, -200]);
-	assert.deepEqual(out.after, ['travel', 460, 60, -600]);
+	assert.equal(out.after[1], 460);
+	heads(out.after, [60, -200], [60, -600], 'along the new path');
 });
 
 test('C1, C2: a new target cancels the stale search, whose late answer is dropped, never reviving the old target', () => {
@@ -367,7 +418,8 @@ test('hand-made crossings win: the engine walks to the gate, the crossing itself
 		r.handmade = leg.handmade == true
 		emit(r)`);
 	assert.deepEqual(out.toGate, [1, 600, 20], 'searched only up to the gate');
-	assert.deepEqual(out.walk, ['travel', 1201, 0, 300], 'along the path to the gate');
+	assert.equal(out.walk[1], 1201);
+	heads(out.walk, [-500, 500], [0, 300], 'along the path to the gate');
 	assert.deepEqual(out.crossing, ['travel', 45, 600, -20], 'straight through the gate to its other side');
 	assert.equal(out.calls, 1, 'no search across the crossing');
 	assert.equal(out.handmade, true);
@@ -824,7 +876,7 @@ test('Z2: a path searched with the height that ends more than 30 yards above or 
 		r.close = { calls(), aim()[1] }
 		emit(r)`);
 	assert.deepEqual(out.retry, [2, true, 0], 'asked again without z; the off-floor path is not followed');
-	assert.deepEqual(out.used.slice(2), [100, -300], 'the answer without z is the arrow\'s path');
+	heads(out.used, [0, 0], [100, -300], 'the answer without z is the arrow\'s path');
 	assert.equal(out.within, 3, 'another goal with a height: searched with it');
 	assert.deepEqual(out.close, [3, 'travel'], '25 yards off is within 30: kept');
 });
@@ -1519,7 +1571,8 @@ test('profile: every search carries the player\'s faction as opts.profile; a neu
 	assert.deepEqual(out.horde, ['Horde', 'table', false], 'the arrow\'s own walk: opts { waterWalking, profile }');
 	assert.equal(out.hordeAim, 'travel');
 	assert.deepEqual(out.none, [false, false], 'neutral or unread: no profile');
-	assert.deepEqual(out.noneAim, ['travel', 316, 50, -150], 'and it routes');
+	assert.deepEqual(out.noneAim.slice(0, 2), ['travel', 316], 'and it routes');
+	heads(out.noneAim, [0, 0], [50, -150], 'along its path');
 	assert.equal(out.batch, 'Alliance', 'the planner\'s measure too');
 });
 
