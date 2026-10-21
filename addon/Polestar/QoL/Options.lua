@@ -58,6 +58,16 @@ register(QUESTING, L["Buttons"], L["Action buttons"], {
 		onClick = function() if QoL.Buttons then QoL.Buttons.ResetPositions() end end },
 })
 
+register(QUESTING, L["Buttons"], L["Action-bar macro"], {
+	{ kind = "button", label = L["Create target macro"],
+		help = L["Put a character macro on your cursor to place on an action bar. It follows the guide outside combat, even with the Target button hidden. Uses guide order; does not cycle names or icons on each press."],
+		disabled = function() return not (QoL.ActionBarMacro and QoL.ActionBarMacro.Supported()) end,
+		onClick = function() if QoL.ActionBarMacro then QoL.ActionBarMacro.Place() end end },
+	{ kind = "button", label = L["Stop macro updates"],
+		help = L["Leave the macro as it is and stop following the guide. Create target macro resumes updates if it is unchanged. Editing, renaming or deleting the macro also stops updates."],
+		onClick = function() if QoL.ActionBarMacro then QoL.ActionBarMacro.Stop() end end },
+})
+
 register(QUESTING, L["Rewards & gear"], L["Quest rewards"], {
 	{ kind = "toggle", key = "qol.rewardHighlight", label = L["Mark quest rewards"],
 		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most."] },

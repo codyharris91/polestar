@@ -3299,6 +3299,41 @@ flight timer and the instance tracker are set under Quality of Life.
 
 ## QoL — quality-of-life helpers
 
+### Targeting from an action bar
+
+`QoL/ActionBarMacro.lua` creates a character macro only after the player
+chooses **Questing → Buttons → Create target macro**, then puts it on the
+cursor for placement. It reuses `Buttons.TargetNames`, `TargetMacro` and
+`MarkLine("mob")`, independently of whether the floating Target button is
+shown. It tries names in guide order; an action-bar press does not run the
+floating button's `PostClick`, so it does not cycle names or marker icons.
+The macro contains the actual targeting commands, not a `/click` chain.
+
+The macro follows the active guide and marking settings. Writes wait until
+combat ends and the built-in macro editor closes; an empty target list
+replaces the old commands with a harmless comment. The prepared macro can
+still be used in combat with its last out-of-combat targets. Client target
+selection and raid-marker permission limits remain those of the Target
+button.
+
+`QoL.State().actionBarMacro` stores the macro's name, last verified body and
+enabled flag for this character. Each write resolves its current character
+macro slot and checks that the name is unique and its body unchanged. A
+manual edit, rename or deletion ends management; missing macros are never
+recreated automatically. Stop macro updates leaves the macro in place and
+disables synchronization. Explicit creation can resume an unchanged macro.
+Creation refuses an occupied cursor, a name collision, full character slots,
+missing client APIs and bodies over 255 bytes. Macro API writes are guarded
+against synchronous `UPDATE_MACROS` re-entry and verified by reading back
+the result.
+
+The API sequence follows Forever 1.60.1 (70450)'s
+[macro creation and editing](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_MacroUI/Blizzard_MacroIconSelector.lua#L97-L119),
+[synchronous event contract](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_APIDocumentationGenerated/UIMacrosDocumentation.lua#L65-L72)
+and [macro cursor handling](https://github.com/Gethe/wow-ui-source/blob/172a387e3ab85b26e6640d3058d5ec1e6ccd4c63/Interface/AddOns/Blizzard_ClickBindingUI/Blizzard_ClickBindingUI.lua#L424-L435).
+Native body normalization is not documented by these sources; a mismatched
+readback stops management instead of repeatedly writing.
+
 ### Quest reward marks — QoL, reads Gear
 
 One system marks the client's reward choices: `QoL/Rewards.lua`. Gear only
