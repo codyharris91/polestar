@@ -530,6 +530,30 @@ test('a failed name click reports the NPC once; successful clicks, right clicks 
 	assert.deepEqual(out.messages, ['Prospector Khazgorm not found nearby.']);
 });
 
+test('a Shift-, Ctrl- or Alt-click runs no macro: it navigates like a row click, with no "not found" and no mark advance', () => {
+	const [out] = run(`
+		Polestar.Set("qol.markTarget", true)
+		Polestar.Set("qol.markMob", "cycle")
+		uistub.setGuide(uistub.elwynn, 3)
+		settle()
+		local button = assert(targetFor(rowFor("Kobold Vermin")), "missing mob overlay")
+		local messages, marks = {}, 0
+		UIErrorsFrame.AddMessage = function(_, text) messages[#messages + 1] = text end
+		Polestar.On("QOL_TARGET_MARK_CHANGED", function() marks = marks + 1 end)
+		local before = callCount("AimGoal")
+		q.target = false
+		for _, key in ipairs({ "shift", "ctrl", "alt" }) do
+			stub.keys[key] = true
+			postClick(button, "LeftButton", false)
+			stub.keys[key] = false
+		end
+		local modified = { messages = #messages, marks = marks, navigated = callCount("AimGoal") - before }
+		postClick(button, "LeftButton", false)
+		emit({ modified = modified, plain = { messages = #messages, marks = marks } })`);
+	assert.deepEqual(out.modified, { messages: 0, marks: 0, navigated: 3 });
+	assert.deepEqual(out.plain, { messages: 1, marks: 1 }, 'an unmodified click still reports and advances');
+});
+
 test('a failed name click falls back to chat when the error display is unavailable', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)

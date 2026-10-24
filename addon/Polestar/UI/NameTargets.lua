@@ -65,9 +65,13 @@ local function createButton(i)
 	b:HookScript("PostClick", function(self, mouse, down)
 		if down or locked() then return end
 		local kind = self.psKind
+		-- "type1" answers only an unmodified left click: with Shift, Ctrl or
+		-- Alt held no macro ran, so nothing was targeted or marked and the
+		-- click is only the ordinary row click.
+		local ran = mouse == "LeftButton" and not (IsModifierKeyDown and IsModifierKeyDown())
 		-- The secure macro clears absent or dead targets. Report that result
 		-- before navigation can repaint the row and reuse this button.
-		if mouse == "LeftButton" and UnitExists and not UnitExists("target") then
+		if ran and UnitExists and not UnitExists("target") then
 			local message = string.format(L["%s not found nearby."], self.psName or "")
 			if UIErrorsFrame and UIErrorsFrame.AddMessage then
 				UIErrorsFrame:AddMessage(message, 1, 0.2, 0.2)
@@ -78,7 +82,7 @@ local function createButton(i)
 		if mouse == "LeftButton" or (mouse == "RightButton" and self.psRight) then ownerScript(self, "OnClick", mouse) end
 		-- Navigation can change the step and reuse this overlay. Advance the
 		-- kind whose macro just ran, after the ordinary click has finished.
-		if mouse == "LeftButton" then ns.QoL.Buttons.AdvanceMark(kind) end
+		if ran then ns.QoL.Buttons.AdvanceMark(kind) end
 	end)
 	NameTargets.buttons[i] = b
 	return b

@@ -3443,6 +3443,8 @@ arrow navigation; the quest's right-click menu, non-quest completion and
 adjacent controls keep working.
 A left-click that finds no living target reports the NPC name through
 `UIErrorsFrame` (chat fallback), before navigation can reuse the button.
+The overlay sets `type1`, so a Shift-, Ctrl- or Alt-click runs no macro: it
+is only the ordinary row click, with no report and no mark-cycle advance.
 
 ### Quest reward marks — QoL, reads Gear
 
